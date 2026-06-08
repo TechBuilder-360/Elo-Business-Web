@@ -1,15 +1,18 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
-  devtools: { enabled: true },
-  nitro: {
-    routeRules: {
-      "/**": {
-        headers: {
-          "X-Frame-Options": "DENY",
-          "Content-Security-Policy": "frame-ancestors 'none';"
-        }
-      }
-    }
+  future: {
+    compatibilityVersion: 4,
   },
+  modules: [
+    '@nuxtjs/tailwindcss',
+    '@pinia/nuxt',
+  ],
+  devtools: { enabled: true },
+  app: {
+    head: {
+      htmlAttrs: { class: 'dark' },
+      meta: [{ name: 'viewport', content: 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' }],
+    },
+  },
+  css: ['~/assets/css/main.css'],
 })

@@ -1,0 +1,117 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 20% 98%;
+    --foreground: 200 50% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 200 50% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 200 50% 10%;
+
+    --primary: 321 8% 49%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 321 8% 94%;
+    --secondary-foreground: 321 12% 30%;
+
+    --muted: 321 6% 93%;
+    --muted-foreground: 321 5% 45%;
+
+    --accent: 321 10% 90%;
+    --accent-foreground: 321 12% 30%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 321 6% 87%;
+    --input: 321 6% 87%;
+    --ring: 321 8% 49%;
+
+    --radius: 0.75rem;
+
+    --warning: 45 93% 47%;
+    --warning-foreground: 45 93% 30%;
+
+    --step-active: 321 8% 49%;
+    --step-complete: 321 8% 49%;
+    --step-inactive: 321 5% 75%;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 321 8% 49%;
+  }
+
+  .dark {
+    /* Auto-generate dark mode colors using reverse logic from standard shadcn if user didn't provide them */
+    --background: 200 50% 10%;
+    --foreground: 210 20% 98%;
+
+    --card: 200 50% 10%;
+    --card-foreground: 210 20% 98%;
+
+    --popover: 200 50% 10%;
+    --popover-foreground: 210 20% 98%;
+
+    --primary: 321 8% 49%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 321 12% 30%;
+    --secondary-foreground: 321 8% 94%;
+
+    --muted: 321 5% 45%;
+    --muted-foreground: 321 6% 93%;
+
+    --accent: 321 12% 30%;
+    --accent-foreground: 321 10% 90%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 321 12% 30%;
+    --input: 321 12% 30%;
+    --ring: 321 8% 49%;
+
+    --warning: 45 93% 47%;
+    --warning-foreground: 45 93% 30%;
+
+    --step-active: 321 8% 49%;
+    --step-complete: 321 8% 49%;
+    --step-inactive: 321 5% 45%;
+
+    --sidebar-background: 200 50% 10%;
+    --sidebar-foreground: 240 5.3% 86.1%;
+    --sidebar-primary: 240 5.9% 90%;
+    --sidebar-primary-foreground: 0 0% 10%;
+    --sidebar-accent: 240 4.8% 15.9%;
+    --sidebar-accent-foreground: 240 5.9% 90%;
+    --sidebar-border: 220 13% 15%;
+    --sidebar-ring: 321 8% 49%;
+  }
+}
+
+@layer base {
+  html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+}
