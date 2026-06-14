@@ -1,7 +1,9 @@
 import { useGQLMutation } from "./useGraphQL";
 import { navigateTo } from "#app";
+import { useQueryClient } from "@tanstack/vue-query";
 
 export const useAuth = () => {
+  const qc = useQueryClient();
 
   // ──────────────────────────────────────────────
   // Step 1: Request OTP (email + password)
@@ -55,7 +57,15 @@ export const useAuth = () => {
 
   const loginMutation = useGQLMutation(LOGIN_MUTATION, {
     onSuccess: (data) => {
-      // Token is now set securely by the server proxy via HttpOnly cookie
+      // Token is set securely server-side via HttpOnly cookie by /api/remote proxy
+
+      // Pre-seed the Vue Query cache so the businesses page loads instantly
+      // without waiting for a refetch after navigation
+      if (data?.login?.user) {
+        qc.setQueryData(["currentUser"], {
+          user: data.login.user,
+        });
+      }
     },
     onError: (err) => {
       console.error("Login error:", err);
@@ -95,7 +105,7 @@ export const useAuth = () => {
   };
 
   // ──────────────────────────────────────────────
-  // Logout
+  // Logout — clears the HttpOnly cookie server-side
   // ──────────────────────────────────────────────
   const logout = async () => {
     try {
@@ -103,6 +113,7 @@ export const useAuth = () => {
     } catch (e) {
       console.error("Logout error", e);
     }
+    qc.removeQueries({ queryKey: ["currentUser"] });
     navigateTo("/");
   };
 
