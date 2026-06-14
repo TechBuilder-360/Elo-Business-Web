@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from "vue";
+import { useAuth } from "@/composables/useAuth";
 import {
   Card,
   CardContent,
@@ -22,26 +23,30 @@ definePageMeta({
 
 const route = useRoute();
 const email = route.query.email || "your email";
+const identifier = route.query.identifier;
 const otp = ref("");
-const isLoading = ref(false);
+const { login } = useAuth();
+const isPending = login.isPending;
 
-const handleVerify = () => {
+const handleVerify = async () => {
   if (otp.value.length !== 6) {
     toast.error("Please enter the complete 6-digit code");
     return;
   }
 
-  isLoading.value = true;
-  setTimeout(() => {
-    isLoading.value = false;
-    // Simulate checking verification status
-    const isVerified = true;
-    if (isVerified) {
-      navigateTo("/businesses");
-    } else {
-      navigateTo("/verify-identity");
-    }
-  }, 1000);
+  if (!identifier) {
+    toast.error("Invalid session. Please login again.");
+    navigateTo("/");
+    return;
+  }
+
+  try {
+    await login.mutateAsync({ otp: String(otp.value), identifier: String(identifier) });
+    toast.success("Login successful");
+    navigateTo("/businesses");
+  } catch (error) {
+    toast.error(error.message || "Failed to verify OTP");
+  }
 };
 
 const handleResend = () => {
@@ -93,10 +98,10 @@ const handleResend = () => {
           <Button
             @click="handleVerify"
             class="w-full"
-            :disabled="isLoading || otp.length !== 6"
+            :disabled="isPending || otp.length !== 6"
           >
-            {{ isLoading ? "Verifying..." : "Verify" }}
-            <ArrowRight v-if="!isLoading" class="w-4 h-4 ml-2" />
+            {{ isPending ? "Verifying..." : "Verify" }}
+            <ArrowRight v-if="!isPending" class="w-4 h-4 ml-2" />
           </Button>
 
           <div class="text-center">

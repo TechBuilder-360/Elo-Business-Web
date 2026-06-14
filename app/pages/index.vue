@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from "vue";
+import { useAuth } from "@/composables/useAuth";
 import {
   Card,
   CardContent,
@@ -19,7 +20,8 @@ definePageMeta({
 
 const email = ref("");
 const password = ref("");
-const isLoading = ref(false);
+const { requestOtp } = useAuth();
+const isPending = requestOtp.isPending;
 
 const handleLogin = async () => {
   if (!email.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
@@ -31,16 +33,20 @@ const handleLogin = async () => {
     return;
   }
 
-  isLoading.value = true;
-  // Simulate API call
-  setTimeout(() => {
-    isLoading.value = false;
+  try {
+    const data = await requestOtp.mutateAsync({ 
+      email_address: email.value, 
+      password: password.value 
+    });
+    
     toast.success("OTP sent to your email");
     navigateTo({
       path: "/verify-otp",
-      query: { email: email.value },
+      query: { identifier: data.Identifier, email: email.value },
     });
-  }, 1200);
+  } catch (error) {
+    toast.error(error.message || "Failed to authenticate");
+  }
 };
 </script>
 
@@ -100,9 +106,9 @@ const handleLogin = async () => {
               </div>
             </div>
 
-            <Button type="submit" class="w-full" :disabled="isLoading">
-              {{ isLoading ? "Signing in..." : "Continue" }}
-              <ArrowRight v-if="!isLoading" class="w-4 h-4 ml-2" />
+            <Button type="submit" class="w-full" :disabled="isPending">
+              {{ isPending ? "Signing in..." : "Continue" }}
+              <ArrowRight v-if="!isPending" class="w-4 h-4 ml-2" />
             </Button>
 
             <p class="text-center text-sm text-muted-foreground">
