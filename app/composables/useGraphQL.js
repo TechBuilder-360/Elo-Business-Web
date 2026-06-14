@@ -11,7 +11,7 @@ export const useGraphQL = () => {
     }
 
     try {
-      const response = await $fetch('https://elo--elo-backend--fwg2j6rrxrkh.code.run/api', {
+      const response = await $fetch('/api/remote', {
         method: 'POST',
         body: { query, variables },
         headers,
