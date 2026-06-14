@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from "vue";
 import { useAuth } from "@/composables/useAuth";
+import { useAuth } from "@/composables/useAuth";
 import {
   Card,
   CardContent,
@@ -25,6 +26,8 @@ const form = ref({
   password: "",
   confirmPassword: "",
 });
+const { register } = useAuth();
+const isPending = register.isPending;
 const { register } = useAuth();
 const isPending = register.isPending;
 
@@ -69,6 +72,7 @@ const validate = () => {
 };
 
 const handleSubmit = async () => {
+const handleSubmit = async () => {
   const error = validate();
   if (error) {
     toast.error(error);
@@ -82,16 +86,18 @@ const handleSubmit = async () => {
       email_address: form.value.email,
       password: form.value.password,
     };
+    
+    // Only include optional fields if they have a value
+    if (form.value.displayName) {
+      payload.display_name = form.value.displayName;
+    }
 
-    console.log("[Registration Payload]", JSON.stringify(payload, null, 2));
     await register.mutateAsync(payload);
-
+    
     toast.success("Account created successfully! Please sign in.");
-    await navigateTo("/");
+    navigateTo("/");
   } catch (err) {
-    // Show the most specific error message available
-    const gqlMsg = err?.graphQLErrors?.[0]?.message;
-    toast.error(gqlMsg || err.message || "Failed to create account");
+    toast.error(err.message || "Failed to create account");
   }
 };
 </script>
@@ -186,6 +192,9 @@ const handleSubmit = async () => {
               </div>
             </div>
 
+            <Button type="submit" class="w-full" :disabled="isPending">
+              {{ isPending ? "Creating account..." : "Create account" }}
+              <ArrowRight v-if="!isPending" class="w-4 h-4 ml-2" />
             <Button type="submit" class="w-full" :disabled="isPending">
               {{ isPending ? "Creating account..." : "Create account" }}
               <ArrowRight v-if="!isPending" class="w-4 h-4 ml-2" />

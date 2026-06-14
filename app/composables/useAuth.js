@@ -57,63 +57,30 @@ export const useAuth = () => {
 
   const loginMutation = useGQLMutation(LOGIN_MUTATION, {
     onSuccess: (data) => {
-      // Token is set securely server-side via HttpOnly cookie by /api/remote proxy
-
-      // Pre-seed the Vue Query cache so the businesses page loads instantly
-      // without waiting for a refetch after navigation
-      if (data?.login?.user) {
-        qc.setQueryData(["currentUser"], {
-          user: data.login.user,
-        });
-      }
-    },
-    onError: (err) => {
-      console.error("Login error:", err);
+      tokenCookie.value = data.access_token;
     },
   });
 
-  // Wrap mutateAsync so callers pass { otp, identifier } directly
-  const loginOriginal = loginMutation.mutateAsync.bind(loginMutation);
-  loginMutation.mutateAsync = async ({ otp, identifier }) => {
-    const data = await loginOriginal({
-      input: { otp, identifier },
-    });
-    return data?.login;
-  };
+  const registerMutation = useMutation({
+    mutationFn: async (userData) => {
+      const query = `
+        mutation Registration($input: Registration!) {
+          registration(input: $input) {
+            __typename
+          }
+        }
+      `;
+      const variables = {
+        input: userData,
+      };
 
-  // ──────────────────────────────────────────────
-  // Registration
-  // ──────────────────────────────────────────────
-  const REGISTRATION_MUTATION = `
-    mutation Registration($input: Registration!) {
-      registration(input: $input) {
-        __typename
-      }
-    }
-  `;
-
-  const registerMutation = useGQLMutation(REGISTRATION_MUTATION, {
-    onError: (err) => {
-      console.error("Registration error:", err);
+      const response = await execute(query, variables);
+      return response.registration;
     },
   });
 
-  // Wrap mutateAsync so callers pass the flat userData object directly
-  const registerOriginal = registerMutation.mutateAsync.bind(registerMutation);
-  registerMutation.mutateAsync = async (userData) => {
-    return await registerOriginal({ input: userData });
-  };
-
-  // ──────────────────────────────────────────────
-  // Logout — clears the HttpOnly cookie server-side
-  // ──────────────────────────────────────────────
-  const logout = async () => {
-    try {
-      await $fetch("/api/logout", { method: "POST" });
-    } catch (e) {
-      console.error("Logout error", e);
-    }
-    qc.removeQueries({ queryKey: ["currentUser"] });
+  const logout = () => {
+    tokenCookie.value = null;
     navigateTo("/");
   };
 
