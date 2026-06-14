@@ -55,7 +55,7 @@ const handleResend = () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-background flex items-center justify-center px-4">
+  <div class="h-[100dvh] overflow-y-auto bg-background flex items-center justify-center px-4 py-6">
     <div class="w-full max-w-md">
       <div class="flex flex-col items-center mb-8">
         <div

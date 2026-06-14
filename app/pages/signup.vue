@@ -99,7 +99,7 @@ const handleSubmit = async () => {
 
 <template>
   <div
-    class="min-h-screen bg-background flex items-center justify-center px-4 py-8"
+    class="h-[100dvh] overflow-y-auto bg-background flex items-center justify-center px-4 py-8"
   >
     <div class="w-full max-w-md">
       <div class="flex flex-col items-center mb-8">
