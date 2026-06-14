@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from "vue";
+import { useAuth } from "@/composables/useAuth";
 import {
   Card,
   CardContent,
@@ -25,7 +26,8 @@ const form = ref({
   password: "",
   confirmPassword: "",
 });
-const isLoading = ref(false);
+const { register } = useAuth();
+const isPending = register.isPending;
 
 const updateField = (key, value) => {
   form.value[key] = value;
@@ -65,22 +67,33 @@ const validate = () => {
   return null;
 };
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
   const error = validate();
   if (error) {
     toast.error(error);
     return;
   }
 
-  isLoading.value = true;
-  setTimeout(() => {
-    isLoading.value = false;
-    toast.success("Account created. Check your email for an OTP.");
-    navigateTo({
-      path: "/verify-otp",
-      query: { email: form.value.email },
-    });
-  }, 1000);
+  try {
+    const payload = {
+      first_name: form.value.firstName,
+      last_name: form.value.lastName,
+      email_address: form.value.email,
+      password: form.value.password,
+    };
+    
+    // Only include optional fields if they have a value
+    if (form.value.displayName) {
+      payload.display_name = form.value.displayName;
+    }
+
+    await register.mutateAsync(payload);
+    
+    toast.success("Account created successfully! Please sign in.");
+    navigateTo("/");
+  } catch (err) {
+    toast.error(err.message || "Failed to create account");
+  }
 };
 </script>
 
@@ -189,9 +202,9 @@ const handleSubmit = () => {
               </div>
             </div>
 
-            <Button type="submit" class="w-full" :disabled="isLoading">
-              {{ isLoading ? "Creating account..." : "Create account" }}
-              <ArrowRight v-if="!isLoading" class="w-4 h-4 ml-2" />
+            <Button type="submit" class="w-full" :disabled="isPending">
+              {{ isPending ? "Creating account..." : "Create account" }}
+              <ArrowRight v-if="!isPending" class="w-4 h-4 ml-2" />
             </Button>
 
             <p class="text-center text-sm text-muted-foreground">

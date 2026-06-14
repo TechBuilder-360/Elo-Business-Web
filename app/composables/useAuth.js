@@ -51,6 +51,24 @@ export const useAuth = () => {
     }
   });
 
+  const registerMutation = useMutation({
+    mutationFn: async (userData) => {
+      const query = `
+        mutation Registration($input: Registration!) {
+          registration(input: $input) {
+            __typename
+          }
+        }
+      `;
+      const variables = {
+        input: userData
+      };
+      
+      const response = await execute(query, variables);
+      return response.registration;
+    }
+  });
+
   const logout = () => {
     tokenCookie.value = null;
     navigateTo('/');
@@ -59,6 +77,7 @@ export const useAuth = () => {
   return {
     requestOtp: requestOtpMutation,
     login: loginMutation,
+    register: registerMutation,
     logout
   };
 };
