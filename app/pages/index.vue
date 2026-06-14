@@ -54,7 +54,6 @@ const handleLogin = async () => {
     });
   } catch (error) {
     const gqlMsg = error?.graphQLErrors?.[0]?.message;
-    // We filter out the generic "GraphQL error" from the Error object if there's no custom message
     const fallbackMsg =
       error.message === "GraphQL error"
         ? "Failed to authenticate"
