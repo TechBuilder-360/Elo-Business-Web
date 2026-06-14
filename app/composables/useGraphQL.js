@@ -71,14 +71,11 @@ export const useGraphQL = () => {
     }
 
     try {
-      const response = await $fetch(
-        "https://elo--elo-backend--fwg2j6rrxrkh.code.run/api",
-        {
-          method: "POST",
-          body: { query, variables },
-          headers,
-        },
-      );
+      const response = await $fetch("/api/remote", {
+        method: "POST",
+        body: { query, variables },
+        headers,
+      });
 
       if (response.errors) {
         throw new Error(response.errors[0].message || "GraphQL Error");

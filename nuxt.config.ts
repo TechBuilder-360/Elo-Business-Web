@@ -25,5 +25,8 @@ export default defineNuxtConfig({
         'sweetalert2'
       ]
     }
+  },
+  routeRules: {
+    '/api/remote': { proxy: 'https://elo--elo-backend--fwg2j6rrxrkh.code.run/api' }
   }
 })
