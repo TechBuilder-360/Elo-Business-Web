@@ -68,6 +68,13 @@ const validate = () => {
   return null;
 };
 
+const toBase64 = (file) => new Promise((resolve, reject) => {
+  const reader = new FileReader();
+  reader.readAsDataURL(file);
+  reader.onload = () => resolve(reader.result);
+  reader.onerror = (error) => reject(error);
+});
+
 const handleSubmit = async () => {
   const error = validate();
   if (error) {
@@ -81,12 +88,17 @@ const handleSubmit = async () => {
       last_name: form.value.lastName,
       email_address: form.value.email,
       password: form.value.password,
+      // Optional fields
+      ...(form.value.displayName && { display_name: form.value.displayName }),
+      ...(form.value.phoneNumber && {
+        phone_number: form.value.phoneNumber.replace(/^0/, "+234"),
+      }),
+      ...(form.value.avatar && { avatar: await toBase64(form.value.avatar) }),
     };
 
     // Only include optional fields if they have a value
-    if (form.value.displayName) {
-      payload.display_name = form.value.displayName;
-    }
+    // (already handled in payload construction)
+
 
     await register.mutateAsync(payload);
 
