@@ -89,17 +89,29 @@ const handleSubmit = async () => {
       last_name: form.value.lastName,
       email_address: form.value.email,
       password: form.value.password,
-      // Optional fields
-      ...(form.value.displayName && { display_name: form.value.displayName }),
-      ...(form.value.phoneNumber && {
-        phone_number: form.value.phoneNumber.replace(/^0/, "+234"),
+      // Optional fields – only included when non-empty
+      ...(form.value.displayName?.trim() && {
+        display_name: form.value.displayName.trim(),
       }),
+      ...(form.value.phoneNumber?.trim() &&
+        (() => {
+          const raw = form.value.phoneNumber.trim().replace(/\D/g, ""); // strip non-digits
+          let e164 = "";
+          if (raw.startsWith("234")) {
+            e164 = "+" + raw; // already has country code digits
+          } else if (raw.startsWith("0") && raw.length === 11) {
+            e164 = "+234" + raw.slice(1); // local Nigerian format: 0XXXXXXXXXX
+          } else if (raw.length === 10) {
+            e164 = "+234" + raw; // without leading 0
+          } else if (form.value.phoneNumber.trim().startsWith("+")) {
+            e164 = form.value.phoneNumber.trim(); // already E.164
+          }
+          return e164 ? { phone_number: e164 } : {};
+        })()),
       ...(form.value.avatar && { avatar: await toBase64(form.value.avatar) }),
     };
 
-    // Only include optional fields if they have a value
-    // (already handled in payload construction)
-
+    console.log("[Registration Payload]", JSON.stringify(payload, null, 2));
     await register.mutateAsync(payload);
 
     toast.success("Account created successfully! Please sign in.");
