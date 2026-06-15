@@ -23,6 +23,7 @@ const form = ref({
   email: "",
   firstName: "",
   lastName: "",
+  phoneNumber: "",
   password: "",
   confirmPassword: "",
 });
@@ -41,6 +42,8 @@ const validate = () => {
   if (!form.value.lastName.trim()) return "Last name is required";
   if (form.value.lastName.length > 50)
     return "Last name must be less than 50 characters";
+
+  if (!form.value.phoneNumber.trim()) return "Phone number is required";
 
   if (form.value.displayName && form.value.displayName.length > 100) {
     return "Display name must be less than 100 characters";
@@ -78,17 +81,18 @@ const handleSubmit = async () => {
     const payload = {
       first_name: form.value.firstName,
       last_name: form.value.lastName,
+      phone_number: form.value.phoneNumber,
       email_address: form.value.email,
       password: form.value.password,
     };
-    
+
     // Only include optional fields if they have a value
     if (form.value.displayName) {
       payload.display_name = form.value.displayName;
     }
 
     await register.mutateAsync(payload);
-    
+
     toast.success("Account created successfully! Please sign in.");
     navigateTo("/");
   } catch (err) {
@@ -154,6 +158,17 @@ const handleSubmit = async () => {
                 :modelValue="form.displayName"
                 @update:modelValue="(v) => updateField('displayName', v)"
                 placeholder="janedoe"
+              />
+            </div>
+
+            <div class="space-y-2">
+              <Label for="phoneNumber">Phone number</Label>
+              <Input
+                id="phoneNumber"
+                type="tel"
+                :modelValue="form.phoneNumber"
+                @update:modelValue="(v) => updateField('phoneNumber', v)"
+                placeholder="+1234567890"
               />
             </div>
 
