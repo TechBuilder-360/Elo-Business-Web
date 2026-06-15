@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/vue-query";
 import { $fetch } from "ofetch";
+import { useCookie } from "#app";
 
 // Core GraphQL request helper
 // Auth token is injected server-side by the proxy via HttpOnly cookie
