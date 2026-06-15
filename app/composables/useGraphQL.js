@@ -27,30 +27,32 @@ async function gqlRequest({ query, variables = {} }) {
 
 // Query hook – use anywhere in Vue components
 export function useGQLQuery(key, query, variables = {}, opts = {}) {
-  return useQuery(key, () => gqlRequest({ query, variables }), opts);
+  return useQuery({
+    queryKey: key,
+    queryFn: () => gqlRequest({ query, variables }),
+    ...opts,
+  });
 }
 
 // Mutation hook with optimistic update support
 export function useGQLMutation(mutation, opts = {}) {
   const qc = useQueryClient();
-  return useMutation(
-    (vars) => gqlRequest({ query: mutation, variables: vars }),
-    {
-      onMutate: async (newData) => {
-        await qc.cancelQueries(["currentUser"]);
-        const previous = qc.getQueryData(["currentUser"]);
-        qc.setQueryData(["currentUser"], newData);
-        return { previous };
-      },
-      onError: (err, _vars, context) => {
-        if (context?.previous) {
-          qc.setQueryData(["currentUser"], context.previous);
-        }
-        console.error(err);
-      },
-      ...opts,
+  return useMutation({
+    mutationFn: (vars) => gqlRequest({ query: mutation, variables: vars }),
+    onMutate: async (newData) => {
+      await qc.cancelQueries({ queryKey: ["currentUser"] });
+      const previous = qc.getQueryData(["currentUser"]);
+      qc.setQueryData(["currentUser"], newData);
+      return { previous };
     },
-  );
+    onError: (err, _vars, context) => {
+      if (context?.previous) {
+        qc.setQueryData(["currentUser"], context.previous);
+      }
+      console.error(err);
+    },
+    ...opts,
+  });
 }
 
 // Legacy execute helper for backward compatibility
