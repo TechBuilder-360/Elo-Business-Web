@@ -1,9 +1,9 @@
 import { useMutation } from '@tanstack/vue-query';
-import { useGraphQL } from './useGraphQL';
+import { useExecute } from './useGraphQL';
 import { useCookie, navigateTo } from '#app';
 
 export const useAuth = () => {
-  const { execute } = useGraphQL();
+  const { execute } = useExecute();
   
   // Initialize cookie outside of async callbacks to maintain Nuxt context
   const tokenCookie = useCookie('auth_token', {
