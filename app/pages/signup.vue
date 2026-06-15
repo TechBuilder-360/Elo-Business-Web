@@ -24,6 +24,8 @@ const form = ref({
   firstName: "",
   lastName: "",
   phoneNumber: "",
+  // Avatar will be a File object (image)
+  avatar: null,
   password: "",
   confirmPassword: "",
 });
@@ -70,6 +72,13 @@ const validate = () => {
   return null;
 };
 
+const toBase64 = (file) => new Promise((resolve, reject) => {
+  const reader = new FileReader();
+  reader.readAsDataURL(file);
+  reader.onload = () => resolve(reader.result);
+  reader.onerror = (error) => reject(error);
+});
+
 const handleSubmit = async () => {
   const error = validate();
   if (error) {
@@ -81,15 +90,19 @@ const handleSubmit = async () => {
     const payload = {
       first_name: form.value.firstName,
       last_name: form.value.lastName,
-      phone_number: form.value.phoneNumber,
       email_address: form.value.email,
       password: form.value.password,
+      // Optional fields
+      ...(form.value.displayName && { display_name: form.value.displayName }),
+      ...(form.value.phoneNumber && {
+        phone_number: form.value.phoneNumber.replace(/^0/, "+234"),
+      }),
+      ...(form.value.avatar && { avatar: await toBase64(form.value.avatar) }),
     };
 
     // Only include optional fields if they have a value
-    if (form.value.displayName) {
-      payload.display_name = form.value.displayName;
-    }
+    // (already handled in payload construction)
+
 
     await register.mutateAsync(payload);
 
@@ -162,13 +175,23 @@ const handleSubmit = async () => {
             </div>
 
             <div class="space-y-2">
-              <Label for="phoneNumber">Phone number</Label>
+              <Label for="avatar">Avatar URL (optional)</Label>
               <Input
-                id="phoneNumber"
-                type="tel"
-                :modelValue="form.phoneNumber"
-                @update:modelValue="(v) => updateField('phoneNumber', v)"
-                placeholder="+1234567890"
+                id="avatar"
+                type="text"
+                :modelValue="form.avatar"
+                @update:modelValue="(v) => updateField('avatar', v)"
+                placeholder="https://example.com/avatar.jpg"
+              />
+            </div>
+            <div class="space-y-2">
+              <Label for="avatar">Avatar URL (optional)</Label>
+              <Input
+                id="avatar"
+                type="text"
+                :modelValue="form.avatar"
+                @update:modelValue="(v) => updateField('avatar', v)"
+                placeholder="https://example.com/avatar.jpg"
               />
             </div>
 
