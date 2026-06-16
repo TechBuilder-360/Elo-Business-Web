@@ -40,7 +40,7 @@ const handleLogin = async () => {
     });
     
     toast.success("OTP sent to your email");
-    navigateTo({
+    await navigateTo({
       path: "/verify-otp",
       query: { identifier: data.Identifier, email: email.value },
     });

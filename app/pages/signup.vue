@@ -55,6 +55,12 @@ const validate = () => {
   if (form.value.password.length > 72)
     return "Password must be less than 72 characters";
 
+  const passwordRegex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]+$/;
+  if (!passwordRegex.test(form.value.password)) {
+    return "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character";
+  }
+
   if (form.value.password !== form.value.confirmPassword) {
     return "Passwords do not match";
   }
@@ -81,7 +87,7 @@ const handleSubmit = async () => {
     await register.mutateAsync(payload);
 
     toast.success("Account created successfully! Please sign in.");
-    navigateTo("/");
+    await navigateTo("/");
   } catch (err) {
     // Show the most specific error message available
     const gqlMsg = err?.graphQLErrors?.[0]?.message;
