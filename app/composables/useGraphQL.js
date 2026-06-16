@@ -26,7 +26,6 @@ export function useGQLQuery(key, query, variables = {}, opts = {}) {
   return useQuery({
     queryKey: key,
     queryFn: () => gqlRequest({ query, variables }),
-    retry: false,
     ...opts,
   });
 }
