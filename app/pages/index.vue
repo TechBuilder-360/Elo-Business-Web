@@ -45,7 +45,10 @@ const handleLogin = async () => {
       query: { identifier: data.Identifier, email: email.value },
     });
   } catch (error) {
-    toast.error(error.message || "Failed to authenticate");
+    const gqlMsg = error?.graphQLErrors?.[0]?.message;
+    // We filter out the generic "GraphQL error" from the Error object if there's no custom message
+    const fallbackMsg = error.message === "GraphQL error" ? "Failed to authenticate" : error.message;
+    toast.error(gqlMsg || fallbackMsg);
   }
 };
 </script>

@@ -9,7 +9,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { toast } from "@/utils/alert";
+import { toast, showAlert } from "@/utils/alert";
 import { Building2, ArrowRight, RotateCcw } from "lucide-vue-next";
 import {
   InputOTP,
@@ -25,7 +25,7 @@ const route = useRoute();
 const email = route.query.email || "your email";
 const identifier = route.query.identifier;
 const otp = ref("");
-const { login } = useAuth();
+const { login, requestOtp } = useAuth();
 const isPending = login.isPending;
 
 const handleVerify = async () => {
@@ -41,21 +41,61 @@ const handleVerify = async () => {
   }
 
   try {
-    await login.mutateAsync({ otp: String(otp.value), identifier: String(identifier) });
+    await login.mutateAsync({
+      otp: String(otp.value),
+      identifier: String(identifier),
+    });
     toast.success("Login successful");
-    navigateTo("/businesses");
+    await navigateTo("/businesses");
   } catch (error) {
-    toast.error(error.message || "Failed to verify OTP");
+    const gqlMsg = error?.graphQLErrors?.[0]?.message;
+    const fallbackMsg =
+      error.message === "GraphQL error"
+        ? "Failed to verify OTP"
+        : error.message;
+    toast.error(gqlMsg || fallbackMsg);
   }
 };
 
-const handleResend = () => {
-  toast.success("A new OTP has been sent to your email");
+const handleResend = async () => {
+  const { value: password } = await showAlert({
+    title: "Verify Password",
+    text: "Please enter your password to resend the OTP.",
+    input: "password",
+    inputPlaceholder: "Enter your password",
+    showCancelButton: true,
+    confirmButtonText: "Resend",
+    confirmButtonColor: "hsl(var(--primary))",
+    inputValidator: (value) => {
+      if (!value) {
+        return "You need to enter your password!";
+      }
+    },
+  });
+
+  if (password) {
+    try {
+      await requestOtp.mutateAsync({
+        email_address: email,
+        password: password,
+      });
+      toast.success("A new OTP has been sent to your email");
+    } catch (error) {
+      const gqlMsg = error?.graphQLErrors?.[0]?.message;
+      const fallbackMsg =
+        error.message === "GraphQL error"
+          ? "Failed to resend OTP"
+          : error.message;
+      toast.error(gqlMsg || fallbackMsg);
+    }
+  }
 };
 </script>
 
 <template>
-  <div class="h-[100dvh] overflow-y-auto bg-background flex items-center justify-center px-4 py-6">
+  <div
+    class="h-[100dvh] overflow-y-auto bg-background flex items-center justify-center px-4 py-6"
+  >
     <div class="w-full max-w-md">
       <div class="flex flex-col items-center mb-8">
         <div
