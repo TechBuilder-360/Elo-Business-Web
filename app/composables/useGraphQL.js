@@ -1,17 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/vue-query";
 import { $fetch } from "ofetch";
-import { useCookie } from "#app";
 
-// Core GraphQL request helper – adds auth token if present
+// Core GraphQL request helper
+// Auth token is injected server-side by the proxy via HttpOnly cookie
 async function gqlRequest({ query, variables = {} }) {
-  const token = useCookie("auth_token");
   const headers = {
     "Content-Type": "application/json",
     Accept: "application/json",
   };
-  if (token?.value) {
-    headers["Authorization"] = `Bearer ${token.value}`;
-  }
   const response = await $fetch("/api/remote", {
     method: "POST",
     body: { query, variables },
@@ -30,6 +26,7 @@ export function useGQLQuery(key, query, variables = {}, opts = {}) {
   return useQuery({
     queryKey: key,
     queryFn: () => gqlRequest({ query, variables }),
+    retry: false,
     ...opts,
   });
 }

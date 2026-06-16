@@ -14,7 +14,7 @@ const { userBusinesses } = useBusiness();
 const { data, isPending, isError } = userBusinesses;
 
 const businesses = computed(() => {
-  return data.value?.userBusinesses || [];
+  return data.value?.getUserBusinsses || [];
 });
 
 const roleColors = {

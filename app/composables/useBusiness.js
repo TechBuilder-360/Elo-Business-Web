@@ -5,8 +5,8 @@ export const useBusiness = () => {
   // Fetch User Businesses
   // ──────────────────────────────────────────────
   const USER_BUSINESSES_QUERY = `
-    query UserBusinesses {
-      userBusinesses {
+    query GetUserBusinesses {
+      getUserBusinsses {
         id
         name
         role
