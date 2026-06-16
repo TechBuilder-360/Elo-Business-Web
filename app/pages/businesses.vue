@@ -2,10 +2,9 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Plus, ChevronRight } from "lucide-vue-next";
+import { Building2, Plus, ChevronRight, Loader2 } from "lucide-vue-next";
 
 import { useBusiness } from "@/composables/useBusiness";
-import { Skeleton } from "@/components/ui/skeleton";
 
 definePageMeta({
   layout: false,
@@ -51,16 +50,12 @@ const handleOnboardNew = () => {
         </p>
       </div>
 
-      <div v-if="isPending" class="space-y-3">
-        <Card class="shadow-sm border bg-card p-4">
-          <div class="flex items-center gap-3">
-            <Skeleton class="w-10 h-10 rounded-lg" />
-            <div class="space-y-2">
-              <Skeleton class="h-4 w-[150px]" />
-              <Skeleton class="h-3 w-[100px]" />
-            </div>
-          </div>
-        </Card>
+      <div
+        v-if="isPending"
+        class="flex flex-col items-center justify-center py-12"
+      >
+        <Loader2 class="w-8 h-8 text-primary animate-spin mb-3" />
+        <p class="text-sm text-muted-foreground">Loading your businesses...</p>
       </div>
 
       <div
