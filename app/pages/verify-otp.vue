@@ -9,8 +9,18 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { toast, showAlert } from "@/utils/alert";
-import { Building2, ArrowRight, RotateCcw } from "lucide-vue-next";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "@/utils/alert";
+import {
+  Building2,
+  ArrowRight,
+  RotateCcw,
+  Lock,
+  Eye,
+  EyeOff,
+  X,
+} from "lucide-vue-next";
 import {
   InputOTP,
   InputOTPGroup,
@@ -27,6 +37,11 @@ const identifier = route.query.identifier;
 const otp = ref("");
 const { login, requestOtp } = useAuth();
 const isPending = login.isPending;
+
+const isResendModalOpen = ref(false);
+const resendPassword = ref("");
+const showResendPassword = ref(false);
+const isResending = requestOtp.isPending;
 
 const handleVerify = async () => {
   if (otp.value.length !== 6) {
@@ -57,37 +72,32 @@ const handleVerify = async () => {
   }
 };
 
-const handleResend = async () => {
-  const { value: password } = await showAlert({
-    title: "Verify Password",
-    text: "Please enter your password to resend the OTP.",
-    input: "password",
-    inputPlaceholder: "Enter your password",
-    showCancelButton: true,
-    confirmButtonText: "Resend",
-    confirmButtonColor: "hsl(var(--primary))",
-    inputValidator: (value) => {
-      if (!value) {
-        return "You need to enter your password!";
-      }
-    },
-  });
+const handleResendClick = () => {
+  resendPassword.value = "";
+  showResendPassword.value = false;
+  isResendModalOpen.value = true;
+};
 
-  if (password) {
-    try {
-      await requestOtp.mutateAsync({
-        email_address: email,
-        password: password,
-      });
-      toast.success("A new OTP has been sent to your email");
-    } catch (error) {
-      const gqlMsg = error?.graphQLErrors?.[0]?.message;
-      const fallbackMsg =
-        error.message === "GraphQL error"
-          ? "Failed to resend OTP"
-          : error.message;
-      toast.error(gqlMsg || fallbackMsg);
-    }
+const submitResend = async () => {
+  if (!resendPassword.value) {
+    toast.error("Please enter your password!");
+    return;
+  }
+
+  try {
+    await requestOtp.mutateAsync({
+      email_address: email,
+      password: resendPassword.value,
+    });
+    toast.success("A new OTP has been sent to your email");
+    isResendModalOpen.value = false;
+  } catch (error) {
+    const gqlMsg = error?.graphQLErrors?.[0]?.message;
+    const fallbackMsg =
+      error.message === "GraphQL error"
+        ? "Failed to resend OTP"
+        : error.message;
+    toast.error(gqlMsg || fallbackMsg);
   }
 };
 </script>
@@ -148,13 +158,73 @@ const handleResend = async () => {
             <Button
               variant="ghost"
               size="sm"
-              @click="handleResend"
+              @click="handleResendClick"
               class="text-muted-foreground"
             >
               <RotateCcw class="w-3 h-3 mr-1" />
               Resend code
             </Button>
           </div>
+        </CardContent>
+      </Card>
+    </div>
+
+    <!-- Custom Resend Password Modal -->
+    <div
+      v-if="isResendModalOpen"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm"
+    >
+      <Card class="w-full max-w-sm shadow-xl border border-border">
+        <CardHeader class="pb-4 relative">
+          <button
+            @click="isResendModalOpen = false"
+            class="absolute right-4 top-4 text-muted-foreground hover:text-foreground"
+          >
+            <X class="w-5 h-5" />
+          </button>
+          <CardTitle class="text-lg">Verify Password</CardTitle>
+          <CardDescription>
+            Please enter your password to resend the OTP.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form @submit.prevent="submitResend" class="space-y-4">
+            <div class="space-y-2">
+              <Label for="resend-password">Password</Label>
+              <div class="relative">
+                <Lock
+                  class="absolute left-3 top-3 h-4 w-4 text-muted-foreground"
+                />
+                <Input
+                  id="resend-password"
+                  :type="showResendPassword ? 'text' : 'password'"
+                  v-model="resendPassword"
+                  placeholder="••••••••"
+                  class="pl-10 pr-10"
+                />
+                <button
+                  type="button"
+                  @click="showResendPassword = !showResendPassword"
+                  class="absolute right-3 top-3 text-muted-foreground hover:text-foreground focus:outline-none"
+                >
+                  <Eye v-if="showResendPassword" class="w-4 h-4" />
+                  <EyeOff v-else class="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+            <div class="flex justify-end space-x-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                @click="isResendModalOpen = false"
+              >
+                Cancel
+              </Button>
+              <Button type="submit" :disabled="isResending || !resendPassword">
+                {{ isResending ? "Resending..." : "Resend" }}
+              </Button>
+            </div>
+          </form>
         </CardContent>
       </Card>
     </div>
