@@ -54,6 +54,7 @@ const handleLogin = async () => {
     });
   } catch (error) {
     const gqlMsg = error?.graphQLErrors?.[0]?.message;
+
     const fallbackMsg =
       error.message === "GraphQL error"
         ? "Failed to authenticate"
