@@ -16,6 +16,7 @@ import { useVerification } from "@/composables/useVerification";
 import { toast } from "@/utils/alert";
 import { onMounted, onUnmounted, ref, watch, computed } from "vue";
 import { navigateTo } from "#app";
+import { Skeleton } from "@/components/ui/skeleton";
 
 definePageMeta({
   layout: false,
