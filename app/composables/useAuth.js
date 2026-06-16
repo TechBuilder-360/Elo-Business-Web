@@ -1,12 +1,7 @@
 import { useGQLMutation } from "./useGraphQL";
-import { useCookie, navigateTo } from "#app";
+import { navigateTo } from "#app";
 
 export const useAuth = () => {
-  // Initialize cookie outside of async callbacks to maintain Nuxt context
-  const tokenCookie = useCookie("auth_token", {
-    maxAge: 60 * 60 * 24 * 7, // 7 days
-    path: "/",
-  });
 
   // ──────────────────────────────────────────────
   // Step 1: Request OTP (email + password)
@@ -52,9 +47,7 @@ export const useAuth = () => {
 
   const loginMutation = useGQLMutation(LOGIN_MUTATION, {
     onSuccess: (data) => {
-      if (data?.login?.access_token) {
-        tokenCookie.value = data.login.access_token;
-      }
+      // Token is now set securely by the server proxy via HttpOnly cookie
     },
     onError: (err) => {
       console.error("Login error:", err);
@@ -67,9 +60,6 @@ export const useAuth = () => {
     const data = await loginOriginal({
       input: { otp, identifier },
     });
-    if (data?.login?.access_token) {
-      tokenCookie.value = data.login.access_token;
-    }
     return data?.login;
   };
 
@@ -99,8 +89,12 @@ export const useAuth = () => {
   // ──────────────────────────────────────────────
   // Logout
   // ──────────────────────────────────────────────
-  const logout = () => {
-    tokenCookie.value = null;
+  const logout = async () => {
+    try {
+      await $fetch("/api/logout", { method: "POST" });
+    } catch (e) {
+      console.error("Logout error", e);
+    }
     navigateTo("/");
   };
 

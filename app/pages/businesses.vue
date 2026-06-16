@@ -4,20 +4,19 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Building2, Plus, ChevronRight } from "lucide-vue-next";
 
+import { useBusiness } from "@/composables/useBusiness";
+import { Skeleton } from "@/components/ui/skeleton";
+
 definePageMeta({
   layout: false,
 });
 
-const mockBusinesses = [
-  { id: "1", name: "Acme Technologies", role: "Owner", industry: "Technology" },
-  {
-    id: "2",
-    name: "Lagos Bistro",
-    role: "Manager",
-    industry: "Food & Beverage",
-  },
-  { id: "3", name: "Swift Logistics", role: "Staff", industry: "Logistics" },
-];
+const { userBusinesses } = useBusiness();
+const { data, isPending, isError } = userBusinesses;
+
+const businesses = computed(() => {
+  return data.value?.userBusinesses || [];
+});
 
 const roleColors = {
   Owner: "bg-primary text-primary-foreground",
@@ -52,9 +51,42 @@ const handleOnboardNew = () => {
         </p>
       </div>
 
-      <div class="space-y-3">
+      <div v-if="isPending" class="space-y-3">
+        <Card class="shadow-sm border bg-card p-4">
+          <div class="flex items-center gap-3">
+            <Skeleton class="w-10 h-10 rounded-lg" />
+            <div class="space-y-2">
+              <Skeleton class="h-4 w-[150px]" />
+              <Skeleton class="h-3 w-[100px]" />
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      <div
+        v-else-if="businesses.length === 0"
+        class="text-center py-12 px-4 rounded-xl border border-dashed bg-card/50"
+      >
+        <div
+          class="w-16 h-16 rounded-full bg-accent flex items-center justify-center mx-auto mb-4"
+        >
+          <Building2 class="w-8 h-8 text-accent-foreground" />
+        </div>
+        <h3 class="text-lg font-semibold text-foreground">
+          No businesses found
+        </h3>
+        <p class="text-sm text-muted-foreground mt-2 max-w-[250px] mx-auto">
+          You haven't registered any businesses yet. Create one to get started.
+        </p>
+        <Button class="mt-6" @click="handleOnboardNew">
+          <Plus class="w-4 h-4 mr-2" />
+          Register Business
+        </Button>
+      </div>
+
+      <div v-else class="space-y-3">
         <Card
-          v-for="biz in mockBusinesses"
+          v-for="biz in businesses"
           :key="biz.id"
           class="shadow-sm border cursor-pointer hover:shadow-md hover:border-primary/30 transition-all bg-card"
           @click="handleSelectBusiness(biz)"
@@ -62,6 +94,17 @@ const handleOnboardNew = () => {
           <CardContent class="p-4 flex items-center justify-between">
             <div class="flex items-center gap-3">
               <div
+                v-if="biz.logo"
+                class="w-10 h-10 rounded-lg overflow-hidden border"
+              >
+                <img
+                  :src="biz.logo"
+                  :alt="biz.name"
+                  class="w-full h-full object-cover"
+                />
+              </div>
+              <div
+                v-else
                 class="w-10 h-10 rounded-lg bg-accent flex items-center justify-center"
               >
                 <Building2 class="w-5 h-5 text-accent-foreground" />
@@ -88,9 +131,14 @@ const handleOnboardNew = () => {
         </Card>
       </div>
 
-      <Button variant="outline" class="w-full mt-6" @click="handleOnboardNew">
+      <Button
+        v-if="businesses.length > 0 && !isPending"
+        variant="outline"
+        class="w-full mt-6"
+        @click="handleOnboardNew"
+      >
         <Plus class="w-4 h-4 mr-2" />
-        Onboard New Business
+        Register Another Business
       </Button>
     </div>
   </div>
