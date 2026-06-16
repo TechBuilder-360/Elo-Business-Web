@@ -12,7 +12,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/utils/alert";
-import { Building2, Mail, Lock, ArrowRight } from "lucide-vue-next";
+import {
+  Building2,
+  Mail,
+  Lock,
+  ArrowRight,
+  Eye,
+  EyeOff,
+} from "lucide-vue-next";
 
 definePageMeta({
   layout: false,
@@ -20,6 +27,7 @@ definePageMeta({
 
 const email = ref("");
 const password = ref("");
+const showPassword = ref(false);
 const { requestOtp } = useAuth();
 const isPending = requestOtp.isPending;
 
@@ -34,11 +42,11 @@ const handleLogin = async () => {
   }
 
   try {
-    const data = await requestOtp.mutateAsync({ 
-      email_address: email.value, 
-      password: password.value 
+    const data = await requestOtp.mutateAsync({
+      email_address: email.value,
+      password: password.value,
     });
-    
+
     toast.success("OTP sent to your email");
     await navigateTo({
       path: "/verify-otp",
@@ -47,14 +55,19 @@ const handleLogin = async () => {
   } catch (error) {
     const gqlMsg = error?.graphQLErrors?.[0]?.message;
     // We filter out the generic "GraphQL error" from the Error object if there's no custom message
-    const fallbackMsg = error.message === "GraphQL error" ? "Failed to authenticate" : error.message;
+    const fallbackMsg =
+      error.message === "GraphQL error"
+        ? "Failed to authenticate"
+        : error.message;
     toast.error(gqlMsg || fallbackMsg);
   }
 };
 </script>
 
 <template>
-  <div class="h-[100dvh] overflow-y-auto bg-background flex items-center justify-center px-4 py-6">
+  <div
+    class="h-[100dvh] overflow-y-auto bg-background flex items-center justify-center px-4 py-6"
+  >
     <div class="w-full max-w-md">
       <div class="flex flex-col items-center mb-8">
         <div
@@ -101,11 +114,19 @@ const handleLogin = async () => {
                 />
                 <Input
                   id="password"
-                  type="password"
+                  :type="showPassword ? 'text' : 'password'"
                   placeholder="••••••••"
                   v-model="password"
-                  class="pl-10"
+                  class="pl-10 pr-10"
                 />
+                <button
+                  type="button"
+                  @click="showPassword = !showPassword"
+                  class="absolute right-3 top-3 text-muted-foreground hover:text-foreground focus:outline-none"
+                >
+                  <Eye v-if="showPassword" class="w-4 h-4" />
+                  <EyeOff v-else class="w-4 h-4" />
+                </button>
               </div>
             </div>
 
