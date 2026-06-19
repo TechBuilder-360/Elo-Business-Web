@@ -2,19 +2,26 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Plus, ChevronRight, Loader2 } from "lucide-vue-next";
+import { Building2, Plus, ChevronRight, Loader2, ShieldAlert, CheckCircle2 } from "lucide-vue-next";
 
 import { useBusiness } from "@/composables/useBusiness";
+import { useVerification } from "@/composables/useVerification";
+import { toast } from "@/utils/alert";
 
 definePageMeta({
   layout: false,
 });
 
-const { userBusinesses } = useBusiness();
-const { data, isPending, isError } = userBusinesses;
+const { currentUser, requestVerification } = useVerification();
+const isUserVerified = computed(() => currentUser.data.value?.user?.is_verified === true);
+const userLoading = currentUser.isPending;
+
+// Only fetch businesses if user is verified
+const { userBusinesses } = useBusiness({ enabled: isUserVerified });
+const { data, isPending: bizPending, isError } = userBusinesses;
 
 const businesses = computed(() => {
-  return data.value?.getUserBusinsses || [];
+  return data.value?.getUserBusinsses?.data || [];
 });
 
 const roleColors = {
@@ -33,6 +40,60 @@ const handleSelectBusiness = (business) => {
 const handleOnboardNew = () => {
   navigateTo("/onboard");
 };
+
+// Verification State
+const verificationLink = ref("");
+const verificationStatus = ref("");
+const isRequestingVerification = ref(false);
+const showIframe = ref(false);
+
+watch(
+  () => currentUser.data.value?.user,
+  async (user) => {
+    if (user && !user.is_verified) {
+      if (!verificationLink.value && !isRequestingVerification.value) {
+        isRequestingVerification.value = true;
+        try {
+          const res = await requestVerification.mutateAsync("USER");
+          const verificationRes = res.requestUserVerification;
+
+          if (verificationRes.link) {
+            verificationLink.value = verificationRes.link;
+            verificationStatus.value = verificationRes.status || "pending";
+            // Open iframe if status indicates action is needed
+            if (verificationStatus.value.toLowerCase() !== "in_progress") {
+              showIframe.value = true;
+            }
+          } else if (verificationRes.message) {
+            toast.error(verificationRes.message);
+          }
+        } catch (err) {
+          console.error(err);
+        } finally {
+          isRequestingVerification.value = false;
+        }
+      }
+    }
+  },
+  { immediate: true }
+);
+
+// Listen to iframe postMessage for completion (e.g. Dojah completion)
+onMounted(() => {
+  const handleMessage = (event) => {
+    // Basic catch-all for verification completion events from iframes like Dojah
+    if (event.data?.type === "success" || event.data?.status === "success") {
+      showIframe.value = false;
+      verificationStatus.value = "in_progress";
+    }
+  };
+  window.addEventListener("message", handleMessage);
+  onUnmounted(() => window.removeEventListener("message", handleMessage));
+});
+
+const handleRefreshStatus = () => {
+  currentUser.refetch();
+};
 </script>
 
 <template>
@@ -50,10 +111,49 @@ const handleOnboardNew = () => {
         </p>
       </div>
 
-      <div
-        v-if="isPending"
-        class="flex flex-col items-center justify-center py-12"
-      >
+      </div>
+
+      <!-- User Loading State -->
+      <div v-if="userLoading" class="flex flex-col items-center justify-center py-12">
+        <Loader2 class="w-8 h-8 text-primary animate-spin mb-3" />
+        <p class="text-sm text-muted-foreground">Checking account status...</p>
+      </div>
+
+      <!-- Verification Iframe Modal -->
+      <div v-else-if="!isUserVerified && showIframe && verificationLink" class="fixed inset-0 z-50 bg-background flex flex-col">
+        <div class="flex items-center justify-between p-4 border-b bg-card">
+          <h2 class="font-semibold text-lg">Identity Verification</h2>
+          <Button variant="ghost" size="sm" @click="() => { showIframe = false; verificationStatus = 'in_progress'; }">
+            Close
+          </Button>
+        </div>
+        <iframe :src="verificationLink" class="w-full h-full flex-1 border-none bg-background" allow="camera; microphone" />
+      </div>
+
+      <!-- Verification Pending Screen -->
+      <div v-else-if="!isUserVerified && !showIframe" class="text-center py-12 px-4 rounded-xl border border-dashed bg-card/50">
+        <div class="w-16 h-16 rounded-full bg-yellow-500/20 flex items-center justify-center mx-auto mb-4">
+          <ShieldAlert class="w-8 h-8 text-yellow-600 dark:text-yellow-500" />
+        </div>
+        <h3 class="text-lg font-semibold text-foreground">Verification in Progress</h3>
+        <p class="text-sm text-muted-foreground mt-2 max-w-[300px] mx-auto">
+          Your identity verification is currently being processed. You will receive an email once it is complete.
+        </p>
+        <p class="text-xs text-muted-foreground mt-4">
+          Current Status: <span class="font-medium text-foreground uppercase">{{ verificationStatus }}</span>
+        </p>
+        <Button variant="outline" class="mt-6" @click="handleRefreshStatus" :disabled="currentUser.isFetching">
+          <Loader2 v-if="currentUser.isFetching" class="w-4 h-4 mr-2 animate-spin" />
+          <RotateCcw v-else class="w-4 h-4 mr-2" />
+          Refresh Status
+        </Button>
+        <Button v-if="verificationLink" variant="ghost" class="mt-2 w-full text-xs" @click="showIframe = true">
+          Re-open Verification
+        </Button>
+      </div>
+
+      <!-- Businesses Loading -->
+      <div v-else-if="bizPending" class="flex flex-col items-center justify-center py-12">
         <Loader2 class="w-8 h-8 text-primary animate-spin mb-3" />
         <p class="text-sm text-muted-foreground">Loading your businesses...</p>
       </div>
@@ -127,7 +227,7 @@ const handleOnboardNew = () => {
       </div>
 
       <Button
-        v-if="businesses.length > 0 && !isPending"
+        v-if="businesses.length > 0 && !bizPending"
         variant="outline"
         class="w-full mt-6"
         @click="handleOnboardNew"

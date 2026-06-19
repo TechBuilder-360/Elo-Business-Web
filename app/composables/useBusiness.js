@@ -1,22 +1,25 @@
 import { useGQLQuery, useGQLMutation } from "./useGraphQL";
 
-export const useBusiness = () => {
+export const useBusiness = (options = {}) => {
   // ──────────────────────────────────────────────
   // Fetch User Businesses
   // ──────────────────────────────────────────────
   const USER_BUSINESSES_QUERY = `
     query GetUserBusinesses {
       getUserBusinsses {
-        id
-        name
-        role
-        logo
-        industry
+        message
+        data {
+          id
+          name
+          role
+          logo
+          industry
+        }
       }
     }
   `;
 
-  const userBusinessesQuery = useGQLQuery(["userBusinesses"], USER_BUSINESSES_QUERY);
+  const userBusinessesQuery = useGQLQuery(["userBusinesses"], USER_BUSINESSES_QUERY, {}, options);
 
   // ──────────────────────────────────────────────
   // Register New Business
@@ -24,11 +27,14 @@ export const useBusiness = () => {
   const REGISTER_BUSINESS_MUTATION = `
     mutation RegisterBusiness($input: RegisterBusinessInput!) {
       registerBusiness(input: $input) {
-        id
-        name
-        role
-        logo
-        industry
+        message
+        data {
+          id
+          name
+          role
+          logo
+          industry
+        }
       }
     }
   `;
