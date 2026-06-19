@@ -111,8 +111,6 @@ const handleRefreshStatus = () => {
         </p>
       </div>
 
-      </div>
-
       <!-- User Loading State -->
       <div v-if="userLoading" class="flex flex-col items-center justify-center py-12">
         <Loader2 class="w-8 h-8 text-primary animate-spin mb-3" />
