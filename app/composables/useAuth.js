@@ -41,6 +41,14 @@ export const useAuth = () => {
       login(input: $input) {
         access_token
         expire_at
+        user {
+          first_name
+          last_name
+          display_name
+          is_verified
+          disabled
+          disable_reason
+        }
       }
     }
   `;
