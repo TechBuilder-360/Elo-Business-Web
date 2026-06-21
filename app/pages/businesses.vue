@@ -80,7 +80,7 @@ const handleStartVerification = async () => {
   isRequestingVerification.value = true;
   try {
     const userId = currentUser.data?.value?.user?.id;
-    const res = await requestVerification.mutateAsync({ id: userId, entity: "USER" });
+    const res = await requestVerification.mutateAsync({ id: userId, entity: "USER_VERIFICATION" });
     const verificationRes = res.requestUserVerification;
 
     if (verificationRes?.link) {
