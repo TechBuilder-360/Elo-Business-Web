@@ -79,7 +79,8 @@ const handleStartVerification = async () => {
 
   isRequestingVerification.value = true;
   try {
-    const res = await requestVerification.mutateAsync("USER");
+    const userId = currentUser.data?.value?.user?.id;
+    const res = await requestVerification.mutateAsync({ id: userId, entity: "USER" });
     const verificationRes = res.requestUserVerification;
 
     if (verificationRes?.link) {
