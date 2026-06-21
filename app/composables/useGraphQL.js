@@ -16,11 +16,21 @@ async function gqlRequest({ query, variables = {} }) {
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const response = await $fetch(BACKEND_URL, {
-    method: "POST",
-    body: { query, variables },
-    headers,
-  });
+  let response;
+  try {
+    response = await $fetch(BACKEND_URL, {
+      method: "POST",
+      body: { query, variables },
+      headers,
+    });
+  } catch (error) {
+    // If ofetch throws due to a 4xx/5xx status (like 422 GraphQL error)
+    if (error?.response?._data) {
+      response = error.response._data;
+    } else {
+      throw error;
+    }
+  }
   if (response.errors?.length) {
     const err = new Error(response.errors[0]?.message || "GraphQL error");
     err.graphQLErrors = response.errors;
