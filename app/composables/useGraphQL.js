@@ -14,10 +14,17 @@ async function gqlRequest({ query, variables = {} }) {
     headers,
   });
   if (response.errors?.length) {
-    const err = new Error("GraphQL error");
+    const err = new Error(response.errors[0]?.message || "GraphQL error");
     err.graphQLErrors = response.errors;
     throw err;
   }
+
+  if (!response.data) {
+    throw new Error(
+      response.message || response.error || "Invalid server response format",
+    );
+  }
+
   return response.data;
 }
 
