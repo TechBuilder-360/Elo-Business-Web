@@ -62,36 +62,45 @@ const hasPrompted = ref(false);
 
 watch(
   () => currentUser.data.value?.user,
-  async (user) => {
+  (user) => {
     if (user && !user.is_verified) {
-      if (!verificationLink.value && !isRequestingVerification.value) {
-        isRequestingVerification.value = true;
-        try {
-          const res = await requestVerification.mutateAsync("USER");
-          const verificationRes = res.requestUserVerification;
-
-          if (verificationRes?.link) {
-            verificationLink.value = verificationRes.link;
-            verificationStatus.value = verificationRes.status || "unverified";
-            
-            // We no longer auto-open the iframe. 
-            // The user must click the "Start Verification" button to open it.
-            if (verificationStatus.value.toLowerCase() === "in_progress") {
-              // Wait for email
-            }
-          } else if (verificationRes?.message) {
-            toast.error(verificationRes.message);
-          }
-        } catch (err) {
-          console.error(err);
-        } finally {
-          isRequestingVerification.value = false;
-        }
-      }
+      // Just check if we already have a status we should respect
+      // We don't auto-fetch the link anymore, we wait for the user to click
     }
   },
   { immediate: true },
 );
+
+const handleStartVerification = async () => {
+  if (verificationLink.value) {
+    showIframe.value = true;
+    return;
+  }
+
+  isRequestingVerification.value = true;
+  try {
+    const res = await requestVerification.mutateAsync("USER");
+    const verificationRes = res.requestUserVerification;
+
+    if (verificationRes?.link) {
+      verificationLink.value = verificationRes.link;
+      verificationStatus.value = verificationRes.status || "unverified";
+      
+      if (verificationStatus.value.toLowerCase() !== "in_progress") {
+        showIframe.value = true;
+      }
+    } else if (verificationRes?.message) {
+      toast.error(verificationRes.message);
+    } else {
+      toast.error("Failed to generate verification link.");
+    }
+  } catch (err) {
+    console.error(err);
+    toast.error(err?.graphQLErrors?.[0]?.message || "An error occurred while starting verification.");
+  } finally {
+    isRequestingVerification.value = false;
+  }
+};
 
 // Listen to iframe postMessage for completion (e.g. Dojah completion)
 onMounted(() => {
@@ -108,10 +117,6 @@ onMounted(() => {
 
 const handleRefreshStatus = () => {
   currentUser.refetch();
-};
-
-const handleStartVerification = () => {
-  showIframe.value = true;
 };
 </script>
 
@@ -223,13 +228,13 @@ const handleStartVerification = () => {
         <Button
           class="mt-6"
           @click="handleStartVerification"
-          :disabled="isRequestingVerification || !verificationLink"
+          :disabled="isRequestingVerification"
         >
           <Loader2
             v-if="isRequestingVerification"
             class="w-4 h-4 mr-2 animate-spin"
           />
-          Verify Identity Now
+          {{ isRequestingVerification ? 'Generating Link...' : 'Verify Identity Now' }}
         </Button>
       </div>
 
