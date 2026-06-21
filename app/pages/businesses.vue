@@ -58,6 +58,7 @@ const verificationLink = ref("");
 const verificationStatus = ref("");
 const isRequestingVerification = ref(false);
 const showIframe = ref(false);
+const hasPrompted = ref(false);
 
 watch(
   () => currentUser.data.value?.user,
@@ -71,10 +72,12 @@ watch(
 
           if (verificationRes?.link) {
             verificationLink.value = verificationRes.link;
-            verificationStatus.value = verificationRes.status || "pending";
-            // Open iframe if status indicates action is needed
-            if (verificationStatus.value.toLowerCase() !== "in_progress") {
-              showIframe.value = true;
+            verificationStatus.value = verificationRes.status || "unverified";
+            
+            // We no longer auto-open the iframe. 
+            // The user must click the "Start Verification" button to open it.
+            if (verificationStatus.value.toLowerCase() === "in_progress") {
+              // Wait for email
             }
           } else if (verificationRes?.message) {
             toast.error(verificationRes.message);
@@ -105,6 +108,10 @@ onMounted(() => {
 
 const handleRefreshStatus = () => {
   currentUser.refetch();
+};
+
+const handleStartVerification = () => {
+  showIframe.value = true;
 };
 </script>
 
@@ -145,7 +152,7 @@ const handleRefreshStatus = () => {
             @click="
               () => {
                 showIframe = false;
-                verificationStatus = 'in_progress';
+                // If they close it, we don't assume in_progress unless it sent a success message
               }
             "
           >
@@ -161,7 +168,7 @@ const handleRefreshStatus = () => {
 
       <!-- Verification Pending Screen -->
       <div
-        v-else-if="!isUserVerified && !showIframe"
+        v-else-if="!isUserVerified && !showIframe && verificationStatus.toLowerCase() === 'in_progress'"
         class="text-center py-12 px-4 rounded-xl border border-dashed bg-card/50"
       >
         <div
@@ -195,13 +202,34 @@ const handleRefreshStatus = () => {
           <RotateCcw v-else class="w-4 h-4 mr-2" />
           Refresh Status
         </Button>
-        <Button
-          v-if="verificationLink"
-          variant="ghost"
-          class="mt-2 w-full text-xs"
-          @click="showIframe = true"
+      </div>
+
+      <!-- Verification Initial Prompt -->
+      <div
+        v-else-if="!isUserVerified && !showIframe"
+        class="text-center py-12 px-4 rounded-xl border border-dashed bg-card/50"
+      >
+        <div
+          class="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4"
         >
-          Re-open Verification
+          <ShieldAlert class="w-8 h-8 text-primary" />
+        </div>
+        <h3 class="text-lg font-semibold text-foreground">
+          Identity Verification Required
+        </h3>
+        <p class="text-sm text-muted-foreground mt-2 max-w-[300px] mx-auto">
+          Before you can access your businesses, you need to verify your identity. This process is quick and secure.
+        </p>
+        <Button
+          class="mt-6"
+          @click="handleStartVerification"
+          :disabled="isRequestingVerification || !verificationLink"
+        >
+          <Loader2
+            v-if="isRequestingVerification"
+            class="w-4 h-4 mr-2 animate-spin"
+          />
+          Verify Identity Now
         </Button>
       </div>
 
