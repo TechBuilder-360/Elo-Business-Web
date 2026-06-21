@@ -1,14 +1,22 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/vue-query";
 import { $fetch } from "ofetch";
 
+const BACKEND_URL = "https://elo--elo-backend--fwg2j6rrxrkh.code.run/api";
+
 // Core GraphQL request helper
-// Auth token is injected server-side by the proxy via HttpOnly cookie
 async function gqlRequest({ query, variables = {} }) {
   const headers = {
     "Content-Type": "application/json",
     Accept: "application/json",
   };
-  const response = await $fetch("/api/remote", {
+
+  // Get token directly from cookie
+  const token = useCookie("access_token").value;
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const response = await $fetch(BACKEND_URL, {
     method: "POST",
     body: { query, variables },
     headers,
