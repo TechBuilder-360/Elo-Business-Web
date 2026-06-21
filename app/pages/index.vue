@@ -47,10 +47,18 @@ const handleLogin = async () => {
       password: password.value,
     });
 
+    console.log("Request OTP Response:", data);
+    const identifier = data?.Identifier || data?.identifier || "";
+
+    if (!identifier) {
+      toast.error("An error occurred extracting your session identifier.");
+      return;
+    }
+
     toast.success("OTP sent to your email");
     await navigateTo({
       path: "/verify-otp",
-      query: { identifier: data.Identifier, email: email.value },
+      query: { identifier, email: email.value },
     });
   } catch (error) {
     const gqlMsg = error?.graphQLErrors?.[0]?.message;

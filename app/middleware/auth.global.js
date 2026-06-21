@@ -8,7 +8,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   // Check auth status via server endpoint (reads HttpOnly cookie)
   try {
-    const { authenticated } = await $fetch("/api/auth-check");
+    const headers = useRequestHeaders(["cookie"]);
+    const { authenticated } = await $fetch("/api/auth-check", { headers });
     if (!authenticated) {
       return navigateTo("/");
     }
