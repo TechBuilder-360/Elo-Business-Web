@@ -69,7 +69,6 @@ watch(
         isRequestingVerification.value = true;
         try {
           const res = await requestVerification.mutateAsync({
-            id: user.id || "",
             entity: "USER_VERIFICATION",
           });
           const verificationRes = res.requestUserVerification;
@@ -97,9 +96,7 @@ const handleStartVerification = async () => {
 
   isRequestingVerification.value = true;
   try {
-    const userId = currentUser.data?.value?.currentUserProfile?.id || "";
     const res = await requestVerification.mutateAsync({
-      id: userId,
       entity: "USER_VERIFICATION",
     });
     const verificationRes = res.requestUserVerification;

@@ -49,8 +49,8 @@ export const useVerification = () => {
   const requestOriginal = requestVerificationMutation.mutateAsync.bind(
     requestVerificationMutation,
   );
-  requestVerificationMutation.mutateAsync = async ({ id, entity }) => {
-    return await requestOriginal({ input: { id, entity } });
+  requestVerificationMutation.mutateAsync = async ({ entity }) => {
+    return await requestOriginal({ input: { entity } });
   };
 
   return {
