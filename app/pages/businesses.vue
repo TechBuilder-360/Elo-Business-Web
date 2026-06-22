@@ -134,6 +134,10 @@ onMounted(() => {
     if (event.data?.type === "success" || event.data?.status === "success") {
       showIframe.value = false;
       verificationStatus.value = "in_progress";
+      handleRefreshStatus();
+    } else if (event.data?.type === "close") {
+      showIframe.value = false;
+      handleRefreshStatus();
     }
   };
   window.addEventListener("message", handleMessage);
@@ -182,7 +186,7 @@ const handleRefreshStatus = () => {
             @click="
               () => {
                 showIframe = false;
-                // If they close it, we don't assume in_progress unless it sent a success message
+                handleRefreshStatus();
               }
             "
           >
