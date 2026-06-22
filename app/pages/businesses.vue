@@ -24,7 +24,7 @@ definePageMeta({
 
 const { currentUser, requestVerification } = useVerification();
 const isUserVerified = computed(
-  () => currentUser.data.value?.user?.is_verified === true,
+  () => currentUser.data.value?.currentUserProfile?.is_verified === true,
 );
 const userLoading = currentUser.isPending;
 
@@ -61,11 +61,26 @@ const showIframe = ref(false);
 const hasPrompted = ref(false);
 
 watch(
-  () => currentUser.data.value?.user,
-  (user) => {
+  () => currentUser.data.value?.currentUserProfile,
+  async (user) => {
     if (user && !user.is_verified) {
-      // Just check if we already have a status we should respect
-      // We don't auto-fetch the link anymore, we wait for the user to click
+      // Auto-check verification status if not verified
+      if (!verificationStatus.value && !isRequestingVerification.value) {
+        isRequestingVerification.value = true;
+        try {
+          const res = await requestVerification.mutateAsync({ id: user.id, entity: "USER_VERIFICATION" });
+          const verificationRes = res.requestUserVerification;
+          
+          if (verificationRes) {
+            verificationStatus.value = verificationRes.status || "unverified";
+            verificationLink.value = verificationRes.link || "";
+          }
+        } catch (err) {
+          console.error(err);
+        } finally {
+          isRequestingVerification.value = false;
+        }
+      }
     }
   },
   { immediate: true },
@@ -79,7 +94,7 @@ const handleStartVerification = async () => {
 
   isRequestingVerification.value = true;
   try {
-    const userId = currentUser.data?.value?.user?.id;
+    const userId = currentUser.data?.value?.currentUserProfile?.id;
     const res = await requestVerification.mutateAsync({ id: userId, entity: "USER_VERIFICATION" });
     const verificationRes = res.requestUserVerification;
 
@@ -87,7 +102,7 @@ const handleStartVerification = async () => {
       verificationLink.value = verificationRes.link;
       verificationStatus.value = verificationRes.status || "unverified";
       
-      if (verificationStatus.value.toLowerCase() !== "in_progress") {
+      if (verificationStatus.value.toLowerCase() !== "in_progress" && verificationStatus.value.toLowerCase() !== "processing") {
         showIframe.value = true;
       }
     } else if (verificationRes?.message) {

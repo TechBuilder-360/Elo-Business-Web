@@ -6,7 +6,7 @@ export const useVerification = () => {
   // ──────────────────────────────────────────────
   const USER_QUERY = `
     query CurrentUser {
-      user {
+      getUser {
         id
         first_name
         last_name
