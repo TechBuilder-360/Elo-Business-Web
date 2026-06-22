@@ -68,9 +68,12 @@ watch(
       if (!verificationStatus.value && !isRequestingVerification.value) {
         isRequestingVerification.value = true;
         try {
-          const res = await requestVerification.mutateAsync({ id: user.id, entity: "USER_VERIFICATION" });
+          const res = await requestVerification.mutateAsync({
+            id: user.id || "",
+            entity: "USER_VERIFICATION",
+          });
           const verificationRes = res.requestUserVerification;
-          
+
           if (verificationRes) {
             verificationStatus.value = verificationRes.status || "unverified";
             verificationLink.value = verificationRes.link || "";
@@ -94,15 +97,21 @@ const handleStartVerification = async () => {
 
   isRequestingVerification.value = true;
   try {
-    const userId = currentUser.data?.value?.currentUserProfile?.id;
-    const res = await requestVerification.mutateAsync({ id: userId, entity: "USER_VERIFICATION" });
+    const userId = currentUser.data?.value?.currentUserProfile?.id || "";
+    const res = await requestVerification.mutateAsync({
+      id: userId,
+      entity: "USER_VERIFICATION",
+    });
     const verificationRes = res.requestUserVerification;
 
     if (verificationRes?.link) {
       verificationLink.value = verificationRes.link;
       verificationStatus.value = verificationRes.status || "unverified";
-      
-      if (verificationStatus.value.toLowerCase() !== "in_progress" && verificationStatus.value.toLowerCase() !== "processing") {
+
+      if (
+        verificationStatus.value.toLowerCase() !== "in_progress" &&
+        verificationStatus.value.toLowerCase() !== "processing"
+      ) {
         showIframe.value = true;
       }
     } else if (verificationRes?.message) {
@@ -112,7 +121,10 @@ const handleStartVerification = async () => {
     }
   } catch (err) {
     console.error(err);
-    toast.error(err?.graphQLErrors?.[0]?.message || "An error occurred while starting verification.");
+    toast.error(
+      err?.graphQLErrors?.[0]?.message ||
+        "An error occurred while starting verification.",
+    );
   } finally {
     isRequestingVerification.value = false;
   }
@@ -189,7 +201,11 @@ const handleRefreshStatus = () => {
 
       <!-- Verification Pending Screen -->
       <div
-        v-else-if="!isUserVerified && !showIframe && verificationStatus.toLowerCase() === 'in_progress'"
+        v-else-if="
+          !isUserVerified &&
+          !showIframe &&
+          verificationStatus.toLowerCase() === 'in_progress'
+        "
         class="text-center py-12 px-4 rounded-xl border border-dashed bg-card/50"
       >
         <div
@@ -239,7 +255,8 @@ const handleRefreshStatus = () => {
           Identity Verification Required
         </h3>
         <p class="text-sm text-muted-foreground mt-2 max-w-[300px] mx-auto">
-          Before you can access your businesses, you need to verify your identity. This process is quick and secure.
+          Before you can access your businesses, you need to verify your
+          identity. This process is quick and secure.
         </p>
         <Button
           class="mt-6"
@@ -250,7 +267,11 @@ const handleRefreshStatus = () => {
             v-if="isRequestingVerification"
             class="w-4 h-4 mr-2 animate-spin"
           />
-          {{ isRequestingVerification ? 'Generating Link...' : 'Verify Identity Now' }}
+          {{
+            isRequestingVerification
+              ? "Generating Link..."
+              : "Verify Identity Now"
+          }}
         </Button>
       </div>
 
