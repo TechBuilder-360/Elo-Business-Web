@@ -242,38 +242,28 @@ const handleRefreshStatus = () => {
         </Button>
       </div>
 
-      <!-- Verification Initial Prompt -->
+      <!-- Verification Initial Prompt or Status Check -->
       <div
         v-else-if="!isUserVerified && !showIframe"
         class="text-center py-12 px-4 rounded-xl border border-dashed bg-card/50"
       >
-        <div
-          class="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4"
-        >
-          <ShieldAlert class="w-8 h-8 text-primary" />
+        <div v-if="isRequestingVerification" class="flex flex-col items-center justify-center">
+          <Loader2 class="w-8 h-8 text-primary animate-spin mb-3" />
+          <p class="text-sm text-muted-foreground">Checking verification status...</p>
         </div>
-        <h3 class="text-lg font-semibold text-foreground">
-          Identity Verification Required
-        </h3>
-        <p class="text-sm text-muted-foreground mt-2 max-w-[300px] mx-auto">
-          Before you can access your businesses, you need to verify your
-          identity. This process is quick and secure.
-        </p>
-        <Button
-          class="mt-6"
-          @click="handleStartVerification"
-          :disabled="isRequestingVerification"
-        >
-          <Loader2
-            v-if="isRequestingVerification"
-            class="w-4 h-4 mr-2 animate-spin"
-          />
-          {{
-            isRequestingVerification
-              ? "Generating Link..."
-              : "Verify Identity Now"
-          }}
-        </Button>
+        <div v-else class="flex flex-col items-center">
+          <div class="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
+            <ShieldAlert class="w-8 h-8 text-primary" />
+          </div>
+          <h3 class="text-lg font-semibold text-foreground">Identity Verification Required</h3>
+          <p class="text-sm text-muted-foreground mt-2 max-w-[300px] mx-auto">
+            Before you can access your businesses, you need to verify your identity. This process is quick and secure.
+          </p>
+          <Button class="mt-6" @click="handleStartVerification" :disabled="isRequestingVerification">
+            <Loader2 v-if="isRequestingVerification" class="w-4 h-4 mr-2 animate-spin" />
+            {{ isRequestingVerification ? "Generating Link..." : "Verify Identity Now" }}
+          </Button>
+        </div>
       </div>
 
       <!-- Businesses Loading -->
