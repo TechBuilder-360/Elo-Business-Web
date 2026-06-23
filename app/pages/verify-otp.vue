@@ -33,7 +33,7 @@ definePageMeta({
 
 const route = useRoute();
 const email = route.query.email || "your email";
-const identifier = route.query.identifier;
+const identifier = ref(route.query.identifier);
 const otp = ref("");
 const { login, requestOtp } = useAuth();
 const isPending = login.isPending;
@@ -49,7 +49,7 @@ const handleVerify = async () => {
     return;
   }
 
-  if (!identifier) {
+  if (!identifier.value) {
     toast.error("Invalid session. Please login again.");
     navigateTo("/");
     return;
@@ -58,7 +58,7 @@ const handleVerify = async () => {
   try {
     await login.mutateAsync({
       otp: String(otp.value),
-      identifier: String(identifier),
+      identifier: String(identifier.value),
     });
     toast.success("Login successful");
     await navigateTo("/businesses");
@@ -85,10 +85,16 @@ const submitResend = async () => {
   }
 
   try {
-    await requestOtp.mutateAsync({
+    const response = await requestOtp.mutateAsync({
       email_address: email,
       password: resendPassword.value,
     });
+
+    // CRITICAL FIX: Update the identifier with the newly generated one!
+    if (response?.Identifier) {
+      identifier.value = response.Identifier;
+    }
+
     toast.success("A new OTP has been sent to your email");
     isResendModalOpen.value = false;
   } catch (error) {
