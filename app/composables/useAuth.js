@@ -66,6 +66,12 @@ export const useAuth = () => {
           user: data.login.user,
         });
       }
+      
+      // Pre-seed the Vue Query cache so the businesses page loads instantly
+      if (data?.login?.user) {
+        const qc = useQueryClient();
+        qc.setQueryData(["currentUser"], { currentUserProfile: data.login.user });
+      }
     },
     onError: (err) => {
       console.error("Login error:", err);
