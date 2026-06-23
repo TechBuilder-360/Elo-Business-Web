@@ -8,19 +8,21 @@ export const useBusiness = (options = {}) => {
   const USER_BUSINESSES_QUERY = `
     query GetUserBusinesses {
       getUserBusinsses {
-        message
-        data {
-          id
-          name
-          role
-          logo
-          industry
-        }
+        id
+        name
+        role
+        logo
+        industry
       }
     }
   `;
 
-  const userBusinessesQuery = useGQLQuery(["userBusinesses"], USER_BUSINESSES_QUERY, {}, options);
+  const userBusinessesQuery = useGQLQuery(
+    ["userBusinesses"],
+    USER_BUSINESSES_QUERY,
+    {},
+    options,
+  );
 
   // ──────────────────────────────────────────────
   // Register New Business
@@ -52,7 +54,9 @@ export const useBusiness = (options = {}) => {
   });
 
   // Wrap mutateAsync for easier calling
-  const registerOriginal = registerBusinessMutation.mutateAsync.bind(registerBusinessMutation);
+  const registerOriginal = registerBusinessMutation.mutateAsync.bind(
+    registerBusinessMutation,
+  );
   registerBusinessMutation.mutateAsync = async (inputData) => {
     return await registerOriginal({ input: inputData });
   };
