@@ -73,88 +73,165 @@ const handleLogin = async () => {
 </script>
 
 <template>
-  <div
-    class="h-[100dvh] overflow-y-auto bg-background flex items-center justify-center px-4 py-6"
-  >
-    <div class="w-full max-w-md">
-      <div class="flex flex-col items-center mb-8">
+  <div class="min-h-screen flex w-full bg-background">
+    <!-- Left Panel: Branding / Visuals (Hidden on Mobile) -->
+    <div
+      class="hidden lg:flex flex-1 relative bg-zinc-900 text-white overflow-hidden flex-col justify-between p-12"
+    >
+      <!-- Background subtle pattern/gradient -->
+      <div
+        class="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent opacity-50 z-0"
+      ></div>
+      <div
+        class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent z-0"
+      ></div>
+
+      <!-- Top Branding -->
+      <div class="relative z-10 flex items-center gap-3">
         <div
-          class="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center mb-4"
+          class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20"
         >
-          <Building2 class="w-7 h-7 text-primary-foreground" />
+          <Building2 class="w-6 h-6 text-primary-foreground" />
         </div>
-        <h1 class="text-2xl font-bold text-foreground">Welcome back</h1>
-        <p class="text-sm text-muted-foreground mt-1">
-          Sign in to your account
-        </p>
+        <span class="text-xl font-bold tracking-tight">ELO Business</span>
       </div>
 
-      <Card class="shadow-lg border-0 shadow-foreground/5">
-        <CardHeader class="pb-4">
-          <CardTitle class="text-lg">Sign In</CardTitle>
-          <CardDescription>
-            Enter your credentials to continue
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form @submit.prevent="handleLogin" class="space-y-4">
-            <div class="space-y-2">
-              <Label for="email">Email Address</Label>
+      <!-- Center Visual -->
+      <div class="relative z-10 max-w-lg">
+        <div
+          class="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center mb-8 ring-1 ring-white/20 shadow-2xl"
+        >
+          <Building2 class="w-10 h-10 text-white/80" />
+        </div>
+        <h2 class="text-4xl font-extrabold tracking-tight">ELO Business</h2>
+      </div>
+
+      <!-- Bottom Meta -->
+      <div class="relative z-10 text-sm text-zinc-500 font-medium">
+        &copy; {{ new Date().getFullYear() }} ELO. All rights reserved.
+      </div>
+    </div>
+
+    <!-- Right Panel: Login Form -->
+    <div class="flex-1 flex items-center justify-center p-6 lg:p-12 relative">
+      <!-- Mobile Logo (only shows on mobile since left panel is hidden) -->
+      <div class="absolute top-8 left-8 lg:hidden flex items-center gap-3">
+        <div
+          class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center"
+        >
+          <Building2 class="w-5 h-5 text-primary-foreground" />
+        </div>
+        <span class="font-bold">ELO</span>
+      </div>
+
+      <div class="w-full max-w-sm space-y-8">
+        <div class="text-center lg:text-left">
+          <h1 class="text-3xl font-bold tracking-tight text-foreground">
+            Welcome back
+          </h1>
+          <p class="text-sm text-muted-foreground mt-2">
+            Enter your credentials to access your account
+          </p>
+        </div>
+
+        <form @submit.prevent="handleLogin" class="space-y-6">
+          <div class="space-y-4">
+            <div class="space-y-2 group">
+              <Label
+                for="email"
+                class="text-sm font-medium transition-colors group-focus-within:text-primary"
+                >Email Address</Label
+              >
               <div class="relative">
                 <Mail
-                  class="absolute left-3 top-3 h-4 w-4 text-muted-foreground"
+                  class="absolute left-3 top-3 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary"
                 />
                 <Input
                   id="email"
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder="name@example.com"
                   v-model="email"
-                  class="pl-10"
+                  class="pl-10 h-11 border-muted bg-background hover:bg-accent/50 focus-visible:ring-primary focus-visible:border-primary transition-all shadow-sm"
                 />
               </div>
             </div>
 
-            <div class="space-y-2">
-              <Label for="password">Password</Label>
+            <div class="space-y-2 group">
+              <div class="flex items-center justify-between">
+                <Label
+                  for="password"
+                  class="text-sm font-medium transition-colors group-focus-within:text-primary"
+                  >Password</Label
+                >
+              </div>
               <div class="relative">
                 <Lock
-                  class="absolute left-3 top-3 h-4 w-4 text-muted-foreground"
+                  class="absolute left-3 top-3 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary"
                 />
                 <Input
                   id="password"
                   :type="showPassword ? 'text' : 'password'"
                   placeholder="••••••••"
                   v-model="password"
-                  class="pl-10 pr-10"
+                  class="pl-10 pr-10 h-11 border-muted bg-background hover:bg-accent/50 focus-visible:ring-primary focus-visible:border-primary transition-all shadow-sm"
                 />
                 <button
                   type="button"
                   @click="showPassword = !showPassword"
-                  class="absolute right-3 top-3 text-muted-foreground hover:text-foreground focus:outline-none"
+                  class="absolute right-3 top-3 text-muted-foreground hover:text-foreground focus:outline-none transition-colors"
                 >
                   <Eye v-if="showPassword" class="w-4 h-4" />
                   <EyeOff v-else class="w-4 h-4" />
                 </button>
               </div>
             </div>
+          </div>
 
-            <Button type="submit" class="w-full" :disabled="isPending">
-              {{ isPending ? "Signing in..." : "Continue" }}
-              <ArrowRight v-if="!isPending" class="w-4 h-4 ml-2" />
-            </Button>
-
-            <p class="text-center text-sm text-muted-foreground">
-              Don't have an account?
-              <NuxtLink
-                to="/signup"
-                class="text-primary font-medium hover:underline ml-1"
+          <Button
+            type="submit"
+            class="w-full h-11 font-medium transition-all active:scale-[0.98]"
+            :disabled="isPending"
+          >
+            <span v-if="isPending" class="flex items-center">
+              <svg
+                class="animate-spin -ml-1 mr-3 h-4 w-4 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
               >
-                Sign up
-              </NuxtLink>
-            </p>
-          </form>
-        </CardContent>
-      </Card>
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                ></circle>
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+              Signing in...
+            </span>
+            <span v-else class="flex items-center justify-center">
+              Continue
+              <ArrowRight class="w-4 h-4 ml-2" />
+            </span>
+          </Button>
+
+          <p class="text-center text-sm text-muted-foreground">
+            Don't have an account?
+            <NuxtLink
+              to="/signup"
+              class="font-semibold text-primary hover:text-primary/80 transition-colors"
+            >
+              Sign up
+            </NuxtLink>
+          </p>
+        </form>
+      </div>
     </div>
   </div>
 </template>
