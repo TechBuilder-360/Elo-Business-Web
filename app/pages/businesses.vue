@@ -64,7 +64,6 @@ watch(
   () => currentUser.data.value?.currentUserProfile,
   async (user) => {
     if (user && !user.is_verified) {
-      // Auto-check verification status if not verified
       if (!verificationStatus.value && !isRequestingVerification.value) {
         isRequestingVerification.value = true;
         try {
@@ -127,10 +126,8 @@ const handleStartVerification = async () => {
   }
 };
 
-// Listen to iframe postMessage for completion (e.g. Dojah completion)
 onMounted(() => {
   const handleMessage = (event) => {
-    // Basic catch-all for verification completion events from iframes like Dojah
     if (event.data?.type === "success" || event.data?.status === "success") {
       showIframe.value = false;
       verificationStatus.value = "in_progress";
@@ -164,19 +161,11 @@ const handleRefreshStatus = () => {
           </div>
           <h2 class="font-semibold text-foreground">Identity Verification</h2>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          @click="() => { showIframe = false; handleRefreshStatus(); }"
-        >
+        <Button variant="ghost" size="sm" @click="() => { showIframe = false; handleRefreshStatus(); }">
           Close
         </Button>
       </div>
-      <iframe
-        :src="verificationLink"
-        class="w-full h-full flex-1 border-none bg-background"
-        allow="camera; microphone"
-      />
+      <iframe :src="verificationLink" class="w-full h-full flex-1 border-none bg-background" allow="camera; microphone" />
     </div>
 
     <!-- Top Navigation Bar -->
@@ -188,12 +177,7 @@ const handleRefreshStatus = () => {
           </div>
           <span class="font-bold text-foreground text-sm sm:text-base">ELO Business</span>
         </div>
-        <Button
-          v-if="isUserVerified && businesses.length > 0"
-          size="sm"
-          class="gap-2"
-          @click="handleOnboardNew"
-        >
+        <Button v-if="isUserVerified && businesses.length > 0" size="sm" class="gap-2" @click="handleOnboardNew">
           <Plus class="w-4 h-4" />
           <span class="hidden sm:inline">Add Business</span>
         </Button>
@@ -203,7 +187,7 @@ const handleRefreshStatus = () => {
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
 
-      <!-- ── User Loading ── -->
+      <!-- User Loading -->
       <div v-if="userLoading" class="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
           <Loader2 class="w-6 h-6 text-primary animate-spin" />
@@ -211,7 +195,7 @@ const handleRefreshStatus = () => {
         <p class="text-sm text-muted-foreground">Checking your account...</p>
       </div>
 
-      <!-- ── Verification: In Progress (Processing) ── -->
+      <!-- Verification: In Progress -->
       <div
         v-else-if="!isUserVerified && !showIframe && verificationStatus.toLowerCase() === 'in_progress'"
         class="flex flex-col items-center justify-center min-h-[60vh] text-center px-4"
@@ -233,7 +217,7 @@ const handleRefreshStatus = () => {
         </Button>
       </div>
 
-      <!-- ── Verification: Initial Prompt ── -->
+      <!-- Verification: Initial Prompt -->
       <div
         v-else-if="!isUserVerified && !showIframe"
         class="flex flex-col items-center justify-center min-h-[60vh] text-center px-4"
@@ -259,18 +243,14 @@ const handleRefreshStatus = () => {
         </div>
       </div>
 
-      <!-- ── Businesses: Skeleton Loading ── -->
+      <!-- Businesses: Skeleton Loading -->
       <div v-else-if="bizPending">
         <div class="mb-8">
           <div class="h-8 w-48 bg-muted rounded-lg animate-pulse mb-2"></div>
           <div class="h-4 w-32 bg-muted/60 rounded-lg animate-pulse"></div>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div
-            v-for="n in 3"
-            :key="n"
-            class="rounded-2xl border bg-card p-6 space-y-4 animate-pulse"
-          >
+          <div v-for="n in 3" :key="n" class="rounded-2xl border bg-card p-6 space-y-4 animate-pulse">
             <div class="flex items-center gap-3">
               <div class="w-12 h-12 rounded-xl bg-muted"></div>
               <div class="space-y-2 flex-1">
@@ -284,7 +264,7 @@ const handleRefreshStatus = () => {
         </div>
       </div>
 
-      <!-- ── Businesses: Empty State ── -->
+      <!-- Businesses: Empty State -->
       <div
         v-else-if="businesses.length === 0"
         class="flex flex-col items-center justify-center min-h-[60vh] text-center px-4"
@@ -302,7 +282,7 @@ const handleRefreshStatus = () => {
         </Button>
       </div>
 
-      <!-- ── Businesses: Grid ── -->
+      <!-- Businesses: Grid -->
       <div v-else>
         <div class="mb-8">
           <h1 class="text-2xl sm:text-3xl font-bold text-foreground">Your Businesses</h1>
@@ -316,21 +296,14 @@ const handleRefreshStatus = () => {
             class="group relative rounded-2xl border bg-card p-6 cursor-pointer hover:-translate-y-1 hover:shadow-xl hover:shadow-foreground/5 hover:border-primary/30 transition-all duration-300"
             @click="handleSelectBusiness(biz)"
           >
-            <!-- Top Row: Logo + Role Badge -->
+            <!-- Logo + Role Badge -->
             <div class="flex items-start justify-between mb-4">
-              <div
-                v-if="biz.logo"
-                class="w-12 h-12 rounded-xl overflow-hidden border shadow-sm"
-              >
+              <div v-if="biz.logo" class="w-12 h-12 rounded-xl overflow-hidden border shadow-sm">
                 <img :src="biz.logo" :alt="biz.name" class="w-full h-full object-cover" />
               </div>
-              <div
-                v-else
-                class="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center"
-              >
+              <div v-else class="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
                 <Building2 class="w-6 h-6 text-primary" />
               </div>
-
               <span
                 class="text-xs font-semibold px-2.5 py-1 rounded-full"
                 :class="roleColors[biz.role] || 'bg-secondary text-secondary-foreground'"
@@ -345,15 +318,14 @@ const handleRefreshStatus = () => {
               <p v-if="biz.industry" class="text-xs text-muted-foreground">{{ biz.industry }}</p>
             </div>
 
-            <!-- Footer arrow -->
-            <div class="flex items-center text-xs text-muted-foreground group-hover:text-primary transition-colors font-medium gap-1 mt-auto">
+            <!-- Footer -->
+            <div class="flex items-center text-xs text-muted-foreground group-hover:text-primary transition-colors font-medium gap-1">
               Open dashboard
               <ChevronRight class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
             </div>
           </div>
         </div>
 
-        <!-- Add Another -->
         <div class="mt-8 flex justify-center">
           <Button variant="outline" class="gap-2" @click="handleOnboardNew">
             <Plus class="w-4 h-4" />
@@ -363,208 +335,5 @@ const handleRefreshStatus = () => {
       </div>
 
     </main>
-  </div>
-</template>
-      <div class="flex flex-col items-center mb-8">
-        <div
-          class="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center mb-4"
-        >
-          <Building2 class="w-7 h-7 text-primary-foreground" />
-        </div>
-        <h1 class="text-2xl font-bold text-foreground">Your Businesses</h1>
-        <p class="text-sm text-muted-foreground mt-1">
-          Select a business to continue
-        </p>
-      </div>
-
-      <!-- User Loading State -->
-      <div
-        v-if="userLoading"
-        class="flex flex-col items-center justify-center py-12"
-      >
-        <Loader2 class="w-8 h-8 text-primary animate-spin mb-3" />
-        <p class="text-sm text-muted-foreground">Checking account status...</p>
-      </div>
-
-      <!-- Verification Iframe Modal -->
-      <div
-        v-else-if="!isUserVerified && showIframe && verificationLink"
-        class="fixed inset-0 z-50 bg-background flex flex-col"
-      >
-        <div class="flex items-center justify-between p-4 border-b bg-card">
-          <h2 class="font-semibold text-lg">Identity Verification</h2>
-          <Button
-            variant="ghost"
-            size="sm"
-            @click="
-              () => {
-                showIframe = false;
-                handleRefreshStatus();
-              }
-            "
-          >
-            Close
-          </Button>
-        </div>
-        <iframe
-          :src="verificationLink"
-          class="w-full h-full flex-1 border-none bg-background"
-          allow="camera; microphone"
-        />
-      </div>
-
-      <!-- Verification Pending Screen -->
-      <div
-        v-else-if="
-          !isUserVerified &&
-          !showIframe &&
-          verificationStatus.toLowerCase() === 'in_progress'
-        "
-        class="text-center py-12 px-4 rounded-xl border border-dashed bg-card/50"
-      >
-        <div
-          class="w-16 h-16 rounded-full bg-yellow-500/20 flex items-center justify-center mx-auto mb-4"
-        >
-          <ShieldAlert class="w-8 h-8 text-yellow-600 dark:text-yellow-500" />
-        </div>
-        <h3 class="text-lg font-semibold text-foreground">
-          Verification in Progress
-        </h3>
-        <p class="text-sm text-muted-foreground mt-2 max-w-[300px] mx-auto">
-          Your identity verification is currently being processed. You will
-          receive an email once it is complete.
-        </p>
-        <p class="text-xs text-muted-foreground mt-4">
-          Current Status:
-          <span class="font-medium text-foreground uppercase">{{
-            verificationStatus
-          }}</span>
-        </p>
-        <Button
-          variant="outline"
-          class="mt-6"
-          @click="handleRefreshStatus"
-          :disabled="currentUser.isFetching"
-        >
-          <Loader2
-            v-if="currentUser.isFetching"
-            class="w-4 h-4 mr-2 animate-spin"
-          />
-          <RotateCcw v-else class="w-4 h-4 mr-2" />
-          Refresh Status
-        </Button>
-      </div>
-
-      <!-- Verification Initial Prompt or Status Check -->
-      <div
-        v-else-if="!isUserVerified && !showIframe"
-        class="text-center py-12 px-4 rounded-xl border border-dashed bg-card/50"
-      >
-        <div v-if="isRequestingVerification" class="flex flex-col items-center justify-center">
-          <Loader2 class="w-8 h-8 text-primary animate-spin mb-3" />
-          <p class="text-sm text-muted-foreground">Checking verification status...</p>
-        </div>
-        <div v-else class="flex flex-col items-center">
-          <div class="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
-            <ShieldAlert class="w-8 h-8 text-primary" />
-          </div>
-          <h3 class="text-lg font-semibold text-foreground">Identity Verification Required</h3>
-          <p class="text-sm text-muted-foreground mt-2 max-w-[300px] mx-auto">
-            Before you can access your businesses, you need to verify your identity. This process is quick and secure.
-          </p>
-          <Button class="mt-6" @click="handleStartVerification" :disabled="isRequestingVerification">
-            <Loader2 v-if="isRequestingVerification" class="w-4 h-4 mr-2 animate-spin" />
-            {{ isRequestingVerification ? "Generating Link..." : "Verify Identity Now" }}
-          </Button>
-        </div>
-      </div>
-
-      <!-- Businesses Loading -->
-      <div
-        v-else-if="bizPending"
-        class="flex flex-col items-center justify-center py-12"
-      >
-        <Loader2 class="w-8 h-8 text-primary animate-spin mb-3" />
-        <p class="text-sm text-muted-foreground">Loading your businesses...</p>
-      </div>
-
-      <div
-        v-else-if="businesses.length === 0"
-        class="text-center py-12 px-4 rounded-xl border border-dashed bg-card/50"
-      >
-        <div
-          class="w-16 h-16 rounded-full bg-accent flex items-center justify-center mx-auto mb-4"
-        >
-          <Building2 class="w-8 h-8 text-accent-foreground" />
-        </div>
-        <h3 class="text-lg font-semibold text-foreground">
-          No businesses found
-        </h3>
-        <p class="text-sm text-muted-foreground mt-2 max-w-[250px] mx-auto">
-          You haven't registered any businesses yet. Create one to get started.
-        </p>
-        <Button class="mt-6" @click="handleOnboardNew">
-          <Plus class="w-4 h-4 mr-2" />
-          Register Business
-        </Button>
-      </div>
-
-      <div v-else class="space-y-3">
-        <Card
-          v-for="biz in businesses"
-          :key="biz.id"
-          class="shadow-sm border cursor-pointer hover:shadow-md hover:border-primary/30 transition-all bg-card"
-          @click="handleSelectBusiness(biz)"
-        >
-          <CardContent class="p-4 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div
-                v-if="biz.logo"
-                class="w-10 h-10 rounded-lg overflow-hidden border"
-              >
-                <img
-                  :src="biz.logo"
-                  :alt="biz.name"
-                  class="w-full h-full object-cover"
-                />
-              </div>
-              <div
-                v-else
-                class="w-10 h-10 rounded-lg bg-accent flex items-center justify-center"
-              >
-                <Building2 class="w-5 h-5 text-accent-foreground" />
-              </div>
-              <div>
-                <p class="font-medium text-foreground">{{ biz.name }}</p>
-                <p class="text-xs text-muted-foreground">
-                  {{ biz.industry }}
-                </p>
-              </div>
-            </div>
-            <div class="flex items-center gap-2">
-              <Badge
-                :class="
-                  roleColors[biz.role] ||
-                  'bg-secondary text-secondary-foreground'
-                "
-              >
-                {{ biz.role }}
-              </Badge>
-              <ChevronRight class="w-4 h-4 text-muted-foreground" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Button
-        v-if="businesses.length > 0 && !bizPending"
-        variant="outline"
-        class="w-full mt-6"
-        @click="handleOnboardNew"
-      >
-        <Plus class="w-4 h-4 mr-2" />
-        Register Another Business
-      </Button>
-    </div>
   </div>
 </template>
