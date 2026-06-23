@@ -3,10 +3,47 @@ import { $fetch } from "ofetch";
 
 const BACKEND_URL = "https://elo--elo-backend--fwg2j6rrxrkh.code.run/api";
 
+// Helper to check if a value is a File/Blob
+function isFile(value) {
+  return (
+    (typeof File !== "undefined" && value instanceof File) ||
+    (typeof Blob !== "undefined" && value instanceof Blob)
+  );
+}
+
+// Recursively extracts files from variables and generates the map for the GraphQL Multipart Request Spec
+function extractFiles(variables) {
+  const files = [];
+  const map = {};
+
+  function recurse(obj, path) {
+    if (obj === null || obj === undefined) return obj;
+    if (isFile(obj)) {
+      const fileId = files.length.toString();
+      files.push(obj);
+      map[fileId] = [path];
+      return null; // Replace file with null in operations
+    }
+    if (Array.isArray(obj)) {
+      return obj.map((item, index) => recurse(item, `${path}.${index}`));
+    }
+    if (typeof obj === "object") {
+      const newObj = {};
+      for (const key in obj) {
+        newObj[key] = recurse(obj[key], `${path}.${key}`);
+      }
+      return newObj;
+    }
+    return obj;
+  }
+
+  const cleanVariables = recurse(variables, "variables");
+  return { cleanVariables, files, map };
+}
+
 // Core GraphQL request helper
 async function gqlRequest({ query, variables = {} }) {
   const headers = {
-    "Content-Type": "application/json",
     Accept: "application/json",
   };
 
@@ -16,11 +53,35 @@ async function gqlRequest({ query, variables = {} }) {
     headers["Authorization"] = `Bearer ${token}`;
   }
 
+  // Check for files to determine request format
+  const { cleanVariables, files, map } = extractFiles(variables);
+  let body;
+
+  if (files.length > 0) {
+    // GraphQL Multipart Request format
+    body = new FormData();
+    body.append(
+      "operations",
+      JSON.stringify({ query, variables: cleanVariables })
+    );
+    body.append("map", JSON.stringify(map));
+
+    files.forEach((file, index) => {
+      body.append(index.toString(), file);
+    });
+    // Do NOT set Content-Type header when using FormData; 
+    // the browser automatically sets it with the required boundary hash.
+  } else {
+    // Standard JSON format
+    headers["Content-Type"] = "application/json";
+    body = { query, variables };
+  }
+
   let response;
   try {
     response = await $fetch(BACKEND_URL, {
       method: "POST",
-      body: { query, variables },
+      body,
       headers,
     });
   } catch (error) {

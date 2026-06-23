@@ -30,14 +30,7 @@ export const useBusiness = (options = {}) => {
   const REGISTER_BUSINESS_MUTATION = `
     mutation RegisterBusiness($input: RegisterBusinessInput!) {
       registerBusiness(input: $input) {
-        message
-        data {
-          id
-          name
-          role
-          logo
-          industry
-        }
+        ok
       }
     }
   `;
