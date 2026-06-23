@@ -76,15 +76,14 @@ const handleLogin = async () => {
   <div class="min-h-screen flex w-full bg-background">
     <!-- Left Panel: Branding / Visuals (Hidden on Mobile) -->
     <div
-      class="hidden lg:flex flex-1 relative bg-zinc-900 text-white overflow-hidden flex-col justify-between p-12"
+      class="hidden lg:flex flex-1 relative bg-zinc-950 text-white overflow-hidden flex-col justify-between p-12"
     >
-      <!-- Background subtle pattern/gradient -->
+      <!-- Background SVG Pattern -->
       <div
-        class="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent opacity-50 z-0"
+        class="absolute inset-0 bg-cover bg-center opacity-70 z-0"
+        style="background-image: url('/elo_login_bg.svg');"
       ></div>
-      <div
-        class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent z-0"
-      ></div>
+
 
       <!-- Top Branding -->
       <div class="relative z-10 flex items-center gap-3">

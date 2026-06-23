@@ -9,23 +9,32 @@ import {
   Loader2,
   ShieldAlert,
   RotateCcw,
+  LogOut,
 } from "lucide-vue-next";
 
 import { useBusiness } from "@/composables/useBusiness";
 import { useVerification } from "@/composables/useVerification";
+import { useAuth } from "@/composables/useAuth";
 import { toast } from "@/utils/alert";
 import { onMounted, onUnmounted, ref, watch, computed } from "vue";
 import { navigateTo } from "#app";
 import { Skeleton } from "@/components/ui/skeleton";
 
+
 definePageMeta({
   layout: false,
 });
 
+const { logout } = useAuth();
 const { currentUser, requestVerification } = useVerification();
 const isUserVerified = computed(
   () => currentUser.data.value?.currentUserProfile?.is_verified === true,
 );
+
+const handleLogout = () => {
+  logout();
+};
+
 const userLoading = currentUser.isPending;
 
 // Only fetch businesses if user is verified
@@ -199,15 +208,27 @@ const handleRefreshStatus = () => {
             >ELO Business</span
           >
         </div>
-        <Button
-          v-if="isUserVerified && businesses.length > 0"
-          size="sm"
-          class="gap-2"
-          @click="handleOnboardNew"
-        >
-          <Plus class="w-4 h-4" />
-          <span class="hidden sm:inline">Add Business</span>
-        </Button>
+        <div class="flex items-center gap-2">
+          <Button
+            v-if="isUserVerified && businesses.length > 0"
+            size="sm"
+            class="gap-2"
+            @click="handleOnboardNew"
+          >
+            <Plus class="w-4 h-4" />
+            <span class="hidden sm:inline">Add Business</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            class="gap-2 text-muted-foreground hover:text-foreground"
+            @click="handleLogout"
+          >
+            <LogOut class="w-4 h-4" />
+            <span class="hidden sm:inline">Log out</span>
+          </Button>
+        </div>
+
       </div>
     </header>
 
