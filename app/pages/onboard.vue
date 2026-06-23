@@ -121,13 +121,13 @@ const handleSubmit = async () => {
     industry: formData.value.industry,
     on_site: formData.value.businessType === "onsite",
     is_registered: formData.value.isRegistered === "yes",
-    address: formData.value.businessType === "onsite" ? {
-      number: formData.value.address.number,
-      street: formData.value.address.street,
-      state: formData.value.address.state,
-      country: formData.value.address.country,
-      zip_code: formData.value.address.zipCode
-    } : null,
+    address: {
+      number: formData.value.businessType === "onsite" ? formData.value.address.number : "",
+      street: formData.value.businessType === "onsite" ? formData.value.address.street : "",
+      state: formData.value.businessType === "onsite" ? formData.value.address.state : "",
+      country: formData.value.businessType === "onsite" ? formData.value.address.country : formData.value.residentCountry,
+      zip_code: formData.value.businessType === "onsite" ? formData.value.address.zipCode : ""
+    },
     registration_detail: formData.value.isRegistered === "yes" ? {
       number: formData.value.registration.regNumber,
       country_of_incorporation: formData.value.registration.countryOfIncorporation,
