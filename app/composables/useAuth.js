@@ -63,7 +63,7 @@ export const useAuth = () => {
       // without waiting for a refetch after navigation
       if (data?.login?.user) {
         qc.setQueryData(["currentUser"], {
-          user: data.login.user,
+          currentUserProfile: data.login.user,
         });
       }
     },

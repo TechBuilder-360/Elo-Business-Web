@@ -18,8 +18,6 @@ import { useAuth } from "@/composables/useAuth";
 import { toast } from "@/utils/alert";
 import { onMounted, onUnmounted, ref, watch, computed } from "vue";
 import { navigateTo } from "#app";
-import { Skeleton } from "@/components/ui/skeleton";
-
 
 definePageMeta({
   layout: false,
@@ -228,7 +226,6 @@ const handleRefreshStatus = () => {
             <span class="hidden sm:inline">Log out</span>
           </Button>
         </div>
-
       </div>
     </header>
 
