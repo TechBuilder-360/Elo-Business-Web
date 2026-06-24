@@ -9,12 +9,10 @@ import {
   Loader2,
   ShieldAlert,
   RotateCcw,
-  LogOut,
 } from "lucide-vue-next";
 
 import { useBusiness } from "@/composables/useBusiness";
 import { useVerification } from "@/composables/useVerification";
-import { useAuth } from "@/composables/useAuth";
 import { toast } from "@/utils/alert";
 import { onMounted, onUnmounted, ref, watch, computed } from "vue";
 import { navigateTo } from "#app";
@@ -23,16 +21,10 @@ definePageMeta({
   layout: false,
 });
 
-const { logout } = useAuth();
 const { currentUser, requestVerification } = useVerification();
 const isUserVerified = computed(
-  () => currentUser.data.value?.currentUserProfile?.is_verified === true,
+  () => currentUser.data.value?.user?.is_verified === true,
 );
-
-const handleLogout = () => {
-  logout();
-};
-
 const userLoading = currentUser.isPending;
 
 // Only fetch businesses if user is verified
@@ -40,7 +32,7 @@ const { userBusinesses } = useBusiness({ enabled: isUserVerified });
 const { data, isPending: bizPending, isError } = userBusinesses;
 
 const businesses = computed(() => {
-  return data.value?.myBusinesses || [];
+  return data.value?.getUserBusinsses?.data || [];
 });
 
 const roleColors = {
@@ -66,23 +58,26 @@ const verificationLink = ref("");
 const verificationStatus = ref("");
 const isRequestingVerification = ref(false);
 const showIframe = ref(false);
-const hasPrompted = ref(false);
 
 watch(
-  () => currentUser.data.value?.currentUserProfile,
+  () => currentUser.data.value?.user,
   async (user) => {
     if (user && !user.is_verified) {
-      if (!verificationStatus.value && !isRequestingVerification.value) {
+      if (!verificationLink.value && !isRequestingVerification.value) {
         isRequestingVerification.value = true;
         try {
-          const res = await requestVerification.mutateAsync({
-            entity: "USER_VERIFICATION",
-          });
+          const res = await requestVerification.mutateAsync("USER");
           const verificationRes = res.requestUserVerification;
 
-          if (verificationRes) {
-            verificationStatus.value = verificationRes.status || "unverified";
-            verificationLink.value = verificationRes.link || "";
+          if (verificationRes?.link) {
+            verificationLink.value = verificationRes.link;
+            verificationStatus.value = verificationRes.status || "pending";
+            // Open iframe if status indicates action is needed
+            if (verificationStatus.value.toLowerCase() !== "in_progress") {
+              showIframe.value = true;
+            }
+          } else if (verificationRes?.message) {
+            toast.error(verificationRes.message);
           }
         } catch (err) {
           console.error(err);
@@ -95,54 +90,13 @@ watch(
   { immediate: true },
 );
 
-const handleStartVerification = async () => {
-  if (verificationLink.value) {
-    showIframe.value = true;
-    return;
-  }
-
-  isRequestingVerification.value = true;
-  try {
-    const res = await requestVerification.mutateAsync({
-      entity: "USER_VERIFICATION",
-    });
-    const verificationRes = res.requestUserVerification;
-
-    if (verificationRes?.link) {
-      verificationLink.value = verificationRes.link;
-      verificationStatus.value = verificationRes.status || "unverified";
-
-      if (
-        verificationStatus.value.toLowerCase() !== "in_progress" &&
-        verificationStatus.value.toLowerCase() !== "processing"
-      ) {
-        showIframe.value = true;
-      }
-    } else if (verificationRes?.message) {
-      toast.error(verificationRes.message);
-    } else {
-      toast.error("Failed to generate verification link.");
-    }
-  } catch (err) {
-    console.error(err);
-    toast.error(
-      err?.graphQLErrors?.[0]?.message ||
-        "An error occurred while starting verification.",
-    );
-  } finally {
-    isRequestingVerification.value = false;
-  }
-};
-
+// Listen to iframe postMessage for completion (e.g. Dojah completion)
 onMounted(() => {
   const handleMessage = (event) => {
+    // Basic catch-all for verification completion events from iframes like Dojah
     if (event.data?.type === "success" || event.data?.status === "success") {
       showIframe.value = false;
       verificationStatus.value = "in_progress";
-      handleRefreshStatus();
-    } else if (event.data?.type === "close") {
-      showIframe.value = false;
-      handleRefreshStatus();
     }
   };
   window.addEventListener("message", handleMessage);
@@ -249,17 +203,124 @@ const handleRefreshStatus = () => {
         <p class="text-sm text-muted-foreground">Checking your account...</p>
       </div>
 
-      <!-- Verification: In Progress -->
+      <!-- User Loading State -->
       <div
-        v-else-if="
-          !isUserVerified &&
-          !showIframe &&
-          verificationStatus.toLowerCase() === 'in_progress'
-        "
-        class="flex flex-col items-center justify-center min-h-[60vh] text-center px-4"
+        v-if="userLoading"
+        class="flex flex-col items-center justify-center py-12"
+      >
+        <Loader2 class="w-8 h-8 text-primary animate-spin mb-3" />
+        <p class="text-sm text-muted-foreground">Checking account status...</p>
+      </div>
+
+      <!-- Verification Iframe Modal -->
+      <div
+        v-else-if="!isUserVerified && showIframe && verificationLink"
+        class="fixed inset-0 z-50 bg-background flex flex-col"
+      >
+        <div class="flex items-center justify-between p-4 border-b bg-card">
+          <h2 class="font-semibold text-lg">Identity Verification</h2>
+          <Button
+            variant="ghost"
+            size="sm"
+            @click="
+              () => {
+                showIframe = false;
+                verificationStatus = 'in_progress';
+              }
+            "
+          >
+            Close
+          </Button>
+        </div>
+        <iframe
+          :src="verificationLink"
+          class="w-full h-full flex-1 border-none bg-background"
+          allow="camera; microphone"
+        />
+      </div>
+
+      <!-- Verification Pending Screen -->
+      <div
+        v-else-if="!isUserVerified && !showIframe"
+        class="text-center py-12 px-4 rounded-xl border border-dashed bg-card/50"
       >
         <div
-          class="w-20 h-20 rounded-full bg-yellow-500/10 border-2 border-yellow-500/20 flex items-center justify-center mx-auto mb-6"
+          class="w-16 h-16 rounded-full bg-yellow-500/20 flex items-center justify-center mx-auto mb-4"
+        >
+          <ShieldAlert class="w-8 h-8 text-yellow-600 dark:text-yellow-500" />
+        </div>
+        <h3 class="text-lg font-semibold text-foreground">
+          Verification in Progress
+        </h3>
+        <p class="text-sm text-muted-foreground mt-2 max-w-[300px] mx-auto">
+          Your identity verification is currently being processed. You will
+          receive an email once it is complete.
+        </p>
+        <p class="text-xs text-muted-foreground mt-4">
+          Current Status:
+          <span class="font-medium text-foreground uppercase">{{
+            verificationStatus
+          }}</span>
+        </p>
+        <Button
+          variant="outline"
+          class="mt-6"
+          @click="handleRefreshStatus"
+          :disabled="currentUser.isFetching"
+        >
+          <Loader2
+            v-if="currentUser.isFetching"
+            class="w-4 h-4 mr-2 animate-spin"
+          />
+          <RotateCcw v-else class="w-4 h-4 mr-2" />
+          Refresh Status
+        </Button>
+        <Button
+          v-if="verificationLink"
+          variant="ghost"
+          class="mt-2 w-full text-xs"
+          @click="showIframe = true"
+        >
+          Re-open Verification
+        </Button>
+      </div>
+
+      <!-- Businesses Loading -->
+      <div
+        v-else-if="bizPending"
+        class="flex flex-col items-center justify-center py-12"
+      >
+        <Loader2 class="w-8 h-8 text-primary animate-spin mb-3" />
+        <p class="text-sm text-muted-foreground">Loading your businesses...</p>
+      </div>
+
+      <div
+        v-else-if="businesses.length === 0"
+        class="text-center py-12 px-4 rounded-xl border border-dashed bg-card/50"
+      >
+        <div
+          class="w-16 h-16 rounded-full bg-accent flex items-center justify-center mx-auto mb-4"
+        >
+          <Building2 class="w-8 h-8 text-accent-foreground" />
+        </div>
+        <h3 class="text-lg font-semibold text-foreground">
+          No businesses found
+        </h3>
+        <p class="text-sm text-muted-foreground mt-2 max-w-[250px] mx-auto">
+          You haven't registered any businesses yet. Create one to get started.
+        </p>
+        <Button class="mt-6" @click="handleOnboardNew">
+          <Plus class="w-4 h-4 mr-2" />
+          Register Business
+        </Button>
+      </div>
+
+      <div v-else class="space-y-3">
+        <Card
+          v-for="biz in businesses"
+          :key="biz.id"
+          class="shadow-sm border cursor-pointer hover:shadow-md hover:border-primary/30 transition-all bg-card"
+          @click="handleSelectBusiness(biz)"
         >
           <ShieldAlert class="w-10 h-10 text-yellow-500" />
         </div>
@@ -343,10 +404,27 @@ const handleRefreshStatus = () => {
             class="rounded-2xl border bg-card p-6 space-y-4 animate-pulse"
           >
             <div class="flex items-center gap-3">
-              <div class="w-12 h-12 rounded-xl bg-muted"></div>
-              <div class="space-y-2 flex-1">
-                <div class="h-4 bg-muted rounded w-3/4"></div>
-                <div class="h-3 bg-muted/60 rounded w-1/2"></div>
+              <div
+                v-if="biz.logo"
+                class="w-10 h-10 rounded-lg overflow-hidden border"
+              >
+                <img
+                  :src="biz.logo"
+                  :alt="biz.name"
+                  class="w-full h-full object-cover"
+                />
+              </div>
+              <div
+                v-else
+                class="w-10 h-10 rounded-lg bg-accent flex items-center justify-center"
+              >
+                <Building2 class="w-5 h-5 text-accent-foreground" />
+              </div>
+              <div>
+                <p class="font-medium text-foreground">{{ biz.name }}</p>
+                <p class="text-xs text-muted-foreground">
+                  {{ biz.industry }}
+                </p>
               </div>
             </div>
             <div class="h-3 bg-muted/40 rounded w-full"></div>
@@ -423,35 +501,15 @@ const handleRefreshStatus = () => {
               </span>
             </div>
 
-            <!-- Business Info -->
-            <div class="space-y-1 mb-4">
-              <h3 class="font-semibold text-foreground text-base leading-tight">
-                {{ biz.name }}
-              </h3>
-              <p v-if="biz.industry" class="text-xs text-muted-foreground">
-                {{ biz.industry }}
-              </p>
-            </div>
-
-            <!-- Footer -->
-            <div
-              class="flex items-center text-xs text-muted-foreground group-hover:text-primary transition-colors font-medium gap-1"
-            >
-              Open dashboard
-              <ChevronRight
-                class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div class="mt-8 flex justify-center">
-          <Button variant="outline" class="gap-2" @click="handleOnboardNew">
-            <Plus class="w-4 h-4" />
-            Register Another Business
-          </Button>
-        </div>
-      </div>
-    </main>
+      <Button
+        v-if="businesses.length > 0 && !bizPending"
+        variant="outline"
+        class="w-full mt-6"
+        @click="handleOnboardNew"
+      >
+        <Plus class="w-4 h-4 mr-2" />
+        Register Another Business
+      </Button>
+    </div>
   </div>
 </template>
