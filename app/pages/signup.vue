@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from "vue";
+import { useAuth } from "@/composables/useAuth";
 import {
   Card,
   CardContent,
@@ -18,14 +19,14 @@ definePageMeta({
 });
 
 const form = ref({
-  displayName: "",
   email: "",
   firstName: "",
   lastName: "",
   password: "",
   confirmPassword: "",
 });
-const isLoading = ref(false);
+const { register } = useAuth();
+const isPending = register.isPending;
 
 const updateField = (key, value) => {
   form.value[key] = value;
@@ -39,10 +40,6 @@ const validate = () => {
   if (!form.value.lastName.trim()) return "Last name is required";
   if (form.value.lastName.length > 50)
     return "Last name must be less than 50 characters";
-
-  if (form.value.displayName && form.value.displayName.length > 100) {
-    return "Display name must be less than 100 characters";
-  }
 
   if (
     !form.value.email.trim() ||
@@ -58,6 +55,12 @@ const validate = () => {
   if (form.value.password.length > 72)
     return "Password must be less than 72 characters";
 
+  const passwordRegex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]+$/;
+  if (!passwordRegex.test(form.value.password)) {
+    return "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character";
+  }
+
   if (form.value.password !== form.value.confirmPassword) {
     return "Passwords do not match";
   }
@@ -65,28 +68,37 @@ const validate = () => {
   return null;
 };
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
   const error = validate();
   if (error) {
     toast.error(error);
     return;
   }
 
-  isLoading.value = true;
-  setTimeout(() => {
-    isLoading.value = false;
-    toast.success("Account created. Check your email for an OTP.");
-    navigateTo({
-      path: "/verify-otp",
-      query: { email: form.value.email },
-    });
-  }, 1000);
+  try {
+    const payload = {
+      first_name: form.value.firstName,
+      last_name: form.value.lastName,
+      email_address: form.value.email,
+      password: form.value.password,
+    };
+
+    console.log("[Registration Payload]", JSON.stringify(payload, null, 2));
+    await register.mutateAsync(payload);
+
+    toast.success("Account created successfully! Please sign in.");
+    await navigateTo("/");
+  } catch (err) {
+    // Show the most specific error message available
+    const gqlMsg = err?.graphQLErrors?.[0]?.message;
+    toast.error(gqlMsg || err.message || "Failed to create account");
+  }
 };
 </script>
 
 <template>
   <div
-    class="min-h-screen bg-background flex items-center justify-center px-4 py-8"
+    class="h-[100dvh] overflow-y-auto bg-background flex items-center justify-center px-4 py-8"
   >
     <div class="w-full max-w-md">
       <div class="flex flex-col items-center mb-8">
@@ -127,21 +139,6 @@ const handleSubmit = () => {
                   placeholder="Doe"
                 />
               </div>
-            </div>
-
-            <div class="space-y-2">
-              <Label for="displayName">
-                Display name
-                <span class="text-muted-foreground font-normal">
-                  (optional)
-                </span>
-              </Label>
-              <Input
-                id="displayName"
-                :modelValue="form.displayName"
-                @update:modelValue="(v) => updateField('displayName', v)"
-                placeholder="janedoe"
-              />
             </div>
 
             <div class="space-y-2">
@@ -189,9 +186,9 @@ const handleSubmit = () => {
               </div>
             </div>
 
-            <Button type="submit" class="w-full" :disabled="isLoading">
-              {{ isLoading ? "Creating account..." : "Create account" }}
-              <ArrowRight v-if="!isLoading" class="w-4 h-4 ml-2" />
+            <Button type="submit" class="w-full" :disabled="isPending">
+              {{ isPending ? "Creating account..." : "Create account" }}
+              <ArrowRight v-if="!isPending" class="w-4 h-4 ml-2" />
             </Button>
 
             <p class="text-center text-sm text-muted-foreground">

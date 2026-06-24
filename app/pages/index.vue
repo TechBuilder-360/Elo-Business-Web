@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from "vue";
+import { useAuth } from "@/composables/useAuth";
 import {
   Card,
   CardContent,
@@ -11,7 +12,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/utils/alert";
-import { Building2, Mail, Lock, ArrowRight } from "lucide-vue-next";
+import {
+  Building2,
+  Mail,
+  Lock,
+  ArrowRight,
+  Eye,
+  EyeOff,
+} from "lucide-vue-next";
 
 definePageMeta({
   layout: false,
@@ -19,7 +27,9 @@ definePageMeta({
 
 const email = ref("");
 const password = ref("");
-const isLoading = ref(false);
+const showPassword = ref(false);
+const { requestOtp } = useAuth();
+const isPending = requestOtp.isPending;
 
 const handleLogin = async () => {
   if (!email.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
@@ -31,21 +41,33 @@ const handleLogin = async () => {
     return;
   }
 
-  isLoading.value = true;
-  // Simulate API call
-  setTimeout(() => {
-    isLoading.value = false;
-    toast.success("OTP sent to your email");
-    navigateTo({
-      path: "/verify-otp",
-      query: { email: email.value },
+  try {
+    const data = await requestOtp.mutateAsync({
+      email_address: email.value,
+      password: password.value,
     });
-  }, 1200);
+
+    toast.success("OTP sent to your email");
+    await navigateTo({
+      path: "/verify-otp",
+      query: { identifier: data.Identifier, email: email.value },
+    });
+  } catch (error) {
+    const gqlMsg = error?.graphQLErrors?.[0]?.message;
+    // We filter out the generic "GraphQL error" from the Error object if there's no custom message
+    const fallbackMsg =
+      error.message === "GraphQL error"
+        ? "Failed to authenticate"
+        : error.message;
+    toast.error(gqlMsg || fallbackMsg);
+  }
 };
 </script>
 
 <template>
-  <div class="min-h-screen bg-background flex items-center justify-center px-4">
+  <div
+    class="h-[100dvh] overflow-y-auto bg-background flex items-center justify-center px-4 py-6"
+  >
     <div class="w-full max-w-md">
       <div class="flex flex-col items-center mb-8">
         <div
@@ -92,17 +114,25 @@ const handleLogin = async () => {
                 />
                 <Input
                   id="password"
-                  type="password"
+                  :type="showPassword ? 'text' : 'password'"
                   placeholder="••••••••"
                   v-model="password"
-                  class="pl-10"
+                  class="pl-10 pr-10"
                 />
+                <button
+                  type="button"
+                  @click="showPassword = !showPassword"
+                  class="absolute right-3 top-3 text-muted-foreground hover:text-foreground focus:outline-none"
+                >
+                  <Eye v-if="showPassword" class="w-4 h-4" />
+                  <EyeOff v-else class="w-4 h-4" />
+                </button>
               </div>
             </div>
 
-            <Button type="submit" class="w-full" :disabled="isLoading">
-              {{ isLoading ? "Signing in..." : "Continue" }}
-              <ArrowRight v-if="!isLoading" class="w-4 h-4 ml-2" />
+            <Button type="submit" class="w-full" :disabled="isPending">
+              {{ isPending ? "Signing in..." : "Continue" }}
+              <ArrowRight v-if="!isPending" class="w-4 h-4 ml-2" />
             </Button>
 
             <p class="text-center text-sm text-muted-foreground">

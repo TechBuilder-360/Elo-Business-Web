@@ -15,10 +15,14 @@ import BusinessInfoStep from "@/components/onboarding/BusinessInfoStep.vue";
 import RegistrationStep from "@/components/onboarding/RegistrationStep.vue";
 import DocumentUploadStep from "@/components/onboarding/DocumentUploadStep.vue";
 import ReviewStep from "@/components/onboarding/ReviewStep.vue";
+import { useBusiness } from "@/composables/useBusiness";
 
 definePageMeta({
   layout: false,
 });
+
+const { registerBusiness } = useBusiness();
+const isSubmitting = registerBusiness.isPending;
 
 const STEPS = ["Business Info", "Registration", "Documents", "Review"];
 
@@ -27,6 +31,7 @@ const formData = ref({
   businessName: "",
   services: "",
   email: "",
+  industry: "",
   residentCountry: "",
   businessType: "onsite",
   address: {
@@ -40,6 +45,7 @@ const formData = ref({
   registration: {
     regNumber: "",
     countryOfIncorporation: "",
+    dateOfIncorporation: "",
     cacDocument: null,
     memartDocument: null,
     statusReport: null,
@@ -79,6 +85,8 @@ const validateStep = (step) => {
           return "Registration number is required";
         if (!formData.value.registration.countryOfIncorporation)
           return "Country of incorporation is required";
+        if (!formData.value.registration.dateOfIncorporation)
+          return "Date of incorporation is required";
         if (!formData.value.registration.cacDocument)
           return "CAC certificate is required";
         if (!formData.value.registration.memartDocument)
@@ -105,13 +113,45 @@ const handleBack = () => {
   currentStep.value = Math.max(currentStep.value - 1, 0);
 };
 
-const handleSubmit = () => {
-  toast.success("Business onboarding submitted successfully!");
-  console.log("Submitted data:", formData.value);
-  navigateTo({
-    path: "/dashboard",
-    query: { name: formData.value.businessName },
-  });
+const handleSubmit = async () => {
+  const payload = {
+    name: formData.value.businessName,
+    about: formData.value.services,
+    email: formData.value.email,
+    industry: formData.value.industry,
+    on_site: formData.value.businessType === "onsite",
+    is_registered: formData.value.isRegistered === "yes",
+    address: formData.value.businessType === "onsite" ? {
+      number: formData.value.address.number,
+      street: formData.value.address.street,
+      state: formData.value.address.state,
+      country: formData.value.address.country,
+      zip_code: formData.value.address.zipCode
+    } : null,
+    registration_detail: formData.value.isRegistered === "yes" ? {
+      number: formData.value.registration.regNumber,
+      country_of_incorporation: formData.value.registration.countryOfIncorporation,
+      date_of_incorporation: formData.value.registration.dateOfIncorporation,
+      certificate_of_incorporation: formData.value.registration.cacDocument,
+      articles_of_association: formData.value.registration.memartDocument,
+      status_certificate: formData.value.registration.statusReport,
+    } : null,
+    other_document: formData.value.documents.length > 0 ? formData.value.documents : null,
+  };
+
+  try {
+    const data = await registerBusiness.mutateAsync(payload);
+    toast.success("Business onboarded successfully!");
+    
+    // Redirect back to businesses selection, which will now show the new business
+    await navigateTo({
+      path: "/businesses"
+    });
+  } catch (error) {
+    const gqlMsg = error?.graphQLErrors?.[0]?.message;
+    const fallbackMsg = error.message === "GraphQL error" ? "Failed to register business" : error.message;
+    toast.error(gqlMsg || fallbackMsg);
+  }
 };
 </script>
 
@@ -195,9 +235,9 @@ const handleSubmit = () => {
               Next
               <ArrowRight class="w-4 h-4 ml-2" />
             </Button>
-            <Button v-else @click="handleSubmit">
+            <Button v-else @click="handleSubmit" :disabled="isSubmitting">
               <Send class="w-4 h-4 mr-2" />
-              Submit Application
+              {{ isSubmitting ? 'Submitting...' : 'Submit Application' }}
             </Button>
           </div>
         </CardContent>
