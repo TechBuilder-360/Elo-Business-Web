@@ -45,7 +45,6 @@ export default defineEventHandler(async (event) => {
     if (error?.response?._data) {
       return error.response._data;
     }
-
     throw createError({
       statusCode: error.response?.status || 502,
       message: error.message || "Bad Gateway",
