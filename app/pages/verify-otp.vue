@@ -33,7 +33,7 @@ definePageMeta({
 
 const route = useRoute();
 const email = route.query.email || "your email";
-const identifier = ref(route.query.identifier);
+const identifier = route.query.identifier;
 const otp = ref("");
 const { login, requestOtp } = useAuth();
 const isPending = login.isPending;
@@ -49,7 +49,7 @@ const handleVerify = async () => {
     return;
   }
 
-  if (!identifier.value) {
+  if (!identifier) {
     toast.error("Invalid session. Please login again.");
     navigateTo("/");
     return;
@@ -58,7 +58,7 @@ const handleVerify = async () => {
   try {
     await login.mutateAsync({
       otp: String(otp.value),
-      identifier: String(identifier.value),
+      identifier: String(identifier),
     });
     toast.success("Login successful");
     await navigateTo("/businesses");
@@ -85,16 +85,10 @@ const submitResend = async () => {
   }
 
   try {
-    const response = await requestOtp.mutateAsync({
+    await requestOtp.mutateAsync({
       email_address: email,
       password: resendPassword.value,
     });
-
-    // CRITICAL FIX: Update the identifier with the newly generated one!
-    if (response?.Identifier) {
-      identifier.value = response.Identifier;
-    }
-
     toast.success("A new OTP has been sent to your email");
     isResendModalOpen.value = false;
   } catch (error) {
@@ -109,19 +103,11 @@ const submitResend = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen flex w-full bg-background">
-    <!-- Left Panel: Branding (Hidden on Mobile) -->
-    <div
-      class="hidden lg:flex flex-1 relative bg-zinc-950 text-white overflow-hidden flex-col justify-between p-12"
-    >
-      <!-- Background SVG Pattern -->
-      <div
-        class="absolute inset-0 bg-cover bg-center opacity-70 z-0"
-        style="background-image: url(&quot;/elo_login_bg.svg&quot;)"
-      ></div>
-
-      <!-- Top Branding -->
-      <div class="relative z-10 flex items-center gap-3">
+  <div
+    class="h-[100dvh] overflow-y-auto bg-background flex items-center justify-center px-4 py-6"
+  >
+    <div class="w-full max-w-md">
+      <div class="flex flex-col items-center mb-8">
         <div
           class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 overflow-hidden"
         >
@@ -203,45 +189,19 @@ const submitResend = async () => {
           <!-- Verify Button -->
           <Button
             @click="handleVerify"
-            class="w-full h-11 font-medium transition-all active:scale-[0.98]"
+            class="w-full"
             :disabled="isPending || otp.length !== 6"
           >
-            <span v-if="isPending" class="flex items-center">
-              <svg
-                class="animate-spin -ml-1 mr-3 h-4 w-4 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  class="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  stroke-width="4"
-                ></circle>
-                <path
-                  class="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-              Verifying...
-            </span>
-            <span v-else class="flex items-center justify-center">
-              Verify Code
-              <ArrowRight class="w-4 h-4 ml-2" />
-            </span>
+            {{ isPending ? "Verifying..." : "Verify" }}
+            <ArrowRight v-if="!isPending" class="w-4 h-4 ml-2" />
           </Button>
 
-          <!-- Resend -->
-          <p class="text-center text-sm text-muted-foreground">
-            Didn't receive a code?
-            <button
-              type="button"
+          <div class="text-center">
+            <Button
+              variant="ghost"
+              size="sm"
               @click="handleResendClick"
-              class="font-semibold text-primary hover:text-primary/80 transition-colors ml-1 underline-offset-4 hover:underline"
+              class="text-muted-foreground"
             >
               Resend
             </button>
@@ -250,118 +210,64 @@ const submitResend = async () => {
       </div>
     </div>
 
-    <!-- Glassmorphism Resend Modal -->
-    <Transition
-      enter-active-class="transition-all duration-200 ease-out"
-      enter-from-class="opacity-0"
-      enter-to-class="opacity-100"
-      leave-active-class="transition-all duration-150 ease-in"
-      leave-from-class="opacity-100"
-      leave-to-class="opacity-0"
+    <!-- Custom Resend Password Modal -->
+    <div
+      v-if="isResendModalOpen"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm"
     >
-      <div
-        v-if="isResendModalOpen"
-        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md"
-        @click.self="isResendModalOpen = false"
-      >
-        <Transition
-          enter-active-class="transition-all duration-200 ease-out"
-          enter-from-class="opacity-0 scale-95 translate-y-2"
-          enter-to-class="opacity-100 scale-100 translate-y-0"
-        >
-          <div
-            v-if="isResendModalOpen"
-            class="w-full max-w-sm bg-card border border-border rounded-2xl shadow-2xl overflow-hidden"
+      <Card class="w-full max-w-sm shadow-xl border border-border">
+        <CardHeader class="pb-4 relative">
+          <button
+            @click="isResendModalOpen = false"
+            class="absolute right-4 top-4 text-muted-foreground hover:text-foreground"
           >
-            <!-- Modal Header -->
-            <div
-              class="flex items-center justify-between p-6 pb-4 border-b border-border"
-            >
-              <div>
-                <h3 class="font-semibold text-foreground">Resend Code</h3>
-                <p class="text-xs text-muted-foreground mt-0.5">
-                  Confirm your password to resend.
-                </p>
-              </div>
-              <button
-                @click="isResendModalOpen = false"
-                class="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <X class="w-4 h-4" />
-              </button>
-            </div>
-            <!-- Modal Body -->
-            <form @submit.prevent="submitResend" class="p-6 space-y-4">
-              <div class="space-y-2 group">
-                <Label
-                  for="resend-password"
-                  class="text-sm font-medium transition-colors group-focus-within:text-primary"
-                  >Password</Label
-                >
-                <div class="relative">
-                  <Lock
-                    class="absolute left-3 top-3 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary"
-                  />
-                  <Input
-                    id="resend-password"
-                    :type="showResendPassword ? 'text' : 'password'"
-                    v-model="resendPassword"
-                    placeholder="••••••••"
-                    class="pl-10 pr-10 h-11 border-muted bg-background hover:bg-accent/50 focus-visible:ring-primary focus-visible:border-primary transition-all"
-                  />
-                  <button
-                    type="button"
-                    @click="showResendPassword = !showResendPassword"
-                    class="absolute right-3 top-3 text-muted-foreground hover:text-foreground focus:outline-none transition-colors"
-                  >
-                    <Eye v-if="showResendPassword" class="w-4 h-4" />
-                    <EyeOff v-else class="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-              <div class="flex gap-3 pt-2">
-                <Button
+            <X class="w-5 h-5" />
+          </button>
+          <CardTitle class="text-lg">Verify Password</CardTitle>
+          <CardDescription>
+            Please enter your password to resend the OTP.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form @submit.prevent="submitResend" class="space-y-4">
+            <div class="space-y-2">
+              <Label for="resend-password">Password</Label>
+              <div class="relative">
+                <Lock
+                  class="absolute left-3 top-3 h-4 w-4 text-muted-foreground"
+                />
+                <Input
+                  id="resend-password"
+                  :type="showResendPassword ? 'text' : 'password'"
+                  v-model="resendPassword"
+                  placeholder="••••••••"
+                  class="pl-10 pr-10"
+                />
+                <button
                   type="button"
-                  variant="outline"
-                  class="flex-1"
-                  @click="isResendModalOpen = false"
+                  @click="showResendPassword = !showResendPassword"
+                  class="absolute right-3 top-3 text-muted-foreground hover:text-foreground focus:outline-none"
                 >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  class="flex-1 transition-all active:scale-[0.98]"
-                  :disabled="isResending || !resendPassword"
-                >
-                  <svg
-                    v-if="isResending"
-                    class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      class="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      stroke-width="4"
-                    ></circle>
-                    <path
-                      class="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  <RotateCcw v-else class="w-3.5 h-3.5 mr-2" />
-                  {{ isResending ? "Sending..." : "Resend" }}
-                </Button>
+                  <Eye v-if="showResendPassword" class="w-4 h-4" />
+                  <EyeOff v-else class="w-4 h-4" />
+                </button>
               </div>
-            </form>
-          </div>
-        </Transition>
-      </div>
-    </Transition>
+            </div>
+            <div class="flex justify-end space-x-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                @click="isResendModalOpen = false"
+              >
+                Cancel
+              </Button>
+              <Button type="submit" :disabled="isResending || !resendPassword">
+                {{ isResending ? "Resending..." : "Resend" }}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   </div>
 </template>

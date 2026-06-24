@@ -47,22 +47,14 @@ const handleLogin = async () => {
       password: password.value,
     });
 
-    console.log("Request OTP Response:", data);
-    const identifier = data?.Identifier || data?.identifier || "";
-
-    if (!identifier) {
-      toast.error("An error occurred extracting your session identifier.");
-      return;
-    }
-
     toast.success("OTP sent to your email");
     await navigateTo({
       path: "/verify-otp",
-      query: { identifier, email: email.value },
+      query: { identifier: data.Identifier, email: email.value },
     });
   } catch (error) {
     const gqlMsg = error?.graphQLErrors?.[0]?.message;
-
+    // We filter out the generic "GraphQL error" from the Error object if there's no custom message
     const fallbackMsg =
       error.message === "GraphQL error"
         ? "Failed to authenticate"
@@ -73,19 +65,11 @@ const handleLogin = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen flex w-full bg-background">
-    <!-- Left Panel: Branding / Visuals (Hidden on Mobile) -->
-    <div
-      class="hidden lg:flex flex-1 relative bg-zinc-950 text-white overflow-hidden flex-col justify-between p-12"
-    >
-      <!-- Background SVG Pattern -->
-      <div
-        class="absolute inset-0 bg-cover bg-center opacity-70 z-0"
-        style="background-image: url(&quot;/elo_login_bg.svg&quot;)"
-      ></div>
-
-      <!-- Top Branding -->
-      <div class="relative z-10 flex items-center gap-3">
+  <div
+    class="h-[100dvh] overflow-y-auto bg-background flex items-center justify-center px-4 py-6"
+  >
+    <div class="w-full max-w-md">
+      <div class="flex flex-col items-center mb-8">
         <div
           class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 overflow-hidden"
         >
@@ -171,12 +155,12 @@ const handleLogin = async () => {
                   :type="showPassword ? 'text' : 'password'"
                   placeholder="••••••••"
                   v-model="password"
-                  class="pl-10 pr-10 h-11 border-muted bg-background hover:bg-accent/50 focus-visible:ring-primary focus-visible:border-primary transition-all shadow-sm"
+                  class="pl-10 pr-10"
                 />
                 <button
                   type="button"
                   @click="showPassword = !showPassword"
-                  class="absolute right-3 top-3 text-muted-foreground hover:text-foreground focus:outline-none transition-colors"
+                  class="absolute right-3 top-3 text-muted-foreground hover:text-foreground focus:outline-none"
                 >
                   <Eye v-if="showPassword" class="w-4 h-4" />
                   <EyeOff v-else class="w-4 h-4" />
@@ -185,17 +169,16 @@ const handleLogin = async () => {
             </div>
           </div>
 
-          <Button
-            type="submit"
-            class="w-full h-11 font-medium transition-all active:scale-[0.98]"
-            :disabled="isPending"
-          >
-            <span v-if="isPending" class="flex items-center">
-              <svg
-                class="animate-spin -ml-1 mr-3 h-4 w-4 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
+            <Button type="submit" class="w-full" :disabled="isPending">
+              {{ isPending ? "Signing in..." : "Continue" }}
+              <ArrowRight v-if="!isPending" class="w-4 h-4 ml-2" />
+            </Button>
+
+            <p class="text-center text-sm text-muted-foreground">
+              Don't have an account?
+              <NuxtLink
+                to="/signup"
+                class="text-primary font-medium hover:underline ml-1"
               >
                 <circle
                   class="opacity-25"

@@ -31,13 +31,13 @@ export default defineEventHandler(async () => {
     }
   `;
   try {
-    const config = useRuntimeConfig();
-    const backendUrl = `${config.backendUrl}/api`;
-
-    const res = await $fetch(backendUrl, {
+    const res = await $fetch(
+      "https://elo--elo-backend--fwg2j6rrxrkh.code.run/api",
+      {
         method: "POST",
         body: { query },
-    });
+      },
+    );
 
     fs.writeFileSync("schema_dump.json", JSON.stringify(res, null, 2));
 

@@ -6,11 +6,9 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return;
   }
 
-  // Check auth status via the server-side endpoint which correctly
-  // reads the HttpOnly auth_token cookie (not accessible to JS directly)
+  // Check auth status via server endpoint (reads HttpOnly cookie)
   try {
-    const fetcher = import.meta.server ? useRequestFetch() : $fetch;
-    const { authenticated } = await fetcher("/api/auth-check");
+    const { authenticated } = await $fetch("/api/auth-check");
     if (!authenticated) {
       return navigateTo("/");
     }
