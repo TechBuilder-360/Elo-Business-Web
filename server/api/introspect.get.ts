@@ -26,10 +26,14 @@ export default defineEventHandler(async () => {
     }
   `;
   try {
+<<<<<<< HEAD
     const config = useRuntimeConfig();
     const backendUrl = `${config.backendUrl}/api`;
 
     const res = await $fetch(backendUrl, {
+=======
+    const res = await $fetch("https://elo--elo-backend--fwg2j6rrxrkh.code.run/api", {
+>>>>>>> e0de1b9 (Authentication (#3))
       method: "POST",
       body: { query }
     });

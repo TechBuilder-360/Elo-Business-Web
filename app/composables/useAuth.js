@@ -120,6 +120,7 @@ export const useAuth = () => {
   return {
     requestOtp: requestOtpMutation,
     login: loginMutation,
-    logout
+    register: registerMutation,
+    logout,
   };
 };
