@@ -7,16 +7,7 @@ export default defineEventHandler(async (event) => {
   const reqHeaders: Record<string, string> = {
     "Content-Type": "application/json",
     ...(headers.authorization ? { Authorization: headers.authorization } : {}),
-    ...(headers["x-business-id"]
-      ? { "x-business-id": headers["x-business-id"] }
-      : {}),
   };
-
-  // Forward the active business context header if present
-  const businessId = headers["x-business-id"];
-  if (businessId) {
-    reqHeaders["x-business-id"] = businessId;
-  }
 
   // Automatically inject HttpOnly cookie as Bearer token if present
   const authCookie = getCookie(event, "auth_token");
@@ -25,14 +16,14 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    // @ts-ignore
-    const backendUrl = `${process.env.BACKEND_URL}/api`;
-
-    const response: any = await $fetch(backendUrl, {
-      method: "POST",
-      body,
-      headers: reqHeaders,
-    });
+    const response: any = await $fetch(
+      "https://elo--elo-backend--fwg2j6rrxrkh.code.run/api",
+      {
+        method: "POST",
+        body,
+        headers: reqHeaders,
+      },
+    );
 
     // Securely extract the token and set the HttpOnly cookie
     if (response?.data?.login?.access_token) {

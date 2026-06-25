@@ -17,6 +17,9 @@ import {
   Loader2,
 } from "lucide-vue-next";
 import BusinessInfoStep from "@/components/onboarding/BusinessInfoStep.vue";
+import RegistrationStep from "@/components/onboarding/RegistrationStep.vue";
+import DocumentUploadStep from "@/components/onboarding/DocumentUploadStep.vue";
+import ReviewStep from "@/components/onboarding/ReviewStep.vue";
 import { useBusiness } from "@/composables/useBusiness";
 
 definePageMeta({
@@ -26,10 +29,15 @@ definePageMeta({
 const { registerBusiness } = useBusiness();
 const isSubmitting = registerBusiness.isPending;
 
+const { registerBusiness } = useBusiness();
+const isSubmitting = registerBusiness.isPending;
+
+const currentStep = ref(0);
 const formData = ref({
   businessName: "",
   services: "",
   email: "",
+  industry: "",
   industry: "",
   residentCountry: "",
   businessType: "onsite",
@@ -41,31 +49,65 @@ const formData = ref({
     country: "",
     zipCode: "",
   },
+  isRegistered: "no",
+  registration: {
+    regNumber: "",
+    countryOfIncorporation: "",
+    dateOfIncorporation: "",
+    cacDocument: null,
+    memartDocument: null,
+    statusReport: null,
+  },
+  documents: [],
 });
 
 const updateFormData = (updates) => {
   formData.value = { ...formData.value, ...updates };
 };
 
-const validateForm = () => {
-  if (!formData.value.businessName.trim()) return "Business name is required";
-  if (!formData.value.services.trim())
-    return "Services description is required";
-  if (
-    !formData.value.email.trim() ||
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.value.email)
-  )
-    return "A valid email is required";
-  if (!formData.value.residentCountry) return "Please select a country";
-  if (!formData.value.businessType) return "Please select business type";
-  if (formData.value.businessType === "onsite") {
-    if (!formData.value.address.street.trim())
-      return "Street address is required";
-    if (!formData.value.address.city.trim()) return "City is required";
-    if (!formData.value.address.state.trim()) return "State is required";
-    if (!formData.value.address.country.trim()) return "Country is required";
+const validateStep = (step) => {
+  switch (step) {
+    case 0:
+      if (!formData.value.businessName.trim())
+        return "Business name is required";
+      if (!formData.value.services.trim())
+        return "Services description is required";
+      if (
+        !formData.value.email.trim() ||
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.value.email)
+      )
+        return "A valid email is required";
+      if (!formData.value.residentCountry) return "Please select a country";
+      if (!formData.value.businessType) return "Please select business type";
+      if (formData.value.businessType === "onsite") {
+        if (!formData.value.address.street.trim())
+          return "Street address is required";
+        if (!formData.value.address.state.trim()) return "State is required";
+        if (!formData.value.address.country.trim())
+          return "Country is required";
+      }
+      if (!formData.value.isRegistered)
+        return "Please indicate if business is registered";
+      return null;
+    case 1:
+      if (formData.value.isRegistered === "yes") {
+        if (!formData.value.registration.regNumber.trim())
+          return "Registration number is required";
+        if (!formData.value.registration.countryOfIncorporation)
+          return "Country of incorporation is required";
+        if (!formData.value.registration.dateOfIncorporation)
+          return "Date of incorporation is required";
+        if (!formData.value.registration.cacDocument)
+          return "CAC certificate is required";
+        if (!formData.value.registration.memartDocument)
+          return "MEMART document is required";
+        if (!formData.value.registration.statusReport)
+          return "Status report is required";
+      }
+      return null;
+    default:
+      return null;
   }
-  return null;
 };
 
 const handleSubmit = async () => {
@@ -74,17 +116,21 @@ const handleSubmit = async () => {
     toast.error(error);
     return;
   }
+  currentStep.value = Math.min(currentStep.value + 1, STEPS.length - 1);
+};
 
+const handleBack = () => {
+  currentStep.value = Math.max(currentStep.value - 1, 0);
+};
+
+const handleSubmit = async () => {
   const payload = {
     name: formData.value.businessName,
     about: formData.value.services,
     email: formData.value.email,
     industry: formData.value.industry,
     on_site: formData.value.businessType === "onsite",
-    role: {
-      authorized_representative: true,
-      authorized_representative_email: formData.value.email
-    },
+    is_registered: formData.value.isRegistered === "yes",
     address: {
       number:
         formData.value.businessType === "onsite"
@@ -93,10 +139,6 @@ const handleSubmit = async () => {
       street:
         formData.value.businessType === "onsite"
           ? formData.value.address.street
-          : "",
-      city:
-        formData.value.businessType === "onsite"
-          ? formData.value.address.city
           : "",
       state:
         formData.value.businessType === "onsite"
@@ -111,6 +153,22 @@ const handleSubmit = async () => {
           ? formData.value.address.zipCode
           : "",
     },
+    registration_detail:
+      formData.value.isRegistered === "yes"
+        ? {
+            number: formData.value.registration.regNumber,
+            country_of_incorporation:
+              formData.value.registration.countryOfIncorporation,
+            date_of_incorporation:
+              formData.value.registration.dateOfIncorporation,
+            certificate_of_incorporation:
+              formData.value.registration.cacDocument,
+            articles_of_association: formData.value.registration.memartDocument,
+            status_certificate: formData.value.registration.statusReport,
+          }
+        : null,
+    other_document:
+      formData.value.documents.length > 0 ? formData.value.documents : null,
   };
 
   try {
@@ -142,7 +200,11 @@ const handleSubmit = async () => {
         <div
           class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center overflow-hidden"
         >
-          <img :src="'/favicon_io/favicon_io/apple-touch-icon.png'" class="w-full h-full object-cover" alt="ELO" />
+          <img
+            :src="'/favicon_io/favicon_io/apple-touch-icon.png'"
+            class="w-full h-full object-cover"
+            alt="ELO"
+          />
         </div>
         <div>
           <h1 class="text-lg font-bold text-foreground">Business Onboarding</h1>
@@ -165,11 +227,23 @@ const handleSubmit = async () => {
           <!-- Single Step Form -->
           <BusinessInfoStep :data="formData" :onChange="updateFormData" />
 
-          <div class="flex justify-end mt-8 pt-6 border-t border-border">
-            <Button @click="handleSubmit" :disabled="isSubmitting">
-              <Loader2 v-if="isSubmitting" class="w-4 h-4 mr-2 animate-spin" />
-              <Send v-else class="w-4 h-4 mr-2" />
-              {{ isSubmitting ? "Submitting..." : "Complete Onboarding" }}
+          <div class="flex justify-between mt-8 pt-6 border-t border-border">
+            <Button
+              variant="outline"
+              @click="handleBack"
+              :disabled="currentStep === 0"
+            >
+              <ArrowLeft class="w-4 h-4 mr-2" />
+              Back
+            </Button>
+
+            <Button v-if="currentStep < STEPS.length - 1" @click="handleNext">
+              Next
+              <ArrowRight class="w-4 h-4 ml-2" />
+            </Button>
+            <Button v-else @click="handleSubmit" :disabled="isSubmitting">
+              <Send class="w-4 h-4 mr-2" />
+              {{ isSubmitting ? "Submitting..." : "Submit Application" }}
             </Button>
           </div>
         </CardContent>
