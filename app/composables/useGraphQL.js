@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/vue-query";
 import { $fetch } from "ofetch";
 
-const BACKEND_URL = "https://elo--elo-backend--fwg2j6rrxrkh.code.run/api";
+// Backend URL is only used by the server-side proxy now
 
 // Helper to check if a value is a File/Blob
 function isFile(value) {
@@ -47,11 +47,9 @@ async function gqlRequest({ query, variables = {} }) {
     Accept: "application/json",
   };
 
-  // Get token directly from cookie
-  const token = useCookie("access_token").value;
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
+  // We do not inject Authorization headers here on the client-side.
+  // The server-side proxy (/api/remote) automatically reads the HttpOnly
+  // auth_token cookie and injects it into the backend request.
 
   // Check for files to determine request format
   const { cleanVariables, files, map } = extractFiles(variables);
@@ -62,14 +60,14 @@ async function gqlRequest({ query, variables = {} }) {
     body = new FormData();
     body.append(
       "operations",
-      JSON.stringify({ query, variables: cleanVariables })
+      JSON.stringify({ query, variables: cleanVariables }),
     );
     body.append("map", JSON.stringify(map));
 
     files.forEach((file, index) => {
       body.append(index.toString(), file);
     });
-    // Do NOT set Content-Type header when using FormData; 
+    // Do NOT set Content-Type header when using FormData;
     // the browser automatically sets it with the required boundary hash.
   } else {
     // Standard JSON format
@@ -79,7 +77,7 @@ async function gqlRequest({ query, variables = {} }) {
 
   let response;
   try {
-    response = await $fetch(BACKEND_URL, {
+    response = await $fetch("/api/remote", {
       method: "POST",
       body,
       headers,
