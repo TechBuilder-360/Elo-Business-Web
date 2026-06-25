@@ -85,6 +85,16 @@ const updateReg = (updates) => {
       </Select>
     </div>
 
+    <div class="space-y-2">
+      <Label htmlFor="dateOfIncorporation">Date of Incorporation *</Label>
+      <Input
+        id="dateOfIncorporation"
+        type="date"
+        :modelValue="data.registration.dateOfIncorporation"
+        @update:modelValue="(val) => updateReg({ dateOfIncorporation: val })"
+      />
+    </div>
+
     <!-- File Upload Field 1: CAC -->
     <div class="space-y-2">
       <Label htmlFor="cac">CAC Certificate *</Label>
