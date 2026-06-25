@@ -47,14 +47,22 @@ const handleLogin = async () => {
       password: password.value,
     });
 
+    console.log("Request OTP Response:", data);
+    const identifier = data?.Identifier || data?.identifier || "";
+
+    if (!identifier) {
+      toast.error("An error occurred extracting your session identifier.");
+      return;
+    }
+
     toast.success("OTP sent to your email");
     await navigateTo({
       path: "/verify-otp",
-      query: { identifier: data.Identifier, email: email.value },
+      query: { identifier, email: email.value },
     });
   } catch (error) {
     const gqlMsg = error?.graphQLErrors?.[0]?.message;
-    // We filter out the generic "GraphQL error" from the Error object if there's no custom message
+
     const fallbackMsg =
       error.message === "GraphQL error"
         ? "Failed to authenticate"
@@ -65,15 +73,24 @@ const handleLogin = async () => {
 </script>
 
 <template>
-  <div
-    class="h-[100dvh] overflow-y-auto bg-background flex items-center justify-center px-4 py-6"
-  >
-    <div class="w-full max-w-md">
-      <div class="flex flex-col items-center mb-8">
+  <div class="min-h-screen flex w-full bg-background">
+    <!-- Left Panel: Branding / Visuals (Hidden on Mobile) -->
+    <div
+      class="hidden lg:flex flex-1 relative bg-zinc-950 text-white overflow-hidden flex-col justify-between p-12"
+    >
+      <!-- Background SVG Pattern -->
+      <div
+        class="absolute inset-0 bg-cover bg-center opacity-70 z-0"
+        style="background-image: url('/elo_login_bg.svg');"
+      ></div>
+
+
+      <!-- Top Branding -->
+      <div class="relative z-10 flex items-center gap-3">
         <div
-          class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 overflow-hidden"
+          class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20"
         >
-          <img :src="'/favicon_io/favicon_io/apple-touch-icon.png'" class="w-full h-full object-cover" alt="ELO" />
+          <Building2 class="w-6 h-6 text-primary-foreground" />
         </div>
         <span class="text-xl font-bold tracking-tight">ELO Business</span>
       </div>
@@ -81,9 +98,9 @@ const handleLogin = async () => {
       <!-- Center Visual -->
       <div class="relative z-10 max-w-lg">
         <div
-          class="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center mb-8 ring-1 ring-white/20 shadow-2xl overflow-hidden"
+          class="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center mb-8 ring-1 ring-white/20 shadow-2xl"
         >
-          <img :src="'/favicon_io/favicon_io/apple-touch-icon.png'" class="w-full h-full object-cover" alt="ELO" />
+          <Building2 class="w-10 h-10 text-white/80" />
         </div>
         <h2 class="text-4xl font-extrabold tracking-tight">ELO Business</h2>
       </div>
@@ -99,9 +116,9 @@ const handleLogin = async () => {
       <!-- Mobile Logo (only shows on mobile since left panel is hidden) -->
       <div class="absolute top-8 left-8 lg:hidden flex items-center gap-3">
         <div
-          class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center overflow-hidden"
+          class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center"
         >
-          <img :src="'/favicon_io/favicon_io/apple-touch-icon.png'" class="w-full h-full object-cover" alt="ELO" />
+          <Building2 class="w-5 h-5 text-primary-foreground" />
         </div>
         <span class="font-bold">ELO</span>
       </div>
@@ -155,12 +172,12 @@ const handleLogin = async () => {
                   :type="showPassword ? 'text' : 'password'"
                   placeholder="••••••••"
                   v-model="password"
-                  class="pl-10 pr-10"
+                  class="pl-10 pr-10 h-11 border-muted bg-background hover:bg-accent/50 focus-visible:ring-primary focus-visible:border-primary transition-all shadow-sm"
                 />
                 <button
                   type="button"
                   @click="showPassword = !showPassword"
-                  class="absolute right-3 top-3 text-muted-foreground hover:text-foreground focus:outline-none"
+                  class="absolute right-3 top-3 text-muted-foreground hover:text-foreground focus:outline-none transition-colors"
                 >
                   <Eye v-if="showPassword" class="w-4 h-4" />
                   <EyeOff v-else class="w-4 h-4" />
@@ -169,16 +186,17 @@ const handleLogin = async () => {
             </div>
           </div>
 
-            <Button type="submit" class="w-full" :disabled="isPending">
-              {{ isPending ? "Signing in..." : "Continue" }}
-              <ArrowRight v-if="!isPending" class="w-4 h-4 ml-2" />
-            </Button>
-
-            <p class="text-center text-sm text-muted-foreground">
-              Don't have an account?
-              <NuxtLink
-                to="/signup"
-                class="text-primary font-medium hover:underline ml-1"
+          <Button
+            type="submit"
+            class="w-full h-11 font-medium transition-all active:scale-[0.98]"
+            :disabled="isPending"
+          >
+            <span v-if="isPending" class="flex items-center">
+              <svg
+                class="animate-spin -ml-1 mr-3 h-4 w-4 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
               >
                 <circle
                   class="opacity-25"

@@ -1,4 +1,5 @@
 import { useGQLQuery, useGQLMutation } from "./useGraphQL";
+import { useQueryClient } from "@tanstack/vue-query";
 
 export const useBusiness = (options = {}) => {
   // ──────────────────────────────────────────────
@@ -7,19 +8,21 @@ export const useBusiness = (options = {}) => {
   const USER_BUSINESSES_QUERY = `
     query GetUserBusinesses {
       getUserBusinsses {
-        message
-        data {
-          id
-          name
-          role
-          logo
-          industry
-        }
+        id
+        name
+        role
+        logo
+        industry
       }
     }
   `;
 
-  const userBusinessesQuery = useGQLQuery(["userBusinesses"], USER_BUSINESSES_QUERY, {}, options);
+  const userBusinessesQuery = useGQLQuery(
+    ["userBusinesses"],
+    USER_BUSINESSES_QUERY,
+    {},
+    options,
+  );
 
   // ──────────────────────────────────────────────
   // Register New Business
@@ -27,14 +30,7 @@ export const useBusiness = (options = {}) => {
   const REGISTER_BUSINESS_MUTATION = `
     mutation RegisterBusiness($input: RegisterBusinessInput!) {
       registerBusiness(input: $input) {
-        message
-        data {
-          id
-          name
-          role
-          logo
-          industry
-        }
+        ok
       }
     }
   `;
@@ -51,7 +47,9 @@ export const useBusiness = (options = {}) => {
   });
 
   // Wrap mutateAsync for easier calling
-  const registerOriginal = registerBusinessMutation.mutateAsync.bind(registerBusinessMutation);
+  const registerOriginal = registerBusinessMutation.mutateAsync.bind(
+    registerBusinessMutation,
+  );
   registerBusinessMutation.mutateAsync = async (inputData) => {
     return await registerOriginal({ input: inputData });
   };
