@@ -89,7 +89,6 @@ const handleSubmit = async () => {
     toast.success("Account created successfully! Please sign in.");
     await navigateTo("/");
   } catch (err) {
-    // Show the most specific error message available
     const gqlMsg = err?.graphQLErrors?.[0]?.message;
     toast.error(gqlMsg || err.message || "Failed to create account");
   }
