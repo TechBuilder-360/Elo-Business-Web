@@ -11,6 +11,7 @@ import {
   Eye,
   Settings,
   Wallet,
+  ShieldCheck,
 } from "lucide-vue-next";
 import {
   ChartContainer,
@@ -129,6 +130,13 @@ const handleSettingsNavigation = () => {
     query: { name: businessName.value },
   });
 };
+
+const handleComplianceNavigation = () => {
+  navigateTo({
+    path: "/compliance",
+    query: { name: businessName.value },
+  });
+};
 </script>
 
 <template>
@@ -173,7 +181,17 @@ const handleSettingsNavigation = () => {
             variant="ghost"
             size="icon"
             class="h-9 w-9 text-foreground"
+            @click="handleComplianceNavigation"
+            title="Compliance"
+          >
+            <ShieldCheck class="w-5 h-5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            class="h-9 w-9 text-foreground"
             @click="handleSettingsNavigation"
+            title="Settings"
           >
             <Settings class="w-5 h-5" />
           </Button>
