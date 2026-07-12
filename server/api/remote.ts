@@ -9,6 +9,12 @@ export default defineEventHandler(async (event) => {
     ...(headers.authorization ? { Authorization: headers.authorization } : {}),
   };
 
+  // Forward the active business context header if present
+  const businessId = headers["x-business-id"];
+  if (businessId) {
+    reqHeaders["x-business-id"] = businessId;
+  }
+
   // Automatically inject HttpOnly cookie as Bearer token if present
   const authCookie = getCookie(event, "auth_token");
   if (authCookie && !reqHeaders.Authorization) {

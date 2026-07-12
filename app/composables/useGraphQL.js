@@ -51,6 +51,12 @@ async function gqlRequest({ query, variables = {} }) {
   // The server-side proxy (/api/remote) automatically reads the HttpOnly
   // auth_token cookie and injects it into the backend request.
 
+  // Inject active business ID context if set
+  const activeBusinessId = useState("activeBusinessId");
+  if (activeBusinessId.value) {
+    headers["x-business-id"] = activeBusinessId.value;
+  }
+
   // Check for files to determine request format
   const { cleanVariables, files, map } = extractFiles(variables);
   let body;
