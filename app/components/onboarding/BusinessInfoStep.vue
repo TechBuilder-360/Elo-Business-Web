@@ -28,11 +28,8 @@ const props = defineProps({
 const allCountries = Country.getAllCountries();
 
 const availableStates = computed(() => {
-  const selectedCountry = allCountries.find(
-    (c) => c.name === props.data.address.country
-  );
-  if (!selectedCountry) return [];
-  return State.getStatesOfCountry(selectedCountry.isoCode);
+  if (!props.data.address.country) return [];
+  return State.getStatesOfCountry(props.data.address.country);
 });
 
 const industries = [
@@ -45,7 +42,7 @@ const industries = [
   "Education",
   "Manufacturing",
   "Entertainment",
-  "Other"
+  "Other",
 ];
 </script>
 
@@ -93,7 +90,11 @@ const industries = [
           <SelectValue placeholder="Select country" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem v-for="c in allCountries" :key="c.isoCode" :value="c.name">
+          <SelectItem
+            v-for="c in allCountries"
+            :key="c.isoCode"
+            :value="c.isoCode"
+          >
             {{ c.name }}
           </SelectItem>
         </SelectContent>
@@ -170,14 +171,21 @@ const industries = [
           <Select
             :modelValue="data.address.country"
             @update:modelValue="
-              (val) => onChange({ address: { ...data.address, country: val, state: '' } })
+              (val) =>
+                onChange({
+                  address: { ...data.address, country: val, state: '' },
+                })
             "
           >
             <SelectTrigger id="country">
               <SelectValue placeholder="Select country" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem v-for="c in allCountries" :key="c.isoCode" :value="c.name">
+              <SelectItem
+                v-for="c in allCountries"
+                :key="c.isoCode"
+                :value="c.isoCode"
+              >
                 {{ c.name }}
               </SelectItem>
             </SelectContent>
@@ -196,11 +204,26 @@ const industries = [
               <SelectValue placeholder="Select state" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem v-for="s in availableStates" :key="s.isoCode" :value="s.name">
+              <SelectItem
+                v-for="s in availableStates"
+                :key="s.isoCode"
+                :value="s.name"
+              >
                 {{ s.name }}
               </SelectItem>
             </SelectContent>
           </Select>
+        </div>
+        <div class="space-y-2">
+          <Label htmlFor="city">City</Label>
+          <Input
+            id="city"
+            placeholder="e.g. Ikeja"
+            :modelValue="data.address.city"
+            @update:modelValue="
+              (val) => onChange({ address: { ...data.address, city: val } })
+            "
+          />
         </div>
         <div class="space-y-2">
           <Label htmlFor="zipCode">Zip Code</Label>
@@ -215,7 +238,5 @@ const industries = [
         </div>
       </div>
     </div>
-
-
   </div>
 </template>

@@ -9,7 +9,13 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/utils/alert";
-import { ArrowLeft, ArrowRight, Send, Building2 } from "lucide-vue-next";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Send,
+  Building2,
+  Loader2,
+} from "lucide-vue-next";
 import BusinessInfoStep from "@/components/onboarding/BusinessInfoStep.vue";
 import { useBusiness } from "@/composables/useBusiness";
 
@@ -19,7 +25,6 @@ definePageMeta({
 
 const { registerBusiness } = useBusiness();
 const isSubmitting = registerBusiness.isPending;
-
 
 const formData = ref({
   businessName: "",
@@ -31,10 +36,11 @@ const formData = ref({
   address: {
     number: "",
     street: "",
+    city: "",
     state: "",
     country: "",
     zipCode: "",
-  }
+  },
 });
 
 const updateFormData = (updates) => {
@@ -43,7 +49,8 @@ const updateFormData = (updates) => {
 
 const validateForm = () => {
   if (!formData.value.businessName.trim()) return "Business name is required";
-  if (!formData.value.services.trim()) return "Services description is required";
+  if (!formData.value.services.trim())
+    return "Services description is required";
   if (
     !formData.value.email.trim() ||
     !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.value.email)
@@ -54,6 +61,7 @@ const validateForm = () => {
   if (formData.value.businessType === "onsite") {
     if (!formData.value.address.street.trim())
       return "Street address is required";
+    if (!formData.value.address.city.trim()) return "City is required";
     if (!formData.value.address.state.trim()) return "State is required";
     if (!formData.value.address.country.trim()) return "Country is required";
   }
@@ -73,27 +81,52 @@ const handleSubmit = async () => {
     email: formData.value.email,
     industry: formData.value.industry,
     on_site: formData.value.businessType === "onsite",
-    role: "owner",
+    role: {
+      authorized_representative: true,
+      authorized_representative_email: formData.value.email
+    },
     address: {
-      number: formData.value.businessType === "onsite" ? formData.value.address.number : "",
-      street: formData.value.businessType === "onsite" ? formData.value.address.street : "",
-      state: formData.value.businessType === "onsite" ? formData.value.address.state : "",
-      country: formData.value.businessType === "onsite" ? formData.value.address.country : formData.value.residentCountry,
-      zip_code: formData.value.businessType === "onsite" ? formData.value.address.zipCode : ""
-    }
+      number:
+        formData.value.businessType === "onsite"
+          ? formData.value.address.number
+          : "",
+      street:
+        formData.value.businessType === "onsite"
+          ? formData.value.address.street
+          : "",
+      city:
+        formData.value.businessType === "onsite"
+          ? formData.value.address.city
+          : "",
+      state:
+        formData.value.businessType === "onsite"
+          ? formData.value.address.state
+          : "",
+      country:
+        formData.value.businessType === "onsite"
+          ? formData.value.address.country
+          : formData.value.residentCountry,
+      zip_code:
+        formData.value.businessType === "onsite"
+          ? formData.value.address.zipCode
+          : "",
+    },
   };
 
   try {
     const data = await registerBusiness.mutateAsync(payload);
     toast.success("Business onboarded successfully!");
-    
+
     // Redirect back to businesses selection, which will now show the new business
     await navigateTo({
-      path: "/businesses"
+      path: "/businesses",
     });
   } catch (error) {
     const gqlMsg = error?.graphQLErrors?.[0]?.message;
-    const fallbackMsg = error.message === "GraphQL error" ? "Failed to register business" : error.message;
+    const fallbackMsg =
+      error.message === "GraphQL error"
+        ? "Failed to register business"
+        : error.message;
     toast.error(gqlMsg || fallbackMsg);
   }
 };
@@ -130,15 +163,13 @@ const handleSubmit = async () => {
         </CardHeader>
         <CardContent>
           <!-- Single Step Form -->
-          <BusinessInfoStep
-            :data="formData"
-            :onChange="updateFormData"
-          />
+          <BusinessInfoStep :data="formData" :onChange="updateFormData" />
 
           <div class="flex justify-end mt-8 pt-6 border-t border-border">
             <Button @click="handleSubmit" :disabled="isSubmitting">
-              <Send class="w-4 h-4 mr-2" />
-              {{ isSubmitting ? 'Submitting...' : 'Complete Onboarding' }}
+              <Loader2 v-if="isSubmitting" class="w-4 h-4 mr-2 animate-spin" />
+              <Send v-else class="w-4 h-4 mr-2" />
+              {{ isSubmitting ? "Submitting..." : "Complete Onboarding" }}
             </Button>
           </div>
         </CardContent>

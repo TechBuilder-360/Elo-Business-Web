@@ -341,14 +341,14 @@ const navigateBack = () => {
               <div v-if="businessDocuments.isPending" class="py-8 flex justify-center">
                 <Loader2 class="w-8 h-8 animate-spin text-muted-foreground" />
               </div>
-              <div v-else-if="!businessDocuments.data.value?.businessDocument?.length" class="py-12 text-center border-2 border-dashed rounded-lg bg-accent/20">
+              <div v-else-if="!businessDocuments.data.value?.businessDocuments?.length" class="py-12 text-center border-2 border-dashed rounded-lg bg-accent/20">
                 <FileText class="w-12 h-12 text-muted-foreground/40 mx-auto mb-4" />
                 <h3 class="text-lg font-medium text-foreground">No documents yet</h3>
                 <p class="text-sm text-muted-foreground">Upload your first compliance document above</p>
               </div>
               <div v-else class="space-y-3">
                 <div 
-                  v-for="doc in businessDocuments.data.value?.businessDocument" 
+                  v-for="doc in businessDocuments.data.value?.businessDocuments" 
                   :key="doc.id"
                   class="flex items-center justify-between p-4 rounded-lg border bg-accent/20 hover:bg-accent/40 transition-colors"
                 >

@@ -40,7 +40,7 @@ const { userBusinesses } = useBusiness({ enabled: isUserVerified });
 const { data, isPending: bizPending, isError } = userBusinesses;
 
 const businesses = computed(() => {
-  return data.value?.getUserBusinsses || [];
+  return data.value?.myBusinesses || [];
 });
 
 const roleColors = {

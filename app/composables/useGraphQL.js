@@ -68,7 +68,7 @@ async function gqlRequest({ query, variables = {} }) {
     body = new FormData();
     body.append(
       "operations",
-      JSON.stringify({ query, variables: cleanVariables })
+      JSON.stringify({ query, variables: cleanVariables }),
     );
     body.append("map", JSON.stringify(map));
 

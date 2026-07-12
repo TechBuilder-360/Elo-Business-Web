@@ -2,17 +2,18 @@ import { useGQLQuery, useGQLMutation } from "./useGraphQL";
 import { useQueryClient } from "@tanstack/vue-query";
 
 export const useBusiness = (options = {}) => {
+  const qc = useQueryClient();
+
   // ──────────────────────────────────────────────
   // Fetch User Businesses
   // ──────────────────────────────────────────────
   const USER_BUSINESSES_QUERY = `
     query GetUserBusinesses {
-      getUserBusinsses {
+      myBusinesses {
         id
         name
         role
         logo
-        industry
       }
     }
   `;
@@ -36,7 +37,6 @@ export const useBusiness = (options = {}) => {
   const registerBusinessMutation = useGQLMutation(REGISTER_BUSINESS_MUTATION, {
     onSuccess: () => {
       // Invalidate the userBusinesses query so the list refreshes automatically
-      const qc = useQueryClient();
       qc.invalidateQueries({ queryKey: ["userBusinesses"] });
     },
     onError: (err) => {
@@ -63,7 +63,6 @@ export const useBusiness = (options = {}) => {
 
   const businessDetailMutation = useGQLMutation(BUSINESS_DETAIL_MUTATION, {
     onSuccess: () => {
-      const qc = useQueryClient();
       qc.invalidateQueries({ queryKey: ["userBusinesses"] });
     },
   });
@@ -85,7 +84,6 @@ export const useBusiness = (options = {}) => {
   `;
   const uploadDocumentMutation = useGQLMutation(UPLOAD_DOCUMENT_MUTATION, {
     onSuccess: () => {
-      const qc = useQueryClient();
       qc.invalidateQueries({ queryKey: ["businessDocuments"] });
     },
   });
@@ -104,7 +102,6 @@ export const useBusiness = (options = {}) => {
   `;
   const deleteDocumentMutation = useGQLMutation(DELETE_DOCUMENT_MUTATION, {
     onSuccess: () => {
-      const qc = useQueryClient();
       qc.invalidateQueries({ queryKey: ["businessDocuments"] });
     },
   });
@@ -137,7 +134,7 @@ export const useBusiness = (options = {}) => {
 
   const GET_BUSINESS_DOCUMENTS_QUERY = `
     query GetBusinessDocuments {
-      businessDocument {
+      businessDocuments {
         id
         description
         url
