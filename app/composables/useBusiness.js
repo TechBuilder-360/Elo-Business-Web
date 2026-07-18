@@ -64,6 +64,7 @@ export const useBusiness = (options = {}) => {
   const businessDetailMutation = useGQLMutation(BUSINESS_DETAIL_MUTATION, {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["userBusinesses"] });
+      qc.invalidateQueries({ queryKey: ["activeBusiness"] });
     },
   });
 

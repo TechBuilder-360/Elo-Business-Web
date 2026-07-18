@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, watchEffect } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import {
   Card,
@@ -34,6 +34,8 @@ import {
   ShieldCheck,
   FolderOpen,
   CheckCircle2,
+  Pencil,
+  Eye,
 } from "lucide-vue-next";
 
 definePageMeta({
@@ -45,6 +47,7 @@ const router = useRouter();
 const businessName = computed(() => route.query.name || "Business");
 
 const {
+  userBusinesses,
   businessDetail,
   uploadDocument,
   deleteDocument,
@@ -58,6 +61,7 @@ const {
 const activeSection = ref("profile"); // 'profile', 'documents'
 const profileStep = ref(1); // 1 for General Info, 2 for Registration Details
 const isUploadingDoc = ref(false); // Toggle for document upload form
+const isEditingProfile = ref(false); // Toggle between view and edit mode for profile
 
 const sections = [
   {
@@ -98,6 +102,26 @@ const uploadData = ref({
 });
 
 const fileInput = ref(null);
+
+// ──────────────────────────────────────────────
+// Derive active business from already-fetched list
+// ──────────────────────────────────────────────
+const activeBusinessData = computed(() => {
+  const list = userBusinesses.data.value?.myBusinesses || [];
+  const activeId = import.meta.client
+    ? localStorage.getItem("activeBusinessId")
+    : null;
+  if (activeId) return list.find((b) => b.id === activeId) || null;
+  return list[0] || null;
+});
+
+// Pre-fill infoData from the live API response
+watchEffect(() => {
+  if (activeBusinessData.value) {
+    infoData.value.name = activeBusinessData.value.name || businessName.value;
+    infoData.value.industry = activeBusinessData.value.industry || "";
+  }
+});
 
 // ──────────────────────────────────────────────
 // Progress Calculation
@@ -156,6 +180,8 @@ const handleSaveProfile = async () => {
       },
     });
     toast.success("Profile saved successfully");
+    isEditingProfile.value = false;
+    profileStep.value = 1;
   } catch (error) {
     toast.error(error.message || "Failed to save profile");
   }
@@ -351,17 +377,172 @@ const navigateBack = () => {
             v-if="activeSection === 'profile'"
             class="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500"
           >
-            <div>
-              <h2 class="text-2xl font-bold tracking-tight">
-                Business Profile
-              </h2>
-              <p class="text-muted-foreground mt-1">
-                Update your general details and corporate registration
-                information.
-              </p>
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 class="text-2xl font-bold tracking-tight">
+                  Business Profile
+                </h2>
+                <p class="text-muted-foreground mt-1">
+                  Update your general details and corporate registration
+                  information.
+                </p>
+              </div>
+              <Button
+                v-if="!isEditingProfile"
+                @click="
+                  isEditingProfile = true;
+                  profileStep = 1;
+                "
+                variant="outline"
+                size="sm"
+                class="gap-2"
+              >
+                <Pencil class="w-4 h-4" />
+                Edit Profile
+              </Button>
+              <Button
+                v-else
+                variant="ghost"
+                size="sm"
+                @click="
+                  isEditingProfile = false;
+                  profileStep = 1;
+                "
+              >
+                Cancel
+              </Button>
             </div>
 
-            <Card class="border shadow-sm relative overflow-hidden">
+            <!-- Read-only Business Detail View -->
+            <div v-if="!isEditingProfile">
+              <Card class="border shadow-sm mb-4">
+                <CardContent class="p-6">
+                  <!-- Header with logo -->
+                  <div class="flex items-center gap-4 mb-6 pb-6 border-b">
+                    <div
+                      class="w-14 h-14 rounded-xl overflow-hidden bg-muted flex items-center justify-center shrink-0"
+                    >
+                      <img
+                        v-if="activeBusinessData?.logo"
+                        :src="activeBusinessData.logo"
+                        :alt="activeBusinessData?.name"
+                        class="w-full h-full object-cover"
+                      />
+                      <Building2 v-else class="w-7 h-7 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <h3 class="text-lg font-bold">
+                        {{ activeBusinessData?.name || businessName }}
+                      </h3>
+                      <span
+                        class="text-xs font-semibold uppercase tracking-wide bg-primary/10 text-primary px-2 py-0.5 rounded-full"
+                      >
+                        {{ activeBusinessData?.role || "Owner" }}
+                      </span>
+                    </div>
+                  </div>
+                  <!-- Info grid -->
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-1">
+                      <p
+                        class="text-xs font-semibold text-muted-foreground uppercase tracking-wide"
+                      >
+                        Industry
+                      </p>
+                      <p class="text-sm">
+                        {{
+                          infoData.industry ||
+                          activeBusinessData?.industry ||
+                          "—"
+                        }}
+                      </p>
+                    </div>
+                    <div class="space-y-1">
+                      <p
+                        class="text-xs font-semibold text-muted-foreground uppercase tracking-wide"
+                      >
+                        Website
+                      </p>
+                      <a
+                        :href="infoData.website"
+                        target="_blank"
+                        class="text-sm text-primary hover:underline"
+                      >
+                        {{ infoData.website || "—" }}
+                      </a>
+                    </div>
+                    <div class="space-y-1 md:col-span-2">
+                      <p
+                        class="text-xs font-semibold text-muted-foreground uppercase tracking-wide"
+                      >
+                        About
+                      </p>
+                      <p class="text-sm text-muted-foreground leading-relaxed">
+                        {{ infoData.about || "—" }}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card class="border shadow-sm">
+                <CardHeader class="pb-2">
+                  <CardTitle
+                    class="text-base font-semibold flex items-center gap-2"
+                  >
+                    <ShieldCheck class="w-4 h-4 text-primary" />
+                    Registration Details
+                  </CardTitle>
+                </CardHeader>
+                <CardContent
+                  class="p-6 pt-0 grid grid-cols-1 md:grid-cols-2 gap-6"
+                >
+                  <div class="space-y-1">
+                    <p
+                      class="text-xs font-semibold text-muted-foreground uppercase tracking-wide"
+                    >
+                      RC Number
+                    </p>
+                    <p class="text-sm font-mono">{{ regData.number || "—" }}</p>
+                  </div>
+                  <div class="space-y-1">
+                    <p
+                      class="text-xs font-semibold text-muted-foreground uppercase tracking-wide"
+                    >
+                      Tax ID (TIN)
+                    </p>
+                    <p class="text-sm font-mono">
+                      {{ regData.tax_identification_number || "—" }}
+                    </p>
+                  </div>
+                  <div class="space-y-1">
+                    <p
+                      class="text-xs font-semibold text-muted-foreground uppercase tracking-wide"
+                    >
+                      Country of Incorporation
+                    </p>
+                    <p class="text-sm">
+                      {{ regData.country_of_incorporation || "—" }}
+                    </p>
+                  </div>
+                  <div class="space-y-1">
+                    <p
+                      class="text-xs font-semibold text-muted-foreground uppercase tracking-wide"
+                    >
+                      Date of Incorporation
+                    </p>
+                    <p class="text-sm">
+                      {{ regData.date_of_incorporation || "—" }}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <!-- Edit Wizard (shown when editing) -->
+            <Card
+              v-if="isEditingProfile"
+              class="border shadow-sm relative overflow-hidden"
+            >
               <!-- Progress indicator for steps -->
               <div
                 class="flex items-center absolute top-0 left-0 right-0 h-1 bg-muted"
@@ -647,7 +828,9 @@ const navigateBack = () => {
                 </div>
 
                 <div class="flex items-center justify-between pt-2">
-                  <Button variant="ghost" @click="isUploadingDoc = false">Cancel</Button>
+                  <Button variant="ghost" @click="isUploadingDoc = false"
+                    >Cancel</Button
+                  >
                   <Button
                     @click="handleUploadDocument"
                     :disabled="
@@ -675,7 +858,12 @@ const navigateBack = () => {
                     businessDocuments.data.value?.getDocuments?.length || 0
                   }}</Badge>
                 </h3>
-                <Button v-if="!isUploadingDoc" @click="isUploadingDoc = true" size="sm" class="gap-2">
+                <Button
+                  v-if="!isUploadingDoc"
+                  @click="isUploadingDoc = true"
+                  size="sm"
+                  class="gap-2"
+                >
                   <UploadCloud class="w-4 h-4" />
                   Upload New Document
                 </Button>
