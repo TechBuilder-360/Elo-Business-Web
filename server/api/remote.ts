@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
       setCookie(event, "auth_token", response.data.login.access_token, {
         httpOnly: true,
         secure: true,
-        sameSite: "strict",
+        sameSite: "lax",
         path: "/",
         maxAge: 60 * 60 * 24 * 7, // 7 days
       });
