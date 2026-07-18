@@ -134,7 +134,7 @@ export const useBusiness = (options = {}) => {
 
   const GET_BUSINESS_DOCUMENTS_QUERY = `
     query GetBusinessDocuments {
-      businessDocuments {
+      getDocuments {
         id
         description
         url
