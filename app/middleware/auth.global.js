@@ -6,9 +6,14 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return;
   }
 
-  // Check auth status directly from the standard cookie
-  const token = useCookie("access_token").value;
-  if (!token) {
+  // Check auth status via the server-side endpoint which correctly
+  // reads the HttpOnly auth_token cookie (not accessible to JS directly)
+  try {
+    const { authenticated } = await $fetch("/api/auth-check");
+    if (!authenticated) {
+      return navigateTo("/");
+    }
+  } catch {
     return navigateTo("/");
   }
 });
