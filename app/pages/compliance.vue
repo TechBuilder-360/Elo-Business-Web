@@ -293,7 +293,7 @@ const navigateBack = () => {
                 <div class="grid gap-6">
                   <div class="space-y-2">
                     <Label class="text-sm font-semibold">Business Name</Label>
-                    <Input v-model="infoData.name" placeholder="Enter business name" class="max-w-md" />
+                    <Input v-model="infoData.name" disabled placeholder="Enter business name" class="max-w-md" />
                     <p class="text-[11px] text-muted-foreground">This is your official trading name.</p>
                   </div>
                   
@@ -316,8 +316,8 @@ const navigateBack = () => {
                 </div>
                 
                 <div class="flex justify-end pt-6 border-t">
-                  <Button @click="handleSaveInfo" :disabled="businessDetail.isPending" class="min-w-[120px]">
-                    <Loader2 v-if="businessDetail.isPending" class="w-4 h-4 mr-2 animate-spin" />
+                  <Button @click="handleSaveInfo" :disabled="businessDetail.isPending.value" class="min-w-[120px]">
+                    <Loader2 v-if="businessDetail.isPending.value" class="w-4 h-4 mr-2 animate-spin" />
                     <Save v-else class="w-4 h-4 mr-2" />
                     Save Changes
                   </Button>
@@ -367,8 +367,8 @@ const navigateBack = () => {
                 </div>
 
                 <div class="flex justify-end pt-6 border-t mt-8">
-                  <Button @click="handleSaveReg" :disabled="businessDetail.isPending" class="min-w-[120px]">
-                    <Loader2 v-if="businessDetail.isPending" class="w-4 h-4 mr-2 animate-spin" />
+                  <Button @click="handleSaveReg" :disabled="businessDetail.isPending.value" class="min-w-[120px]">
+                    <Loader2 v-if="businessDetail.isPending.value" class="w-4 h-4 mr-2 animate-spin" />
                     <Save v-else class="w-4 h-4 mr-2" />
                     Save Details
                   </Button>
@@ -447,8 +447,8 @@ const navigateBack = () => {
                 </div>
 
                 <div class="flex justify-end pt-2">
-                  <Button @click="handleUploadDocument" :disabled="uploadDocument.isPending || !uploadData.fileObj" class="min-w-[120px]">
-                    <Loader2 v-if="uploadDocument.isPending" class="w-4 h-4 mr-2 animate-spin" />
+                  <Button @click="handleUploadDocument" :disabled="uploadDocument.isPending.value || !uploadData.fileObj" class="min-w-[120px]">
+                    <Loader2 v-if="uploadDocument.isPending.value" class="w-4 h-4 mr-2 animate-spin" />
                     <UploadCloud v-else class="w-4 h-4 mr-2" />
                     Upload File
                   </Button>
@@ -463,7 +463,7 @@ const navigateBack = () => {
                 <Badge variant="secondary" class="rounded-full">{{ businessDocuments.data.value?.getDocuments?.length || 0 }}</Badge>
               </h3>
               
-              <div v-if="businessDocuments.isPending" class="py-12 flex justify-center bg-card rounded-xl border shadow-sm">
+              <div v-if="businessDocuments.isPending.value" class="py-12 flex justify-center bg-card rounded-xl border shadow-sm">
                 <Loader2 class="w-8 h-8 animate-spin text-muted-foreground" />
               </div>
               
@@ -498,7 +498,7 @@ const navigateBack = () => {
                     size="icon" 
                     class="text-destructive hover:bg-destructive/10 hover:text-destructive shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
                     @click="handleDeleteDocument(doc.id)"
-                    :disabled="deleteDocument.isPending"
+                    :disabled="deleteDocument.isPending.value"
                     title="Delete document"
                   >
                     <Trash2 class="w-4 h-4" />
