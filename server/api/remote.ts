@@ -22,9 +22,10 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    const response: any = await $fetch(
-      "https://elo--elo-backend--fwg2j6rrxrkh.code.run/api",
-      {
+    const config = useRuntimeConfig();
+    const backendUrl = `${config.backendUrl}/api`;
+
+    const response: any = await $fetch(backendUrl, {
         method: "POST",
         body,
         headers: reqHeaders,

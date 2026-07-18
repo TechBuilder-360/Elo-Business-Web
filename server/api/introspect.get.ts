@@ -26,7 +26,10 @@ export default defineEventHandler(async () => {
     }
   `;
   try {
-    const res = await $fetch("https://elo--elo-backend--fwg2j6rrxrkh.code.run/api", {
+    const config = useRuntimeConfig();
+    const backendUrl = `${config.backendUrl}/api`;
+
+    const res = await $fetch(backendUrl, {
       method: "POST",
       body: { query }
     });
