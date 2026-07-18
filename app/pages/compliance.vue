@@ -115,23 +115,13 @@ const completionPercentage = computed(() => {
 // ──────────────────────────────────────────────
 // Handlers: Info & Registration
 // ──────────────────────────────────────────────
-const handleSaveInfo = async () => {
+const handleSaveProfile = async () => {
   try {
     await businessDetail.mutateAsync({
       name: infoData.value.name,
       about: infoData.value.about,
       industry: infoData.value.industry,
       website: infoData.value.website,
-    });
-    toast.success("Business info updated successfully");
-  } catch (error) {
-    toast.error(error.message || "Failed to update business info");
-  }
-};
-
-const handleSaveReg = async () => {
-  try {
-    await businessDetail.mutateAsync({
       registration_detail: {
         number: regData.value.number,
         country_of_incorporation: regData.value.country_of_incorporation,
@@ -139,9 +129,9 @@ const handleSaveReg = async () => {
         tax_identification_number: regData.value.tax_identification_number,
       },
     });
-    toast.success("Registration details updated successfully");
+    toast.success("Profile saved successfully");
   } catch (error) {
-    toast.error(error.message || "Failed to update registration details");
+    toast.error(error.message || "Failed to save profile");
   }
 };
 
@@ -316,7 +306,7 @@ const navigateBack = () => {
                 </div>
                 
                 <div class="flex justify-end pt-6 border-t">
-                  <Button @click="handleSaveInfo" :disabled="businessDetail.isPending.value" class="min-w-[120px]">
+                  <Button @click="handleSaveProfile" :disabled="businessDetail.isPending.value" class="min-w-[120px]">
                     <Loader2 v-if="businessDetail.isPending.value" class="w-4 h-4 mr-2 animate-spin" />
                     <Save v-else class="w-4 h-4 mr-2" />
                     Save Changes
@@ -367,7 +357,7 @@ const navigateBack = () => {
                 </div>
 
                 <div class="flex justify-end pt-6 border-t mt-8">
-                  <Button @click="handleSaveReg" :disabled="businessDetail.isPending.value" class="min-w-[120px]">
+                  <Button @click="handleSaveProfile" :disabled="businessDetail.isPending.value" class="min-w-[120px]">
                     <Loader2 v-if="businessDetail.isPending.value" class="w-4 h-4 mr-2 animate-spin" />
                     <Save v-else class="w-4 h-4 mr-2" />
                     Save Details
