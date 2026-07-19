@@ -15,9 +15,11 @@ export default defineEventHandler(async (event) => {
     reqHeaders.Authorization = `Bearer ${authCookie}`;
   }
 
+  // @ts-ignore
+  const backendUrl = process.env.BACKEND_URL;
+
   try {
-    // @ts-ignore
-    const response: any = await $fetch(`${process.env.BACKEND_URL}/api`, {
+    const response: any = await $fetch(`${backendUrl}/api`, {
       method: "POST",
       body,
       headers: reqHeaders,
