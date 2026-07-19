@@ -192,7 +192,9 @@ const handleSettingsNavigation = () => {
               <Eye class="w-5 h-5 text-accent-foreground" />
             </div>
             <div>
-              <p class="text-xs text-muted-foreground font-medium">Total Visits</p>
+              <p class="text-xs text-muted-foreground font-medium">
+                Total Visits
+              </p>
               <p class="text-2xl font-bold text-foreground">
                 {{ totalVisits.toLocaleString() }}
               </p>
@@ -207,7 +209,9 @@ const handleSettingsNavigation = () => {
               <TrendingUp class="w-5 h-5 text-accent-foreground" />
             </div>
             <div>
-              <p class="text-xs text-muted-foreground font-medium">Latest Revenue</p>
+              <p class="text-xs text-muted-foreground font-medium">
+                Latest Revenue
+              </p>
               <p class="text-2xl font-bold text-foreground">
                 ${{ latestRevenue.toLocaleString() }}
               </p>
@@ -222,8 +226,12 @@ const handleSettingsNavigation = () => {
               <Users class="w-5 h-5 text-accent-foreground" />
             </div>
             <div>
-              <p class="text-xs text-muted-foreground font-medium">Total Customers</p>
-              <p class="text-2xl font-bold text-foreground">{{ totalCustomers }}</p>
+              <p class="text-xs text-muted-foreground font-medium">
+                Total Customers
+              </p>
+              <p class="text-2xl font-bold text-foreground">
+                {{ totalCustomers }}
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -231,10 +239,10 @@ const handleSettingsNavigation = () => {
 
       <!-- Engagement Chart -->
       <Card class="border-0 shadow-md shadow-foreground/5 bg-card">
-        <CardHeader
-          class="flex flex-row items-center justify-between pb-2"
-        >
-          <CardTitle class="text-base text-foreground">Business Engagements</CardTitle>
+        <CardHeader class="flex flex-row items-center justify-between pb-2">
+          <CardTitle class="text-base text-foreground"
+            >Business Engagements</CardTitle
+          >
           <Tabs
             :modelValue="engagementPeriod"
             @update:modelValue="(val) => (engagementPeriod = val)"
@@ -253,10 +261,7 @@ const handleSettingsNavigation = () => {
           </Tabs>
         </CardHeader>
         <CardContent>
-          <ChartContainer
-            :config="engagementConfig"
-            class="h-[260px] w-full"
-          >
+          <ChartContainer :config="engagementConfig" class="h-[260px] w-full">
             <BarChart :data="engagementData">
               <CartesianGrid strokeDasharray="3 3" :vertical="false" />
               <XAxis dataKey="name" />
@@ -275,7 +280,9 @@ const handleSettingsNavigation = () => {
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card class="border-0 shadow-md shadow-foreground/5 bg-card">
           <CardHeader class="pb-2">
-            <CardTitle class="text-base text-foreground">Business Revenue</CardTitle>
+            <CardTitle class="text-base text-foreground"
+              >Business Revenue</CardTitle
+            >
           </CardHeader>
           <CardContent>
             <ChartContainer :config="revenueConfig" class="h-[220px] w-full">
@@ -297,7 +304,9 @@ const handleSettingsNavigation = () => {
 
         <Card class="border-0 shadow-md shadow-foreground/5 bg-card">
           <CardHeader class="pb-2">
-            <CardTitle class="text-base text-foreground">Customer Growth</CardTitle>
+            <CardTitle class="text-base text-foreground"
+              >Customer Growth</CardTitle
+            >
           </CardHeader>
           <CardContent>
             <ChartContainer :config="customerConfig" class="h-[220px] w-full">
