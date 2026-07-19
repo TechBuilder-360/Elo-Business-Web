@@ -16,14 +16,12 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    const response: any = await $fetch(
-      "https://elo--elo-backend--fwg2j6rrxrkh.code.run/api",
-      {
-        method: "POST",
-        body,
-        headers: reqHeaders,
-      },
-    );
+    // @ts-ignore
+    const response: any = await $fetch(`${process.env.BACKEND_URL}/api`, {
+      method: "POST",
+      body,
+      headers: reqHeaders,
+    });
 
     // Securely extract the token and set the HttpOnly cookie
     if (response?.data?.login?.access_token) {
@@ -45,7 +43,7 @@ export default defineEventHandler(async (event) => {
     if (error?.response?._data) {
       return error.response._data;
     }
-    
+
     throw createError({
       statusCode: error.response?.status || 502,
       message: error.message || "Bad Gateway",
