@@ -23,9 +23,9 @@ const handleLaunchVerification = () => {
     <div class="w-full max-w-md">
       <div class="flex flex-col items-center mb-8">
         <div
-          class="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center mb-4"
+          class="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center mb-4 overflow-hidden"
         >
-          <Building2 class="w-7 h-7 text-primary-foreground" />
+          <img src="/favicon_io/favicon_io/apple-touch-icon.png" class="w-full h-full object-cover" alt="ELO" />
         </div>
         <h1 class="text-2xl font-bold text-foreground">Verify your identity</h1>
         <p class="text-sm text-muted-foreground mt-1">

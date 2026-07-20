@@ -89,9 +89,9 @@ const handleBack = () => {
             <ArrowLeft class="w-4 h-4" />
           </Button>
           <div
-            class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center"
+            class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center overflow-hidden"
           >
-            <Building2 class="w-5 h-5 text-primary-foreground" />
+            <img src="/favicon_io/favicon_io/apple-touch-icon.png" class="w-full h-full object-cover" alt="ELO" />
           </div>
           <div>
             <h1 class="text-lg font-bold leading-tight">

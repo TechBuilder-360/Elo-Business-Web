@@ -9,11 +9,11 @@ export const useBusiness = (options = {}) => {
   // ──────────────────────────────────────────────
   const USER_BUSINESSES_QUERY = `
     query GetUserBusinesses {
-      myBusinesses {
+      getUserBusinsses {
         id
         name
         role
-        logo
+        industry
       }
     }
   `;

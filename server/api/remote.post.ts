@@ -22,8 +22,8 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    const config = useRuntimeConfig();
-    const backendUrl = `${config.backendUrl}/api`;
+    // @ts-ignore
+    const backendUrl = `${process.env.BACKEND_URL}/api`;
 
     const response: any = await $fetch(backendUrl, {
         method: "POST",
