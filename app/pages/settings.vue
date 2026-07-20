@@ -46,7 +46,7 @@ const handleEditBusinessInfo = () => {
           <div
             class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center overflow-hidden"
           >
-            <img src="/favicon_io/favicon_io/apple-touch-icon.png" class="w-full h-full object-cover" alt="ELO" />
+            <img :src="'/favicon_io/favicon_io/apple-touch-icon.png'" class="w-full h-full object-cover" alt="ELO" />
           </div>
           <div>
             <h1 class="text-lg font-bold leading-tight">Settings</h1>

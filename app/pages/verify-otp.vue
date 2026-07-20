@@ -125,7 +125,7 @@ const submitResend = async () => {
         <div
           class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 overflow-hidden"
         >
-          <img src="/favicon_io/favicon_io/apple-touch-icon.png" class="w-full h-full object-cover" alt="ELO" />
+          <img :src="'/favicon_io/favicon_io/apple-touch-icon.png'" class="w-full h-full object-cover" alt="ELO" />
         </div>
         <span class="text-xl font-bold tracking-tight">ELO Business</span>
       </div>
@@ -157,7 +157,7 @@ const submitResend = async () => {
         <div
           class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center overflow-hidden"
         >
-          <img src="/favicon_io/favicon_io/apple-touch-icon.png" class="w-full h-full object-cover" alt="ELO" />
+          <img :src="'/favicon_io/favicon_io/apple-touch-icon.png'" class="w-full h-full object-cover" alt="ELO" />
         </div>
         <span class="font-bold">ELO</span>
       </div>
