@@ -40,7 +40,7 @@ const { userBusinesses } = useBusiness({ enabled: isUserVerified });
 const { data, isPending: bizPending, isError } = userBusinesses;
 
 const businesses = computed(() => {
-  return data.value?.myBusinesses || [];
+  return data.value?.getUserBusinsses || [];
 });
 
 const roleColors = {
@@ -199,13 +199,9 @@ const handleRefreshStatus = () => {
       >
         <div class="flex items-center gap-3">
           <div
-            class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center overflow-hidden"
+            class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center"
           >
-            <img
-              :src="'/favicon_io/favicon_io/apple-touch-icon.png'"
-              class="w-full h-full object-cover"
-              alt="ELO"
-            />
+            <Building2 class="w-4 h-4 text-primary-foreground" />
           </div>
           <span class="font-bold text-foreground text-sm sm:text-base"
             >ELO Business</span

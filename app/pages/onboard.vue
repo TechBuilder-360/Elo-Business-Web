@@ -29,15 +29,13 @@ definePageMeta({
 const { registerBusiness } = useBusiness();
 const isSubmitting = registerBusiness.isPending;
 
-const { registerBusiness } = useBusiness();
-const isSubmitting = registerBusiness.isPending;
+const STEPS = ["Business Info", "Registration", "Documents", "Review"];
 
 const currentStep = ref(0);
 const formData = ref({
   businessName: "",
   services: "",
   email: "",
-  industry: "",
   industry: "",
   residentCountry: "",
   businessType: "onsite",
