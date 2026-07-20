@@ -107,7 +107,7 @@ const fileInput = ref(null);
 // Derive active business from already-fetched list
 // ──────────────────────────────────────────────
 const activeBusinessData = computed(() => {
-  const list = userBusinesses.data.value?.getUserBusinsses || [];
+  const list = userBusinesses.data.value?.myBusinesses || [];
   const activeId = import.meta.client
     ? localStorage.getItem("activeBusinessId")
     : null;
