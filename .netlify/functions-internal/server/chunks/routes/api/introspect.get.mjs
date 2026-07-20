@@ -1,4 +1,4 @@
-import { a as defineEventHandler } from '../../nitro/nitro.mjs';
+import { a as defineEventHandler, C as useRuntimeConfig } from '../../nitro/nitro.mjs';
 import 'node:http';
 import 'node:https';
 import 'node:events';
@@ -8,7 +8,6 @@ import 'node:path';
 import 'node:crypto';
 
 const introspect_get = defineEventHandler(async () => {
-  var _a, _b, _c, _d, _e, _f;
   const query = `
     query {
       __schema {
@@ -34,29 +33,22 @@ const introspect_get = defineEventHandler(async () => {
     }
   `;
   try {
-    const backendUrl = `${process.env.BACKEND_URL}/api`;
+    const config = useRuntimeConfig();
+    const backendUrl = `${config.backendUrl}/api`;
     const res = await $fetch(backendUrl, {
       method: "POST",
       body: { query }
     });
-    const types = ((_b = (_a = res == null ? void 0 : res.data) == null ? void 0 : _a.__schema) == null ? void 0 : _b.types) || [];
+    const types = res.data.__schema.types;
     const resType = types.find((t) => t.name === "Response");
     const queryType = types.find((t) => t.name === "Query");
     const mutType = types.find((t) => t.name === "Mutation");
     return {
       Response: resType == null ? void 0 : resType.fields,
-      getUserBusinsses: (_c = queryType == null ? void 0 : queryType.fields) == null ? void 0 : _c.find(
-        (f) => f.name === "getUserBusinsses"
-      ),
-      verificationQuery: (_d = queryType == null ? void 0 : queryType.fields) == null ? void 0 : _d.find(
-        (f) => f.name === "verification"
-      ),
-      verificationMut: (_e = mutType == null ? void 0 : mutType.fields) == null ? void 0 : _e.find(
-        (f) => f.name === "verification"
-      ),
-      registerBusiness: (_f = mutType == null ? void 0 : mutType.fields) == null ? void 0 : _f.find(
-        (f) => f.name === "registerBusiness"
-      )
+      getUserBusinsses: queryType == null ? void 0 : queryType.fields.find((f) => f.name === "getUserBusinsses"),
+      verificationQuery: queryType == null ? void 0 : queryType.fields.find((f) => f.name === "verification"),
+      verificationMut: mutType == null ? void 0 : mutType.fields.find((f) => f.name === "verification"),
+      registerBusiness: mutType == null ? void 0 : mutType.fields.find((f) => f.name === "registerBusiness")
     };
   } catch (err) {
     return { error: err.message };

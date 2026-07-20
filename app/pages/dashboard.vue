@@ -12,8 +12,6 @@ import {
   Settings,
   Wallet,
   ShieldCheck,
-  Moon,
-  Sun
 } from "lucide-vue-next";
 import {
   ChartContainer,

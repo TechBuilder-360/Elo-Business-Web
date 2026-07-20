@@ -42,7 +42,6 @@ const txFilter = ref("all");
 const activeTab = ref("fiat");
 
 const { getWalletsQuery, getCurrenciesQuery, addWallet } = useBusiness();
-const { isDark, toggleTheme } = useTheme();
 const qc = useQueryClient();
 const {
   data: walletsData,
@@ -57,25 +56,17 @@ const showAddWalletModal = ref(false);
 const selectedCurrencyCode = ref("");
 const isAddingWallet = ref(false);
 
-const groupedCurrencies = computed(() => {
-  const all = currenciesData.value?.currencies || [];
-  return {
-    fiat: all.filter((c) => c.is_fiat),
-    crypto: all.filter((c) => !c.is_fiat),
-  };
-});
-
-const activeCurrencies = computed(() => {
-  if (activeTab.value === 'fiat') return groupedCurrencies.value.fiat;
-  return groupedCurrencies.value.crypto;
-});
+const fiatCurrencies = computed(
+  () => currenciesData.value?.currencies?.filter((c) => c.is_fiat) || [],
+);
 
 const handleAddWallet = async () => {
   if (!selectedCurrencyCode.value) return;
   isAddingWallet.value = true;
   // Optimistic update — add a placeholder wallet immediately
-  const allCurr = currenciesData.value?.currencies || [];
-  const curr = allCurr.find((c) => c.code === selectedCurrencyCode.value) || {};
+  const curr =
+    fiatCurrencies.value.find((c) => c.code === selectedCurrencyCode.value) ||
+    {};
   const optimisticWallet = {
     id: `optimistic-${Date.now()}`,
     currency: selectedCurrencyCode.value,
@@ -128,69 +119,18 @@ const wallets = computed(() => {
   return fetchedWallets.map((w) => {
     const curr = currList.find((c) => c.code === w.currency) || {};
     const symbol = curr.symbol || w.currency;
-    const is_fiat = curr.is_fiat !== undefined ? curr.is_fiat : true; // default true
-
-    // Restore dummy mock accounts to fulfill UI layout request
-    const mockAccounts = [];
-    if (is_fiat) {
-      if (w.currency === "NGN") {
-        mockAccounts.push(
-          {
-            id: "ngn-1",
-            bankName: "GTBank",
-            accountName: "Chidi Ventures Ltd",
-            accountNumber: "0123456789",
-            sortCode: "058",
-            isPrimary: true,
-          },
-          {
-            id: "ngn-2",
-            bankName: "Access Bank",
-            accountName: "Chidi Ventures Ltd",
-            accountNumber: "9876543210",
-            sortCode: "044",
-            isPrimary: false,
-          },
-        );
-      } else if (w.currency === "USD") {
-        mockAccounts.push({
-          id: "usd-1",
-          bankName: "Mercury",
-          accountName: "Chidi Ventures Inc",
-          accountNumber: "1928374650",
-          routingNumber: "084009519",
-          isPrimary: true,
-        });
-      }
-    } else {
-      // Crypto mock addresses
-      mockAccounts.push({
-        id: `crypto-1`,
-        address: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
-        network:
-          w.currency === "PYUSD" || w.currency === "USDC" ? "ERC-20" : "TRC-20",
-        isPrimary: true,
-      });
-    }
-
     return {
       id: w.id,
       currency: w.currency,
       symbol,
-      is_fiat,
       balance: w.available_balance || 0,
       totalRevenue: w.ledger_balance || 0,
       totalSpent: 0,
       pendingAmount: w.holding_balance || 0,
       transactions: [], // will wire up once transaction query is available
-      accounts: mockAccounts,
+      accounts: [],
     };
   });
-});
-
-const filteredWallets = computed(() => {
-  if (activeTab.value === 'fiat') return wallets.value.filter(w => w.is_fiat);
-  return wallets.value.filter(w => !w.is_fiat);
 });
 
 const formatAmount = (amount, symbol) => {
@@ -499,32 +439,19 @@ const handleBackToDashboard = () => {
       </div>
 
       <div v-else class="space-y-6 animate-in fade-in duration-300">
-        <Tabs :modelValue="activeTab" @update:modelValue="(val) => activeTab = val" class="w-full">
-          <TabsList class="mb-4">
-            <TabsTrigger value="fiat">Fiat Wallets</TabsTrigger>
-            <TabsTrigger value="crypto">Crypto Wallets</TabsTrigger>
-          </TabsList>
-        </Tabs>
-
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <!-- Empty state if no wallets after loading -->
           <div
-            v-if="filteredWallets.length === 0"
+            v-if="wallets.length === 0"
             class="col-span-2 flex flex-col items-center justify-center py-20 text-muted-foreground"
           >
-            <div
-              class="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4"
-            >
+            <div class="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
               <WalletIcon class="w-8 h-8 text-primary" />
             </div>
-            <p class="text-base font-semibold text-foreground mb-1">
-              No wallets yet
-            </p>
-            <p class="text-sm mb-5">
-              Create your first Treasury wallet to start transacting.
-            </p>
+            <p class="text-base font-semibold text-foreground mb-1">No wallets yet</p>
+            <p class="text-sm mb-5">Create your first Treasury wallet to start transacting.</p>
             <Button @click="showAddWalletModal = true" class="gap-2">
-              <span class="text-lg leading-none">+</span> Add {{ activeTab === 'fiat' ? 'Fiat' : 'Crypto' }} Wallet
+              <span class="text-lg leading-none">+</span> Add Wallet
             </Button>
           </div>
           <Card
@@ -572,13 +499,9 @@ const handleBackToDashboard = () => {
         </div>
 
         <!-- Add Wallet button shown when wallets exist -->
-        <div v-if="filteredWallets.length > 0" class="flex justify-end">
-          <Button
-            variant="outline"
-            class="gap-2"
-            @click="showAddWalletModal = true"
-          >
-            <span class="text-lg leading-none">+</span> Add {{ activeTab === 'fiat' ? 'Fiat' : 'Crypto' }} Wallet
+        <div v-if="wallets.length > 0" class="flex justify-end">
+          <Button variant="outline" class="gap-2" @click="showAddWalletModal = true">
+            <span class="text-lg leading-none">+</span> Add Wallet
           </Button>
         </div>
       </div>
@@ -593,25 +516,19 @@ const handleBackToDashboard = () => {
       >
         <Card class="w-full max-w-sm border-0 shadow-2xl bg-card">
           <CardHeader class="pb-3">
-            <CardTitle class="text-base text-foreground"
-              >Add {{ activeTab === 'fiat' ? 'Fiat' : 'Crypto' }} Wallet</CardTitle
-            >
-            <p class="text-xs text-muted-foreground mt-1">
-              Select a currency to create your wallet
-            </p>
+            <CardTitle class="text-base text-foreground">Add Treasury Wallet</CardTitle>
+            <p class="text-xs text-muted-foreground mt-1">Select a currency to create your wallet</p>
           </CardHeader>
           <CardContent class="space-y-4">
             <div class="space-y-2">
-              <label class="text-sm font-medium text-foreground"
-                >Currency</label
-              >
+              <label class="text-sm font-medium text-foreground">Currency</label>
               <select
                 v-model="selectedCurrencyCode"
                 class="w-full h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
               >
                 <option value="" disabled>Select currency...</option>
                 <option
-                  v-for="c in activeCurrencies"
+                  v-for="c in fiatCurrencies"
                   :key="c.code"
                   :value="c.code"
                 >

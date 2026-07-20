@@ -1,4 +1,4 @@
-import { a as defineEventHandler, B as readBody, l as getHeaders, k as getCookie, D as setCookie, c as createError } from '../../nitro/nitro.mjs';
+import { a as defineEventHandler, y as readBody, l as getHeaders, k as getCookie, C as useRuntimeConfig, A as setCookie, c as createError } from '../../nitro/nitro.mjs';
 import 'node:http';
 import 'node:https';
 import 'node:events';
@@ -23,11 +23,11 @@ const remote = defineEventHandler(async (event) => {
   if (authCookie && !reqHeaders.Authorization) {
     reqHeaders.Authorization = `Bearer ${authCookie}`;
   }
-  process.env.BACKEND_URL;
   try {
-    const backendUrl2 = `${process.env.BACKEND_URL}/api`;
+    const config = useRuntimeConfig();
+    const backendUrl = `${config.backendUrl}/api`;
     const response = await $fetch(
-      backendUrl2,
+      backendUrl,
       {
         method: "POST",
         body,
@@ -35,18 +35,14 @@ const remote = defineEventHandler(async (event) => {
       }
     );
     if ((_b = (_a = response == null ? void 0 : response.data) == null ? void 0 : _a.login) == null ? void 0 : _b.access_token) {
-      const cookieOptions = {
+      setCookie(event, "auth_token", response.data.login.access_token, {
         httpOnly: true,
-        // secure: true, // disabled temporarily to allow login on non-HTTPS live hosts
+        secure: true,
         sameSite: "lax",
-        path: "/"
-      };
-      if (response.data.login.expire_at) {
-        cookieOptions.expires = new Date(response.data.login.expire_at);
-      } else {
-        cookieOptions.maxAge = 60 * 60 * 24 * 7;
-      }
-      setCookie(event, "auth_token", response.data.login.access_token, cookieOptions);
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7
+        // 7 days
+      });
       response.data.login.access_token = "SECURE_HTTP_ONLY_COOKIE_SET";
     }
     return response;
