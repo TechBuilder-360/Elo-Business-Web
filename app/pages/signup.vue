@@ -104,7 +104,7 @@ const handleSubmit = async () => {
         <div
           class="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center mb-4 overflow-hidden"
         >
-          <img src="/favicon_io/favicon_io/apple-touch-icon.png" class="w-full h-full object-cover" alt="ELO" />
+          <img :src="'/favicon_io/favicon_io/apple-touch-icon.png'" class="w-full h-full object-cover" alt="ELO" />
         </div>
         <h1 class="text-2xl font-bold text-foreground">Create your account</h1>
         <p class="text-sm text-muted-foreground mt-1">
