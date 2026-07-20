@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed } from "vue";
 import { useBusiness } from "@/composables/useBusiness";
+import { useQueryClient } from "@tanstack/vue-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -37,18 +38,75 @@ const selectedWallet = ref(null);
 const showBalance = ref(true);
 const txFilter = ref("all");
 
-const { getWalletsQuery, getCurrenciesQuery } = useBusiness();
-const { data: walletsData, isPending: isWalletsPending, isError: isWalletsError, error: walletsError } =
-  getWalletsQuery("TREASURY");
+const { getWalletsQuery, getCurrenciesQuery, addWallet } = useBusiness();
+const qc = useQueryClient();
+const {
+  data: walletsData,
+  isPending: isWalletsPending,
+  isError: isWalletsError,
+  error: walletsError,
+} = getWalletsQuery("TREASURY");
 const { data: currenciesData } = getCurrenciesQuery();
 
-import { watch } from "vue";
-watch(walletsData, (val) => {
-  console.log("[Wallet] Raw wallets response:", JSON.stringify(val));
-}, { immediate: true });
-watch(isWalletsError, (val) => {
-  if (val) console.error("[Wallet] Wallets query error:", walletsError.value);
-}, { immediate: true });
+// Add Wallet modal state
+const showAddWalletModal = ref(false);
+const selectedCurrencyCode = ref("");
+const isAddingWallet = ref(false);
+
+const fiatCurrencies = computed(
+  () => currenciesData.value?.currencies?.filter((c) => c.is_fiat) || [],
+);
+
+const handleAddWallet = async () => {
+  if (!selectedCurrencyCode.value) return;
+  isAddingWallet.value = true;
+  // Optimistic update — add a placeholder wallet immediately
+  const curr =
+    fiatCurrencies.value.find((c) => c.code === selectedCurrencyCode.value) ||
+    {};
+  const optimisticWallet = {
+    id: `optimistic-${Date.now()}`,
+    currency: selectedCurrencyCode.value,
+    symbol: curr.symbol || selectedCurrencyCode.value,
+    balance: 0,
+    totalRevenue: 0,
+    totalSpent: 0,
+    pendingAmount: 0,
+    transactions: [],
+    accounts: [],
+  };
+  qc.setQueryData(["wallets", "TREASURY"], (old) => ({
+    wallets: [
+      ...(old?.wallets || []),
+      {
+        id: optimisticWallet.id,
+        currency: optimisticWallet.currency,
+        available_balance: 0,
+        ledger_balance: 0,
+        holding_balance: 0,
+        type: "TREASURY",
+        active: true,
+      },
+    ],
+  }));
+  showAddWalletModal.value = false;
+
+  try {
+    await addWallet.mutateAsync({
+      currency_code: selectedCurrencyCode.value,
+      wallet_type: "TREASURY",
+    });
+    // Refetch real data to replace the optimistic entry
+    qc.invalidateQueries({ queryKey: ["wallets", "TREASURY"] });
+    selectedCurrencyCode.value = "";
+  } catch (err) {
+    // Roll back optimistic update on failure
+    qc.invalidateQueries({ queryKey: ["wallets", "TREASURY"] });
+    console.error("Add wallet failed:", err);
+  } finally {
+    isAddingWallet.value = false;
+  }
+};
 
 const wallets = computed(() => {
   const fetchedWallets = walletsData.value?.wallets;
@@ -370,13 +428,16 @@ const handleBackToDashboard = () => {
           <!-- Empty state if no wallets after loading -->
           <div
             v-if="wallets.length === 0"
-            class="col-span-2 text-center py-16 text-muted-foreground"
+            class="col-span-2 flex flex-col items-center justify-center py-20 text-muted-foreground"
           >
-            <WalletIcon class="w-10 h-10 mx-auto mb-3 opacity-30" />
-            <p class="text-sm font-medium">No wallets found</p>
-            <p class="text-xs mt-1">
-              Wallets will appear here once created by your provider.
-            </p>
+            <div class="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+              <WalletIcon class="w-8 h-8 text-primary" />
+            </div>
+            <p class="text-base font-semibold text-foreground mb-1">No wallets yet</p>
+            <p class="text-sm mb-5">Create your first Treasury wallet to start transacting.</p>
+            <Button @click="showAddWalletModal = true" class="gap-2">
+              <span class="text-lg leading-none">+</span> Add Wallet
+            </Button>
           </div>
           <Card
             v-for="w in wallets"
@@ -421,7 +482,65 @@ const handleBackToDashboard = () => {
             </CardContent>
           </Card>
         </div>
+
+        <!-- Add Wallet button shown when wallets exist -->
+        <div v-if="wallets.length > 0" class="flex justify-end">
+          <Button variant="outline" class="gap-2" @click="showAddWalletModal = true">
+            <span class="text-lg leading-none">+</span> Add Wallet
+          </Button>
+        </div>
       </div>
     </main>
+
+    <!-- Add Wallet Modal -->
+    <Teleport to="body">
+      <div
+        v-if="showAddWalletModal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
+        @click.self="showAddWalletModal = false"
+      >
+        <Card class="w-full max-w-sm border-0 shadow-2xl bg-card">
+          <CardHeader class="pb-3">
+            <CardTitle class="text-base text-foreground">Add Treasury Wallet</CardTitle>
+            <p class="text-xs text-muted-foreground mt-1">Select a currency to create your wallet</p>
+          </CardHeader>
+          <CardContent class="space-y-4">
+            <div class="space-y-2">
+              <label class="text-sm font-medium text-foreground">Currency</label>
+              <select
+                v-model="selectedCurrencyCode"
+                class="w-full h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="" disabled>Select currency...</option>
+                <option
+                  v-for="c in fiatCurrencies"
+                  :key="c.code"
+                  :value="c.code"
+                >
+                  {{ c.symbol }} {{ c.name }} ({{ c.code }})
+                </option>
+              </select>
+            </div>
+            <div class="flex gap-3 pt-2">
+              <Button
+                variant="outline"
+                class="flex-1"
+                @click="showAddWalletModal = false"
+              >
+                Cancel
+              </Button>
+              <Button
+                class="flex-1"
+                :disabled="!selectedCurrencyCode || isAddingWallet"
+                @click="handleAddWallet"
+              >
+                <span v-if="isAddingWallet">Creating...</span>
+                <span v-else>Create Wallet</span>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </Teleport>
   </div>
 </template>
