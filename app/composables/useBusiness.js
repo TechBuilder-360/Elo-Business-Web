@@ -180,8 +180,45 @@ export const useBusiness = (options = {}) => {
       ["businessDetail", id],
       GET_BUSINESS_DETAIL_QUERY,
       computed(() => ({ id: unref(id) })),
-      { enabled: computed(() => !!unref(id)), ...queryOptions }
+      { enabled: computed(() => !!unref(id)), ...queryOptions },
     );
+  };
+
+  const GET_WALLETS_QUERY = `
+    query GetWallets($wallet_type: WalletType! = TREASURY) {
+      wallets(wallet_type: $wallet_type) {
+        id
+        type
+        available_balance
+        ledger_balance
+        holding_balance
+        currency
+        active
+      }
+    }
+  `;
+  const getWalletsQuery = (walletType = "TREASURY", queryOptions = {}) => {
+    return useGQLQuery(
+      ["wallets", walletType],
+      GET_WALLETS_QUERY,
+      { wallet_type: walletType },
+      queryOptions,
+    );
+  };
+
+  const GET_CURRENCIES_QUERY = `
+    query GetCurrencies {
+      currencies {
+        id
+        code
+        name
+        symbol
+        is_fiat
+      }
+    }
+  `;
+  const getCurrenciesQuery = (queryOptions = {}) => {
+    return useGQLQuery(["currencies"], GET_CURRENCIES_QUERY, {}, queryOptions);
   };
 
   return {
@@ -193,5 +230,7 @@ export const useBusiness = (options = {}) => {
     kybDocuments: kybDocumentsQuery,
     businessDocuments: businessDocumentsQuery,
     getBusinessDetailQuery,
+    getWalletsQuery,
+    getCurrenciesQuery,
   };
 };
