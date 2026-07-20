@@ -7,6 +7,7 @@ export default defineEventHandler(async (event) => {
   const reqHeaders: Record<string, string> = {
     "Content-Type": "application/json",
     ...(headers.authorization ? { Authorization: headers.authorization } : {}),
+    ...(headers["x-business-id"] ? { "x-business-id": headers["x-business-id"] } : {}),
   };
 
   // Forward the active business context header if present
@@ -20,6 +21,9 @@ export default defineEventHandler(async (event) => {
   if (authCookie && !reqHeaders.Authorization) {
     reqHeaders.Authorization = `Bearer ${authCookie}`;
   }
+
+  // @ts-ignore
+  const backendUrl = process.env.BACKEND_URL;
 
   try {
     // @ts-ignore

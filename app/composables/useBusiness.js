@@ -9,7 +9,7 @@ export const useBusiness = (options = {}) => {
   // ──────────────────────────────────────────────
   const USER_BUSINESSES_QUERY = `
     query GetUserBusinesses {
-      getUserBusinsses {
+      myBusinesses {
         id
         name
         role
@@ -44,7 +44,6 @@ export const useBusiness = (options = {}) => {
     },
   });
 
-  // Wrap mutateAsync for easier calling
   const registerOriginal = registerBusinessMutation.mutateAsync.bind(
     registerBusinessMutation,
   );

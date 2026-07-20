@@ -21,6 +21,9 @@ export default defineEventHandler(async (event) => {
     reqHeaders.Authorization = `Bearer ${authCookie}`;
   }
 
+  // @ts-ignore
+  const backendUrl = process.env.BACKEND_URL;
+
   try {
     // @ts-ignore
     const backendUrl = `${process.env.BACKEND_URL}/api`;
@@ -52,7 +55,7 @@ export default defineEventHandler(async (event) => {
     if (error?.response?._data) {
       return error.response._data;
     }
-    
+
     throw createError({
       statusCode: error.response?.status || 502,
       message: error.message || "Bad Gateway",
