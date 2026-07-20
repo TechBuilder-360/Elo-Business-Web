@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/vue-query";
 import { $fetch } from "ofetch";
 
-const BACKEND_URL = "https://elo--elo-backend--fwg2j6rrxrkh.code.run/api";
+// Backend URL is only used by the server-side proxy now
 
 // Helper to check if a value is a File/Blob
 function isFile(value) {
@@ -47,10 +47,16 @@ async function gqlRequest({ query, variables = {} }) {
     Accept: "application/json",
   };
 
-  // Get token directly from cookie
-  const token = useCookie("access_token").value;
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
+  // We do not inject Authorization headers here on the client-side.
+  // The server-side proxy (/api/remote) automatically reads the HttpOnly
+  // auth_token cookie and injects it into the backend request.
+
+  // Inject active business ID context if set
+  if (import.meta.client) {
+    const activeBusinessId = localStorage.getItem("activeBusinessId");
+    if (activeBusinessId) {
+      headers["x-business-id"] = activeBusinessId;
+    }
   }
 
   // Check for files to determine request format
@@ -79,7 +85,7 @@ async function gqlRequest({ query, variables = {} }) {
 
   let response;
   try {
-    response = await $fetch(BACKEND_URL, {
+    response = await $fetch("/api/remote", {
       method: "POST",
       body,
       headers,
