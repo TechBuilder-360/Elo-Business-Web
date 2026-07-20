@@ -55,7 +55,7 @@ const industries = [
   "Education",
   "Manufacturing",
   "Entertainment",
-  "Other"
+  "Other",
 ];
 </script>
 
