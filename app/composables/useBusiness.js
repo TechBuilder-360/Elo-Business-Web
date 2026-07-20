@@ -221,6 +221,21 @@ export const useBusiness = (options = {}) => {
     return useGQLQuery(["currencies"], GET_CURRENCIES_QUERY, {}, queryOptions);
   };
 
+  const ADD_WALLET_MUTATION = `
+    mutation AddWallet($currency_code: String!, $wallet_type: WalletType!) {
+      add_wallet(currency_code: $currency_code, wallet_type: $wallet_type) {
+        id
+        type
+        available_balance
+        ledger_balance
+        holding_balance
+        currency
+        active
+      }
+    }
+  `;
+  const addWalletMutation = useGQLMutation(ADD_WALLET_MUTATION);
+
   return {
     userBusinesses: userBusinessesQuery,
     registerBusiness: registerBusinessMutation,
@@ -232,5 +247,6 @@ export const useBusiness = (options = {}) => {
     getBusinessDetailQuery,
     getWalletsQuery,
     getCurrenciesQuery,
+    addWallet: addWalletMutation,
   };
 };

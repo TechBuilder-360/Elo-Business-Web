@@ -7,7 +7,9 @@ export default defineEventHandler(async (event) => {
   const reqHeaders: Record<string, string> = {
     "Content-Type": "application/json",
     ...(headers.authorization ? { Authorization: headers.authorization } : {}),
-    ...(headers["x-business-id"] ? { "x-business-id": headers["x-business-id"] } : {}),
+    ...(headers["x-business-id"]
+      ? { "x-business-id": headers["x-business-id"] }
+      : {}),
   };
 
   // Forward the active business context header if present
@@ -22,19 +24,15 @@ export default defineEventHandler(async (event) => {
     reqHeaders.Authorization = `Bearer ${authCookie}`;
   }
 
-  // @ts-ignore
-  const backendUrl = process.env.BACKEND_URL;
-
   try {
     // @ts-ignore
     const backendUrl = `${process.env.BACKEND_URL}/api`;
 
     const response: any = await $fetch(backendUrl, {
-        method: "POST",
-        body,
-        headers: reqHeaders,
-      },
-    );
+      method: "POST",
+      body,
+      headers: reqHeaders,
+    });
 
     // Securely extract the token and set the HttpOnly cookie
     if (response?.data?.login?.access_token) {

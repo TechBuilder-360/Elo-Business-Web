@@ -37,237 +37,37 @@ const selectedWallet = ref(null);
 const showBalance = ref(true);
 const txFilter = ref("all");
 
-const ngnTransactions = [
-  {
-    id: "1",
-    type: "credit",
-    description: "Payment from Adewale B.",
-    amount: 125000,
-    date: "2026-03-18",
-    status: "completed",
-    reference: "TXN-NGN-8271",
-  },
-  {
-    id: "2",
-    type: "debit",
-    description: "Supplier — Kemi Fabrics",
-    amount: 45000,
-    date: "2026-03-17",
-    status: "completed",
-    reference: "TXN-NGN-8270",
-  },
-  {
-    id: "3",
-    type: "credit",
-    description: "Service fee — Hair styling",
-    amount: 18500,
-    date: "2026-03-16",
-    status: "completed",
-    reference: "TXN-NGN-8269",
-  },
-  {
-    id: "4",
-    type: "credit",
-    description: "Product sale — Skincare set",
-    amount: 32000,
-    date: "2026-03-15",
-    status: "pending",
-    reference: "TXN-NGN-8268",
-  },
-  {
-    id: "5",
-    type: "debit",
-    description: "Withdrawal to GTBank",
-    amount: 200000,
-    date: "2026-03-14",
-    status: "completed",
-    reference: "TXN-NGN-8267",
-  },
-  {
-    id: "6",
-    type: "credit",
-    description: "Payment from Tunde M.",
-    amount: 67000,
-    date: "2026-03-12",
-    status: "completed",
-    reference: "TXN-NGN-8266",
-  },
-  {
-    id: "7",
-    type: "debit",
-    description: "Electricity — EKEDC",
-    amount: 15800,
-    date: "2026-03-10",
-    status: "failed",
-    reference: "TXN-NGN-8265",
-  },
-];
-
-const usdTransactions = [
-  {
-    id: "1",
-    type: "credit",
-    description: "Freelance — Morgan & Co.",
-    amount: 2400,
-    date: "2026-03-19",
-    status: "completed",
-    reference: "TXN-USD-4102",
-  },
-  {
-    id: "2",
-    type: "debit",
-    description: "SaaS subscription — Notion",
-    amount: 96,
-    date: "2026-03-17",
-    status: "completed",
-    reference: "TXN-USD-4101",
-  },
-  {
-    id: "3",
-    type: "credit",
-    description: "Consulting fee — Harper Ltd",
-    amount: 1750,
-    date: "2026-03-14",
-    status: "completed",
-    reference: "TXN-USD-4100",
-  },
-  {
-    id: "4",
-    type: "debit",
-    description: "Domain renewal",
-    amount: 14.99,
-    date: "2026-03-12",
-    status: "completed",
-    reference: "TXN-USD-4099",
-  },
-  {
-    id: "5",
-    type: "credit",
-    description: "Product sale — Int'l order",
-    amount: 385,
-    date: "2026-03-10",
-    status: "pending",
-    reference: "TXN-USD-4098",
-  },
-];
-
 const { getWalletsQuery, getCurrenciesQuery } = useBusiness();
-const { data: walletsData, isPending: isWalletsPending } =
+const { data: walletsData, isPending: isWalletsPending, isError: isWalletsError, error: walletsError } =
   getWalletsQuery("TREASURY");
 const { data: currenciesData } = getCurrenciesQuery();
 
+import { watch } from "vue";
+watch(walletsData, (val) => {
+  console.log("[Wallet] Raw wallets response:", JSON.stringify(val));
+}, { immediate: true });
+watch(isWalletsError, (val) => {
+  if (val) console.error("[Wallet] Wallets query error:", walletsError.value);
+}, { immediate: true });
+
 const wallets = computed(() => {
   const fetchedWallets = walletsData.value?.wallets;
+  if (!fetchedWallets) return []; // still loading
   const currList = currenciesData.value?.currencies || [];
-
-  if (!fetchedWallets || fetchedWallets.length === 0) {
-    // Fallback if backend has no wallets yet (new business)
-    return [
-      {
-        id: "mock-ngn",
-        currency: "NGN",
-        symbol: "₦",
-        balance: 1847320.55,
-        totalRevenue: 3240500,
-        totalSpent: 1393179.45,
-        pendingAmount: 32000,
-        transactions: ngnTransactions,
-        accounts: [
-          {
-            id: "ngn-1",
-            bankName: "GTBank",
-            accountName: "Chidi Ventures Ltd",
-            accountNumber: "0123456789",
-            sortCode: "058",
-            isPrimary: true,
-          },
-          {
-            id: "ngn-2",
-            bankName: "Access Bank",
-            accountName: "Chidi Ventures Ltd",
-            accountNumber: "9876543210",
-            sortCode: "044",
-            isPrimary: false,
-          },
-        ],
-      },
-      {
-        id: "mock-usd",
-        currency: "USD",
-        symbol: "$",
-        balance: 8274.01,
-        totalRevenue: 14535,
-        totalSpent: 6260.99,
-        pendingAmount: 385,
-        transactions: usdTransactions,
-        accounts: [
-          {
-            id: "usd-1",
-            bankName: "Mercury",
-            accountName: "Chidi Ventures Inc",
-            accountNumber: "1928374650",
-            routingNumber: "084009519",
-            isPrimary: true,
-          },
-        ],
-      },
-    ];
-  }
 
   return fetchedWallets.map((w) => {
     const curr = currList.find((c) => c.code === w.currency) || {};
     const symbol = curr.symbol || w.currency;
-
-    // Fallback transactions for UI visualization until transaction queries exist
-    const tx =
-      w.currency === "NGN"
-        ? ngnTransactions
-        : w.currency === "USD"
-          ? usdTransactions
-          : [];
-    const accs =
-      w.currency === "NGN"
-        ? [
-            {
-              id: "ngn-1",
-              bankName: "GTBank",
-              accountName: "Chidi Ventures Ltd",
-              accountNumber: "0123456789",
-              sortCode: "058",
-              isPrimary: true,
-            },
-            {
-              id: "ngn-2",
-              bankName: "Access Bank",
-              accountName: "Chidi Ventures Ltd",
-              accountNumber: "9876543210",
-              sortCode: "044",
-              isPrimary: false,
-            },
-          ]
-        : w.currency === "USD"
-          ? [
-              {
-                id: "usd-1",
-                bankName: "Mercury",
-                accountName: "Chidi Ventures Inc",
-                accountNumber: "1928374650",
-                routingNumber: "084009519",
-                isPrimary: true,
-              },
-            ]
-          : [];
-
     return {
       id: w.id,
       currency: w.currency,
-      symbol: symbol,
+      symbol,
       balance: w.available_balance || 0,
       totalRevenue: w.ledger_balance || 0,
       totalSpent: 0,
       pendingAmount: w.holding_balance || 0,
-      transactions: tx,
-      accounts: accs,
+      transactions: [], // will wire up once transaction query is available
+      accounts: [],
     };
   });
 });
@@ -574,7 +374,9 @@ const handleBackToDashboard = () => {
           >
             <WalletIcon class="w-10 h-10 mx-auto mb-3 opacity-30" />
             <p class="text-sm font-medium">No wallets found</p>
-            <p class="text-xs mt-1">Wallets will appear here once created by your provider.</p>
+            <p class="text-xs mt-1">
+              Wallets will appear here once created by your provider.
+            </p>
           </div>
           <Card
             v-for="w in wallets"
