@@ -31,13 +31,16 @@ export const useBusiness = (options = {}) => {
   // ──────────────────────────────────────────────
   const REGISTER_BUSINESS_MUTATION = `
     mutation RegisterBusiness($input: RegisterBusinessInput!) {
-      registerBusiness(input: $input)
+      registerBusiness(input: $input) {
+        ok
+      }
     }
   `;
 
   const registerBusinessMutation = useGQLMutation(REGISTER_BUSINESS_MUTATION, {
     onSuccess: () => {
       // Invalidate the userBusinesses query so the list refreshes automatically
+      const qc = useQueryClient();
       qc.invalidateQueries({ queryKey: ["userBusinesses"] });
     },
     onError: (err) => {
@@ -45,6 +48,7 @@ export const useBusiness = (options = {}) => {
     },
   });
 
+  // Wrap mutateAsync for easier calling
   const registerOriginal = registerBusinessMutation.mutateAsync.bind(
     registerBusinessMutation,
   );

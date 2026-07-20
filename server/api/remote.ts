@@ -29,11 +29,10 @@ export default defineEventHandler(async (event) => {
     const backendUrl = `${process.env.BACKEND_URL}/api`;
 
     const response: any = await $fetch(backendUrl, {
-        method: "POST",
-        body,
-        headers: reqHeaders,
-      },
-    );
+      method: "POST",
+      body,
+      headers: reqHeaders,
+    });
 
     // Securely extract the token and set the HttpOnly cookie
     if (response?.data?.login?.access_token) {
@@ -55,7 +54,6 @@ export default defineEventHandler(async (event) => {
     if (error?.response?._data) {
       return error.response._data;
     }
-
     throw createError({
       statusCode: error.response?.status || 502,
       message: error.message || "Bad Gateway",
