@@ -9,6 +9,12 @@ export default defineEventHandler(async (event) => {
     ...(headers.authorization ? { Authorization: headers.authorization } : {}),
   };
 
+  // Forward the active business context header if present
+  const businessId = headers["x-business-id"];
+  if (businessId) {
+    reqHeaders["x-business-id"] = businessId;
+  }
+
   // Automatically inject HttpOnly cookie as Bearer token if present
   const authCookie = getCookie(event, "auth_token");
   if (authCookie && !reqHeaders.Authorization) {
@@ -19,11 +25,15 @@ export default defineEventHandler(async (event) => {
   const backendUrl = process.env.BACKEND_URL;
 
   try {
-    const response: any = await $fetch(`${backendUrl}/api`, {
-      method: "POST",
-      body,
-      headers: reqHeaders,
-    });
+    // @ts-ignore
+    const backendUrl = `${process.env.BACKEND_URL}/api`;
+
+    const response: any = await $fetch(backendUrl, {
+        method: "POST",
+        body,
+        headers: reqHeaders,
+      },
+    );
 
     // Securely extract the token and set the HttpOnly cookie
     if (response?.data?.login?.access_token) {

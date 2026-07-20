@@ -1,5 +1,6 @@
 import { useGQLQuery, useGQLMutation } from "./useGraphQL";
 import { useQueryClient } from "@tanstack/vue-query";
+import { unref, computed } from "vue";
 
 export const useBusiness = (options = {}) => {
   const qc = useQueryClient();
@@ -14,7 +15,6 @@ export const useBusiness = (options = {}) => {
         name
         role
         logo
-        industry
       }
     }
   `;
@@ -37,6 +37,7 @@ export const useBusiness = (options = {}) => {
 
   const registerBusinessMutation = useGQLMutation(REGISTER_BUSINESS_MUTATION, {
     onSuccess: () => {
+      // Invalidate the userBusinesses query so the list refreshes automatically
       qc.invalidateQueries({ queryKey: ["userBusinesses"] });
     },
     onError: (err) => {
@@ -73,43 +74,6 @@ export const useBusiness = (options = {}) => {
   businessDetailMutation.mutateAsync = async (inputData) => {
     return await businessDetailOriginal({ input: inputData });
   };
-
-  // ──────────────────────────────────────────────
-  // Fetch Single Business by ID (full detail)
-  // ──────────────────────────────────────────────
-  const GET_BUSINESS_QUERY = `
-    query GetBusiness($id: String!) {
-      business(id: $id) {
-        id
-        name
-        logo
-        email
-        on_site
-        about
-        industry
-        number
-        country_of_incorporation
-        date_of_incorporation
-        tax_identification_number
-        address {
-          number
-          city
-          street
-          state
-          country
-          zip_code
-        }
-      }
-    }
-  `;
-
-  const getBusinessQuery = (businessId, queryOptions = {}) =>
-    useGQLQuery(
-      ["activeBusiness", businessId],
-      GET_BUSINESS_QUERY,
-      { id: businessId },
-      { enabled: !!businessId, ...options, ...queryOptions },
-    );
 
   // ──────────────────────────────────────────────
   // Document Management
@@ -151,7 +115,7 @@ export const useBusiness = (options = {}) => {
   };
 
   // ──────────────────────────────────────────────
-  // Queries: KYB & Business Documents
+  // Queries
   // ──────────────────────────────────────────────
   const GET_KYB_DOCUMENTS_QUERY = `
     query GetKYBDocuments {
@@ -186,11 +150,42 @@ export const useBusiness = (options = {}) => {
     options,
   );
 
-  // ──────────────────────────────────────────────
-  // Wallet Queries
-  // ──────────────────────────────────────────────
+  const getBusinessDetailQuery = (id, queryOptions = {}) => {
+    const GET_BUSINESS_DETAIL_QUERY = `
+      query GetBusinessDetail($id: String!) {
+        business(id: $id) {
+          id
+          name
+          logo
+          email
+          on_site
+          about
+          industry
+          number
+          country_of_incorporation
+          date_of_incorporation
+          tax_identification_number
+          address {
+            number
+            city
+            street
+            state
+            country
+            zip_code
+          }
+        }
+      }
+    `;
+    return useGQLQuery(
+      ["businessDetail", id],
+      GET_BUSINESS_DETAIL_QUERY,
+      computed(() => ({ id: unref(id) })),
+      { enabled: computed(() => !!unref(id)), ...queryOptions },
+    );
+  };
+
   const GET_WALLETS_QUERY = `
-    query GetWallets($wallet_type: WalletType!) {
+    query GetWallets($wallet_type: WalletType! = TREASURY) {
       wallets(wallet_type: $wallet_type) {
         id
         type
@@ -202,18 +197,15 @@ export const useBusiness = (options = {}) => {
       }
     }
   `;
-
-  const getWalletsQuery = (walletType = "TREASURY", queryOptions = {}) =>
-    useGQLQuery(
+  const getWalletsQuery = (walletType = "TREASURY", queryOptions = {}) => {
+    return useGQLQuery(
       ["wallets", walletType],
       GET_WALLETS_QUERY,
       { wallet_type: walletType },
-      { ...options, ...queryOptions },
+      queryOptions,
     );
+  };
 
-  // ──────────────────────────────────────────────
-  // Currencies Query
-  // ──────────────────────────────────────────────
   const GET_CURRENCIES_QUERY = `
     query GetCurrencies {
       currencies {
@@ -225,24 +217,36 @@ export const useBusiness = (options = {}) => {
       }
     }
   `;
+  const getCurrenciesQuery = (queryOptions = {}) => {
+    return useGQLQuery(["currencies"], GET_CURRENCIES_QUERY, {}, queryOptions);
+  };
 
-  const currenciesQuery = useGQLQuery(
-    ["currencies"],
-    GET_CURRENCIES_QUERY,
-    {},
-    options,
-  );
+  const ADD_WALLET_MUTATION = `
+    mutation AddWallet($currency_code: String!, $wallet_type: WalletType!) {
+      add_wallet(currency_code: $currency_code, wallet_type: $wallet_type) {
+        id
+        type
+        available_balance
+        ledger_balance
+        holding_balance
+        currency
+        active
+      }
+    }
+  `;
+  const addWalletMutation = useGQLMutation(ADD_WALLET_MUTATION);
 
   return {
     userBusinesses: userBusinessesQuery,
     registerBusiness: registerBusinessMutation,
     businessDetail: businessDetailMutation,
-    getBusiness: getBusinessQuery,
     uploadDocument: uploadDocumentMutation,
     deleteDocument: deleteDocumentMutation,
     kybDocuments: kybDocumentsQuery,
     businessDocuments: businessDocumentsQuery,
-    getWallets: getWalletsQuery,
-    currencies: currenciesQuery,
+    getBusinessDetailQuery,
+    getWalletsQuery,
+    getCurrenciesQuery,
+    addWallet: addWalletMutation,
   };
 };
