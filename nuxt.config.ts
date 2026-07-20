@@ -1,4 +1,11 @@
 export default defineNuxtConfig({
+  nitro: {
+    preset: 'netlify',
+  },
+  runtimeConfig: {
+    // Private - only available server-side
+    backendUrl: process.env.BACKEND_URL || 'https://elo--elo-backend--fwg2j6rrxrkh.code.run',
+  },
   compatibilityDate: '2025-07-15',
   future: {
     compatibilityVersion: 4,

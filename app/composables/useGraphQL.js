@@ -62,14 +62,14 @@ async function gqlRequest({ query, variables = {} }) {
     body = new FormData();
     body.append(
       "operations",
-      JSON.stringify({ query, variables: cleanVariables })
+      JSON.stringify({ query, variables: cleanVariables }),
     );
     body.append("map", JSON.stringify(map));
 
     files.forEach((file, index) => {
       body.append(index.toString(), file);
     });
-    // Do NOT set Content-Type header when using FormData; 
+    // Do NOT set Content-Type header when using FormData;
     // the browser automatically sets it with the required boundary hash.
   } else {
     // Standard JSON format
