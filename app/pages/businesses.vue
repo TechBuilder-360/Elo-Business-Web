@@ -201,7 +201,11 @@ const handleRefreshStatus = () => {
           <div
             class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center overflow-hidden"
           >
-            <img :src="'/favicon_io/favicon_io/apple-touch-icon.png'" class="w-full h-full object-cover" alt="ELO" />
+            <img
+              :src="'/favicon_io/favicon_io/apple-touch-icon.png'"
+              class="w-full h-full object-cover"
+              alt="ELO"
+            />
           </div>
           <span class="font-bold text-foreground text-sm sm:text-base"
             >ELO Business</span
