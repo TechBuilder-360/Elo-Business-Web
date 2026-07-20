@@ -26,14 +26,15 @@ export default defineEventHandler(async () => {
     }
   `;
   try {
-    const res = await $fetch(
-      "https://elo--elo-backend--fwg2j6rrxrkh.code.run/api",
-      {
-        method: "POST",
-        body: { query },
-      },
-    );
 
+    const config = useRuntimeConfig();
+    const backendUrl = `${config.backendUrl}/api`;
+
+    const res = await $fetch(backendUrl, {
+      method: "POST",
+      body: { query }
+    });
+    
     const types = res.data.__schema.types;
     const resType = types.find((t) => t.name === "Response");
     const queryType = types.find((t) => t.name === "Query");

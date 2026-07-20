@@ -108,18 +108,57 @@ const validateStep = (step) => {
   }
 };
 
-const handleSubmit = async () => {
-  const error = validateForm();
-  if (error) {
-    toast.error(error);
-    return;
-  }
-  currentStep.value = Math.min(currentStep.value + 1, STEPS.length - 1);
-};
-
 const handleBack = () => {
   currentStep.value = Math.max(currentStep.value - 1, 0);
 };
+
+const handleSubmit = async () => {
+  const payload = {
+    name: formData.value.businessName,
+    about: formData.value.services,
+    email: formData.value.email,
+    industry: formData.value.industry,
+    on_site: formData.value.businessType === "onsite",
+    is_registered: formData.value.isRegistered === "yes",
+    address: {
+      number:
+        formData.value.businessType === "onsite"
+          ? formData.value.address.number
+          : "",
+      street:
+        formData.value.businessType === "onsite"
+          ? formData.value.address.street
+          : "",
+      state:
+        formData.value.businessType === "onsite"
+          ? formData.value.address.state
+          : "",
+      country:
+        formData.value.businessType === "onsite"
+          ? formData.value.address.country
+          : formData.value.residentCountry,
+      zip_code:
+        formData.value.businessType === "onsite"
+          ? formData.value.address.zipCode
+          : "",
+    },
+    registration_detail:
+      formData.value.isRegistered === "yes"
+        ? {
+            number: formData.value.registration.regNumber,
+            country_of_incorporation:
+              formData.value.registration.countryOfIncorporation,
+            date_of_incorporation:
+              formData.value.registration.dateOfIncorporation,
+            certificate_of_incorporation:
+              formData.value.registration.cacDocument,
+            articles_of_association: formData.value.registration.memartDocument,
+            status_certificate: formData.value.registration.statusReport,
+          }
+        : null,
+    other_document:
+      formData.value.documents.length > 0 ? formData.value.documents : null,
+  };
 
 const handleSubmit = async () => {
   const payload = {
