@@ -65,7 +65,8 @@ const updateFormData = (updates) => {
 const validateStep = (step) => {
   switch (step) {
     case 0:
-      if (!formData.value.businessName.trim()) return "Business name is required";
+      if (!formData.value.businessName.trim())
+        return "Business name is required";
       if (!formData.value.services.trim())
         return "Services description is required";
       if (
@@ -79,7 +80,8 @@ const validateStep = (step) => {
         if (!formData.value.address.street.trim())
           return "Street address is required";
         if (!formData.value.address.state.trim()) return "State is required";
-        if (!formData.value.address.country.trim()) return "Country is required";
+        if (!formData.value.address.country.trim())
+          return "Country is required";
       }
       if (!formData.value.isRegistered)
         return "Please indicate if business is registered";
@@ -160,21 +162,43 @@ const handleSubmit = async () => {
     on_site: formData.value.businessType === "onsite",
     is_registered: formData.value.isRegistered === "yes",
     address: {
-      number: formData.value.businessType === "onsite" ? formData.value.address.number : "",
-      street: formData.value.businessType === "onsite" ? formData.value.address.street : "",
-      state: formData.value.businessType === "onsite" ? formData.value.address.state : "",
-      country: formData.value.businessType === "onsite" ? formData.value.address.country : formData.value.residentCountry,
-      zip_code: formData.value.businessType === "onsite" ? formData.value.address.zipCode : ""
+      number:
+        formData.value.businessType === "onsite"
+          ? formData.value.address.number
+          : "",
+      street:
+        formData.value.businessType === "onsite"
+          ? formData.value.address.street
+          : "",
+      state:
+        formData.value.businessType === "onsite"
+          ? formData.value.address.state
+          : "",
+      country:
+        formData.value.businessType === "onsite"
+          ? formData.value.address.country
+          : formData.value.residentCountry,
+      zip_code:
+        formData.value.businessType === "onsite"
+          ? formData.value.address.zipCode
+          : "",
     },
-    registration_detail: formData.value.isRegistered === "yes" ? {
-      number: formData.value.registration.regNumber,
-      country_of_incorporation: formData.value.registration.countryOfIncorporation,
-      date_of_incorporation: formData.value.registration.dateOfIncorporation,
-      certificate_of_incorporation: formData.value.registration.cacDocument,
-      articles_of_association: formData.value.registration.memartDocument,
-      status_certificate: formData.value.registration.statusReport,
-    } : null,
-    other_document: formData.value.documents.length > 0 ? formData.value.documents : null,
+    registration_detail:
+      formData.value.isRegistered === "yes"
+        ? {
+            number: formData.value.registration.regNumber,
+            country_of_incorporation:
+              formData.value.registration.countryOfIncorporation,
+            date_of_incorporation:
+              formData.value.registration.dateOfIncorporation,
+            certificate_of_incorporation:
+              formData.value.registration.cacDocument,
+            articles_of_association: formData.value.registration.memartDocument,
+            status_certificate: formData.value.registration.statusReport,
+          }
+        : null,
+    other_document:
+      formData.value.documents.length > 0 ? formData.value.documents : null,
   };
 
   try {
@@ -183,11 +207,14 @@ const handleSubmit = async () => {
 
     // Redirect back to businesses selection, which will now show the new business
     await navigateTo({
-      path: "/businesses"
+      path: "/businesses",
     });
   } catch (error) {
     const gqlMsg = error?.graphQLErrors?.[0]?.message;
-    const fallbackMsg = error.message === "GraphQL error" ? "Failed to register business" : error.message;
+    const fallbackMsg =
+      error.message === "GraphQL error"
+        ? "Failed to register business"
+        : error.message;
     toast.error(gqlMsg || fallbackMsg);
   }
 };
