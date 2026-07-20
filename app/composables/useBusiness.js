@@ -1,5 +1,6 @@
 import { useGQLQuery, useGQLMutation } from "./useGraphQL";
 import { useQueryClient } from "@tanstack/vue-query";
+import { unref, computed } from "vue";
 
 export const useBusiness = (options = {}) => {
   const qc = useQueryClient();
@@ -149,6 +150,40 @@ export const useBusiness = (options = {}) => {
     options,
   );
 
+  const getBusinessDetailQuery = (id, queryOptions = {}) => {
+    const GET_BUSINESS_DETAIL_QUERY = `
+      query GetBusinessDetail($id: String!) {
+        business(id: $id) {
+          id
+          name
+          logo
+          email
+          on_site
+          about
+          industry
+          number
+          country_of_incorporation
+          date_of_incorporation
+          tax_identification_number
+          address {
+            number
+            city
+            street
+            state
+            country
+            zip_code
+          }
+        }
+      }
+    `;
+    return useGQLQuery(
+      ["businessDetail", id],
+      GET_BUSINESS_DETAIL_QUERY,
+      computed(() => ({ id: unref(id) })),
+      { enabled: computed(() => !!unref(id)), ...queryOptions }
+    );
+  };
+
   return {
     userBusinesses: userBusinessesQuery,
     registerBusiness: registerBusinessMutation,
@@ -157,5 +192,6 @@ export const useBusiness = (options = {}) => {
     deleteDocument: deleteDocumentMutation,
     kybDocuments: kybDocumentsQuery,
     businessDocuments: businessDocumentsQuery,
+    getBusinessDetailQuery,
   };
 };
