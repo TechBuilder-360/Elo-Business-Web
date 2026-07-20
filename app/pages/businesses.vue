@@ -50,6 +50,9 @@ const roleColors = {
 };
 
 const handleSelectBusiness = (business) => {
+  if (import.meta.client) {
+    localStorage.setItem("activeBusinessId", business.id);
+  }
   navigateTo({
     path: "/dashboard",
     query: { name: business.name },

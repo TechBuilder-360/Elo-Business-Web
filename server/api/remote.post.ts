@@ -7,6 +7,7 @@ export default defineEventHandler(async (event) => {
   const reqHeaders: Record<string, string> = {
     "Content-Type": "application/json",
     ...(headers.authorization ? { Authorization: headers.authorization } : {}),
+    ...(headers["x-business-id"] ? { "x-business-id": headers["x-business-id"] } : {}),
   };
 
   // Automatically inject HttpOnly cookie as Bearer token if present
@@ -15,9 +16,12 @@ export default defineEventHandler(async (event) => {
     reqHeaders.Authorization = `Bearer ${authCookie}`;
   }
 
+  // @ts-ignore
+  const backendUrl = process.env.BACKEND_URL;
+
   try {
     const response: any = await $fetch(
-      "https://elo--elo-backend--fwg2j6rrxrkh.code.run/api",
+      `${backendUrl}/api`,
       {
         method: "POST",
         body,

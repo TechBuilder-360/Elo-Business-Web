@@ -11,6 +11,9 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
+import { computed } from "vue";
+import { Country, State } from "country-state-city";
+
 const props = defineProps({
   data: {
     type: Object,
@@ -22,19 +25,12 @@ const props = defineProps({
   },
 });
 
-const countries = [
-  "Nigeria",
-  "Ghana",
-  "Kenya",
-  "South Africa",
-  "United Kingdom",
-  "United States",
-  "Canada",
-  "Germany",
-  "France",
-  "India",
-  "Other",
-];
+const allCountries = Country.getAllCountries();
+
+const availableStates = computed(() => {
+  if (!props.data.address.country) return [];
+  return State.getStatesOfCountry(props.data.address.country);
+});
 
 const industries = [
   "Technology",
@@ -46,7 +42,7 @@ const industries = [
   "Education",
   "Manufacturing",
   "Entertainment",
-  "Other"
+  "Other",
 ];
 </script>
 
@@ -94,8 +90,12 @@ const industries = [
           <SelectValue placeholder="Select country" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem v-for="c in countries" :key="c" :value="c">
-            {{ c }}
+          <SelectItem
+            v-for="c in allCountries"
+            :key="c.isoCode"
+            :value="c.isoCode"
+          >
+            {{ c.name }}
           </SelectItem>
         </SelectContent>
       </Select>
@@ -167,24 +167,61 @@ const industries = [
           />
         </div>
         <div class="space-y-2">
+          <Label htmlFor="country">Country</Label>
+          <Select
+            :modelValue="data.address.country"
+            @update:modelValue="
+              (val) =>
+                onChange({
+                  address: { ...data.address, country: val, state: '' },
+                })
+            "
+          >
+            <SelectTrigger id="country">
+              <SelectValue placeholder="Select country" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem
+                v-for="c in allCountries"
+                :key="c.isoCode"
+                :value="c.isoCode"
+              >
+                {{ c.name }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div class="space-y-2">
           <Label htmlFor="state">State</Label>
-          <Input
-            id="state"
-            placeholder="Lagos"
+          <Select
             :modelValue="data.address.state"
             @update:modelValue="
               (val) => onChange({ address: { ...data.address, state: val } })
             "
-          />
+            :disabled="!data.address.country"
+          >
+            <SelectTrigger id="state">
+              <SelectValue placeholder="Select state" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem
+                v-for="s in availableStates"
+                :key="s.isoCode"
+                :value="s.name"
+              >
+                {{ s.name }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div class="space-y-2">
-          <Label htmlFor="country">Country</Label>
+          <Label htmlFor="city">City</Label>
           <Input
-            id="country"
-            placeholder="Nigeria"
-            :modelValue="data.address.country"
+            id="city"
+            placeholder="e.g. Ikeja"
+            :modelValue="data.address.city"
             @update:modelValue="
-              (val) => onChange({ address: { ...data.address, country: val } })
+              (val) => onChange({ address: { ...data.address, city: val } })
             "
           />
         </div>
@@ -200,24 +237,6 @@ const industries = [
           />
         </div>
       </div>
-    </div>
-
-    <div class="space-y-3">
-      <Label>Is your business registered? *</Label>
-      <RadioGroup
-        :modelValue="data.isRegistered"
-        @update:modelValue="(val) => onChange({ isRegistered: val })"
-        class="flex gap-6"
-      >
-        <div class="flex items-center space-x-2">
-          <RadioGroupItem value="yes" id="reg-yes" />
-          <Label htmlFor="reg-yes" class="cursor-pointer">Yes</Label>
-        </div>
-        <div class="flex items-center space-x-2">
-          <RadioGroupItem value="no" id="reg-no" />
-          <Label htmlFor="reg-no" class="cursor-pointer">No</Label>
-        </div>
-      </RadioGroup>
     </div>
   </div>
 </template>
