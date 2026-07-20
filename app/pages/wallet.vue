@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed } from "vue";
+import { useBusiness } from "@/composables/useBusiness";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -150,54 +151,126 @@ const usdTransactions = [
   },
 ];
 
-const wallets = [
-  {
-    currency: "NGN",
-    symbol: "₦",
-    balance: 1847320.55,
-    totalRevenue: 3240500,
-    totalSpent: 1393179.45,
-    pendingAmount: 32000,
-    transactions: ngnTransactions,
-    accounts: [
+const { getWalletsQuery, getCurrenciesQuery } = useBusiness();
+const { data: walletsData, isPending: isWalletsPending } =
+  getWalletsQuery("TREASURY");
+const { data: currenciesData } = getCurrenciesQuery();
+
+const wallets = computed(() => {
+  const fetchedWallets = walletsData.value?.wallets;
+  const currList = currenciesData.value?.currencies || [];
+
+  if (!fetchedWallets || fetchedWallets.length === 0) {
+    // Fallback if backend has no wallets yet (new business)
+    return [
       {
-        id: "ngn-1",
-        bankName: "GTBank",
-        accountName: "Chidi Ventures Ltd",
-        accountNumber: "0123456789",
-        sortCode: "058",
-        isPrimary: true,
+        id: "mock-ngn",
+        currency: "NGN",
+        symbol: "₦",
+        balance: 1847320.55,
+        totalRevenue: 3240500,
+        totalSpent: 1393179.45,
+        pendingAmount: 32000,
+        transactions: ngnTransactions,
+        accounts: [
+          {
+            id: "ngn-1",
+            bankName: "GTBank",
+            accountName: "Chidi Ventures Ltd",
+            accountNumber: "0123456789",
+            sortCode: "058",
+            isPrimary: true,
+          },
+          {
+            id: "ngn-2",
+            bankName: "Access Bank",
+            accountName: "Chidi Ventures Ltd",
+            accountNumber: "9876543210",
+            sortCode: "044",
+            isPrimary: false,
+          },
+        ],
       },
       {
-        id: "ngn-2",
-        bankName: "Access Bank",
-        accountName: "Chidi Ventures Ltd",
-        accountNumber: "9876543210",
-        sortCode: "044",
-        isPrimary: false,
+        id: "mock-usd",
+        currency: "USD",
+        symbol: "$",
+        balance: 8274.01,
+        totalRevenue: 14535,
+        totalSpent: 6260.99,
+        pendingAmount: 385,
+        transactions: usdTransactions,
+        accounts: [
+          {
+            id: "usd-1",
+            bankName: "Mercury",
+            accountName: "Chidi Ventures Inc",
+            accountNumber: "1928374650",
+            routingNumber: "084009519",
+            isPrimary: true,
+          },
+        ],
       },
-    ],
-  },
-  {
-    currency: "USD",
-    symbol: "$",
-    balance: 8274.01,
-    totalRevenue: 14535,
-    totalSpent: 6260.99,
-    pendingAmount: 385,
-    transactions: usdTransactions,
-    accounts: [
-      {
-        id: "usd-1",
-        bankName: "Mercury",
-        accountName: "Chidi Ventures Inc",
-        accountNumber: "1928374650",
-        routingNumber: "084009519",
-        isPrimary: true,
-      },
-    ],
-  },
-];
+    ];
+  }
+
+  return fetchedWallets.map((w) => {
+    const curr = currList.find((c) => c.code === w.currency) || {};
+    const symbol = curr.symbol || w.currency;
+
+    // Fallback transactions for UI visualization until transaction queries exist
+    const tx =
+      w.currency === "NGN"
+        ? ngnTransactions
+        : w.currency === "USD"
+          ? usdTransactions
+          : [];
+    const accs =
+      w.currency === "NGN"
+        ? [
+            {
+              id: "ngn-1",
+              bankName: "GTBank",
+              accountName: "Chidi Ventures Ltd",
+              accountNumber: "0123456789",
+              sortCode: "058",
+              isPrimary: true,
+            },
+            {
+              id: "ngn-2",
+              bankName: "Access Bank",
+              accountName: "Chidi Ventures Ltd",
+              accountNumber: "9876543210",
+              sortCode: "044",
+              isPrimary: false,
+            },
+          ]
+        : w.currency === "USD"
+          ? [
+              {
+                id: "usd-1",
+                bankName: "Mercury",
+                accountName: "Chidi Ventures Inc",
+                accountNumber: "1928374650",
+                routingNumber: "084009519",
+                isPrimary: true,
+              },
+            ]
+          : [];
+
+    return {
+      id: w.id,
+      currency: w.currency,
+      symbol: symbol,
+      balance: w.available_balance || 0,
+      totalRevenue: w.ledger_balance || 0,
+      totalSpent: 0,
+      pendingAmount: w.holding_balance || 0,
+      transactions: tx,
+      accounts: accs,
+    };
+  });
+});
 
 const formatAmount = (amount, symbol) => {
   return `${symbol}${amount.toLocaleString(undefined, {
@@ -223,7 +296,7 @@ const filteredTransactions = computed(() => {
   if (!selectedWallet.value) return [];
   if (txFilter.value === "all") return selectedWallet.value.transactions;
   return selectedWallet.value.transactions.filter(
-    (t) => t.type === txFilter.value
+    (t) => t.type === txFilter.value,
   );
 });
 
@@ -281,7 +354,7 @@ const handleBackToDashboard = () => {
           <div class="bg-primary/5 p-6 pb-8">
             <div class="flex items-center justify-between mb-4">
               <p class="text-sm font-medium text-muted-foreground">
-                {{ selectedWallet.currency}} Balance
+                {{ selectedWallet.currency }} Balance
               </p>
               <Button
                 variant="ghost"
@@ -315,7 +388,12 @@ const handleBackToDashboard = () => {
               <div>
                 <p class="text-xs text-muted-foreground">Total Revenue</p>
                 <p class="text-lg font-bold tabular-nums text-foreground">
-                  {{ formatAmount(selectedWallet.totalRevenue, selectedWallet.symbol) }}
+                  {{
+                    formatAmount(
+                      selectedWallet.totalRevenue,
+                      selectedWallet.symbol,
+                    )
+                  }}
                 </p>
               </div>
             </CardContent>
@@ -330,7 +408,12 @@ const handleBackToDashboard = () => {
               <div>
                 <p class="text-xs text-muted-foreground">Total Spent</p>
                 <p class="text-lg font-bold tabular-nums text-foreground">
-                  {{ formatAmount(selectedWallet.totalSpent, selectedWallet.symbol) }}
+                  {{
+                    formatAmount(
+                      selectedWallet.totalSpent,
+                      selectedWallet.symbol,
+                    )
+                  }}
                 </p>
               </div>
             </CardContent>
@@ -345,7 +428,12 @@ const handleBackToDashboard = () => {
               <div>
                 <p class="text-xs text-muted-foreground">Pending</p>
                 <p class="text-lg font-bold tabular-nums text-foreground">
-                  {{ formatAmount(selectedWallet.pendingAmount, selectedWallet.symbol) }}
+                  {{
+                    formatAmount(
+                      selectedWallet.pendingAmount,
+                      selectedWallet.symbol,
+                    )
+                  }}
                 </p>
               </div>
             </CardContent>
@@ -357,10 +445,10 @@ const handleBackToDashboard = () => {
 
         <!-- Transactions -->
         <Card class="border-0 shadow-md shadow-foreground/5 bg-card">
-          <CardHeader
-            class="flex flex-row items-center justify-between pb-2"
-          >
-            <CardTitle class="text-base text-foreground">Transactions</CardTitle>
+          <CardHeader class="flex flex-row items-center justify-between pb-2">
+            <CardTitle class="text-base text-foreground"
+              >Transactions</CardTitle
+            >
             <Tabs
               :modelValue="txFilter"
               @update:modelValue="(val) => (txFilter = val)"
@@ -392,10 +480,7 @@ const handleBackToDashboard = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow
-                  v-for="tx in filteredTransactions"
-                  :key="tx.id"
-                >
+                <TableRow v-for="tx in filteredTransactions" :key="tx.id">
                   <TableCell>
                     <div class="flex items-center gap-2">
                       <div
@@ -410,10 +495,7 @@ const handleBackToDashboard = () => {
                           v-if="tx.type === 'credit'"
                           class="w-3.5 h-3.5 text-emerald-600"
                         />
-                        <ArrowUpRight
-                          v-else
-                          class="w-3.5 h-3.5 text-red-600"
-                        />
+                        <ArrowUpRight v-else class="w-3.5 h-3.5 text-red-600" />
                       </div>
                       <span class="text-sm text-foreground">{{
                         tx.description
@@ -464,8 +546,36 @@ const handleBackToDashboard = () => {
         </Card>
       </div>
 
+      <!-- Loading skeleton while wallet query is pending -->
+      <div v-else-if="isWalletsPending" class="space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div
+            v-for="i in 2"
+            :key="i"
+            class="rounded-xl border-0 bg-card shadow-md shadow-foreground/5 p-5 animate-pulse"
+          >
+            <div class="h-5 w-16 bg-muted rounded mb-4"></div>
+            <div class="h-3 w-24 bg-muted rounded mb-2"></div>
+            <div class="h-8 w-40 bg-muted rounded mb-4"></div>
+            <div class="flex gap-4 pt-3 border-t border-border/50">
+              <div class="h-3 w-20 bg-muted rounded"></div>
+              <div class="h-3 w-20 bg-muted rounded"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div v-else class="space-y-6 animate-in fade-in duration-300">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Empty state if no wallets after loading -->
+          <div
+            v-if="wallets.length === 0"
+            class="col-span-2 text-center py-16 text-muted-foreground"
+          >
+            <WalletIcon class="w-10 h-10 mx-auto mb-3 opacity-30" />
+            <p class="text-sm font-medium">No wallets found</p>
+            <p class="text-xs mt-1">Wallets will appear here once created by your provider.</p>
+          </div>
           <Card
             v-for="w in wallets"
             :key="w.currency"
@@ -474,7 +584,10 @@ const handleBackToDashboard = () => {
           >
             <CardContent class="p-5">
               <div class="flex items-center justify-between mb-4">
-                <Badge variant="secondary" class="text-xs font-semibold text-foreground">
+                <Badge
+                  variant="secondary"
+                  class="text-xs font-semibold text-foreground"
+                >
                   {{ w.currency }}
                 </Badge>
                 <ChevronRight class="w-4 h-4 text-muted-foreground" />
@@ -482,7 +595,9 @@ const handleBackToDashboard = () => {
               <p class="text-xs text-muted-foreground mb-1">
                 Available Balance
               </p>
-              <p class="text-2xl font-bold tracking-tight tabular-nums text-foreground">
+              <p
+                class="text-2xl font-bold tracking-tight tabular-nums text-foreground"
+              >
                 {{ formatAmount(w.balance, w.symbol) }}
               </p>
               <div
