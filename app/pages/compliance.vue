@@ -109,7 +109,7 @@ const sections = [
 // Data Models
 // ──────────────────────────────────────────────
 const infoData = ref({
-  name: businessName.value,
+  name: "", // will be populated from the backend — never use route.query.name here
   about: "",
   industry: "",
   website: "",
@@ -137,12 +137,14 @@ import { watch } from "vue";
 watch(
   [activeBusinessData, fullBusinessData],
   ([active, full]) => {
-    if (active) {
-      infoData.value.name = active.name || businessName.value;
+    if (active && !infoData.value.name) {
+      // Only use the list-level name as a temporary placeholder if we have nothing yet
+      infoData.value.name = active.name || "";
     }
 
     if (full) {
-      infoData.value.name = full.name || infoData.value.name;
+      // Always overwrite with the authoritative name from the business detail query
+      infoData.value.name = full.name || active?.name || "";
       infoData.value.about = full.about || "";
       infoData.value.industry = full.industry || "";
       infoData.value.website = full.email || ""; // Using email for website slot for now if needed, or map properly
