@@ -26,27 +26,34 @@ export default defineEventHandler(async () => {
     }
   `;
   try {
-    const config = useRuntimeConfig();
-    const backendUrl = `${config.backendUrl}/api`;
+    const backendUrl = `${process.env.BACKEND_URL}/api`;
 
-    const res = await $fetch(backendUrl, {
+    const res: any = await $fetch(backendUrl, {
       method: "POST",
-      body: { query }
+      body: { query },
     });
-    
-    const types = res.data.__schema.types;
-    const resType = types.find(t => t.name === "Response");
-    const queryType = types.find(t => t.name === "Query");
-    const mutType = types.find(t => t.name === "Mutation");
-    
+
+    const types = res?.data?.__schema?.types || [];
+    const resType = types.find((t: any) => t.name === "Response");
+    const queryType = types.find((t: any) => t.name === "Query");
+    const mutType = types.find((t: any) => t.name === "Mutation");
+
     return {
       Response: resType?.fields,
-      getUserBusinsses: queryType?.fields.find(f => f.name === "getUserBusinsses"),
-      verificationQuery: queryType?.fields.find(f => f.name === "verification"),
-      verificationMut: mutType?.fields.find(f => f.name === "verification"),
-      registerBusiness: mutType?.fields.find(f => f.name === "registerBusiness")
+      getUserBusinsses: queryType?.fields?.find(
+        (f: any) => f.name === "getUserBusinsses",
+      ),
+      verificationQuery: queryType?.fields?.find(
+        (f: any) => f.name === "verification",
+      ),
+      verificationMut: mutType?.fields?.find(
+        (f: any) => f.name === "verification",
+      ),
+      registerBusiness: mutType?.fields?.find(
+        (f: any) => f.name === "registerBusiness",
+      ),
     };
-  } catch (err) {
+  } catch (err: any) {
     return { error: err.message };
   }
 });

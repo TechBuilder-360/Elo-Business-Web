@@ -53,17 +53,20 @@ const showAddWalletModal = ref(false);
 const selectedCurrencyCode = ref("");
 const isAddingWallet = ref(false);
 
-const fiatCurrencies = computed(
-  () => currenciesData.value?.currencies?.filter((c) => c.is_fiat) || [],
-);
+const groupedCurrencies = computed(() => {
+  const all = currenciesData.value?.currencies || [];
+  return {
+    fiat: all.filter((c) => c.is_fiat),
+    crypto: all.filter((c) => !c.is_fiat),
+  };
+});
 
 const handleAddWallet = async () => {
   if (!selectedCurrencyCode.value) return;
   isAddingWallet.value = true;
   // Optimistic update — add a placeholder wallet immediately
-  const curr =
-    fiatCurrencies.value.find((c) => c.code === selectedCurrencyCode.value) ||
-    {};
+  const allCurr = currenciesData.value?.currencies || [];
+  const curr = allCurr.find((c) => c.code === selectedCurrencyCode.value) || {};
   const optimisticWallet = {
     id: `optimistic-${Date.now()}`,
     currency: selectedCurrencyCode.value,
@@ -116,16 +119,61 @@ const wallets = computed(() => {
   return fetchedWallets.map((w) => {
     const curr = currList.find((c) => c.code === w.currency) || {};
     const symbol = curr.symbol || w.currency;
+    const is_fiat = curr.is_fiat !== undefined ? curr.is_fiat : true; // default true
+
+    // Restore dummy mock accounts to fulfill UI layout request
+    const mockAccounts = [];
+    if (is_fiat) {
+      if (w.currency === "NGN") {
+        mockAccounts.push(
+          {
+            id: "ngn-1",
+            bankName: "GTBank",
+            accountName: "Chidi Ventures Ltd",
+            accountNumber: "0123456789",
+            sortCode: "058",
+            isPrimary: true,
+          },
+          {
+            id: "ngn-2",
+            bankName: "Access Bank",
+            accountName: "Chidi Ventures Ltd",
+            accountNumber: "9876543210",
+            sortCode: "044",
+            isPrimary: false,
+          }
+        );
+      } else if (w.currency === "USD") {
+        mockAccounts.push({
+          id: "usd-1",
+          bankName: "Mercury",
+          accountName: "Chidi Ventures Inc",
+          accountNumber: "1928374650",
+          routingNumber: "084009519",
+          isPrimary: true,
+        });
+      }
+    } else {
+      // Crypto mock addresses
+      mockAccounts.push({
+        id: `crypto-1`,
+        address: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+        network: w.currency === "PYUSD" || w.currency === "USDC" ? "ERC-20" : "TRC-20",
+        isPrimary: true,
+      });
+    }
+
     return {
       id: w.id,
       currency: w.currency,
       symbol,
+      is_fiat,
       balance: w.available_balance || 0,
       totalRevenue: w.ledger_balance || 0,
       totalSpent: 0,
       pendingAmount: w.holding_balance || 0,
       transactions: [], // will wire up once transaction query is available
-      accounts: [],
+      accounts: mockAccounts,
     };
   });
 });
@@ -512,13 +560,24 @@ const handleBackToDashboard = () => {
                 class="w-full h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
               >
                 <option value="" disabled>Select currency...</option>
-                <option
-                  v-for="c in fiatCurrencies"
-                  :key="c.code"
-                  :value="c.code"
-                >
-                  {{ c.symbol }} {{ c.name }} ({{ c.code }})
-                </option>
+                <optgroup label="Fiat Currencies" v-if="groupedCurrencies.fiat?.length">
+                  <option
+                    v-for="c in groupedCurrencies.fiat"
+                    :key="c.code"
+                    :value="c.code"
+                  >
+                    {{ c.symbol }} {{ c.name }} ({{ c.code }})
+                  </option>
+                </optgroup>
+                <optgroup label="Crypto Currencies" v-if="groupedCurrencies.crypto?.length">
+                  <option
+                    v-for="c in groupedCurrencies.crypto"
+                    :key="c.code"
+                    :value="c.code"
+                  >
+                    {{ c.symbol }} {{ c.name }} ({{ c.code }})
+                  </option>
+                </optgroup>
               </select>
             </div>
             <div class="flex gap-3 pt-2">
