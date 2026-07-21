@@ -1,15 +1,15 @@
 import { ref, mergeProps, unref, withCtx, createTextVNode, createVNode, openBlock, createBlock, toDisplayString, computed, Fragment, renderList, provide, h, inject, useSSRContext } from 'vue';
-import { ssrRenderAttrs, ssrRenderComponent, ssrInterpolate, ssrRenderList } from 'vue/server-renderer';
+import { ssrRenderAttrs, ssrRenderAttr, ssrRenderComponent, ssrInterpolate, ssrRenderList } from 'vue/server-renderer';
 import { C as Card, c as CardHeader, d as CardTitle, b as CardDescription, a as CardContent } from './card-Cq6gP5nL.mjs';
 import { B as Button } from './button-Bxu1RhCi.mjs';
 import { t as toast } from './alert-D7s0TqQ8.mjs';
-import { Building2, Loader2, Send } from 'lucide-vue-next';
+import { Loader2, Send } from 'lucide-vue-next';
 import { I as Input } from './input-C1C1FSk7.mjs';
 import { L as Label } from './label-CU-twOy-.mjs';
 import { S as Select, c as SelectTrigger, d as SelectValue, a as SelectContent, b as SelectItem } from './select-BENuuoNZ.mjs';
 import { T as Textarea } from './textarea-CCpVUKiI.mjs';
 import { Country, State } from 'country-state-city';
-import { u as useBusiness } from './useBusiness-DUTOJ7No.mjs';
+import { u as useBusiness } from './useBusiness-BCRRRkfq.mjs';
 import { n as navigateTo } from './server.mjs';
 import 'sweetalert2';
 import './useGraphQL-Bw_Hbd5v.mjs';
@@ -853,9 +853,7 @@ const _sfc_main = {
       }
     };
     return (_ctx, _push, _parent, _attrs) => {
-      _push(`<div${ssrRenderAttrs(mergeProps({ class: "min-h-screen bg-background" }, _attrs))}><header class="border-b bg-card"><div class="container max-w-4xl mx-auto flex items-center gap-3 py-4 px-4"><div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">`);
-      _push(ssrRenderComponent(unref(Building2), { class: "w-5 h-5 text-primary-foreground" }, null, _parent));
-      _push(`</div><div><h1 class="text-lg font-bold text-foreground">Business Onboarding</h1><p class="text-xs text-muted-foreground"> Complete your business registration </p></div></div></header><main class="container max-w-2xl mx-auto py-8 px-4">`);
+      _push(`<div${ssrRenderAttrs(mergeProps({ class: "min-h-screen bg-background" }, _attrs))}><header class="border-b bg-card"><div class="container max-w-4xl mx-auto flex items-center gap-3 py-4 px-4"><div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center overflow-hidden"><img${ssrRenderAttr("src", "/favicon_io/favicon_io/apple-touch-icon.png")} class="w-full h-full object-cover" alt="ELO"></div><div><h1 class="text-lg font-bold text-foreground">Business Onboarding</h1><p class="text-xs text-muted-foreground"> Complete your business registration </p></div></div></header><main class="container max-w-2xl mx-auto py-8 px-4">`);
       _push(ssrRenderComponent(unref(Card), { class: "shadow-lg border-0 shadow-foreground/5 bg-card" }, {
         default: withCtx((_, _push2, _parent2, _scopeId) => {
           if (_push2) {
@@ -1033,4 +1031,4 @@ _sfc_main.setup = (props, ctx) => {
 };
 
 export { _sfc_main as default };
-//# sourceMappingURL=onboard-Bce16RW1.mjs.map
+//# sourceMappingURL=onboard-CwtraWmc.mjs.map

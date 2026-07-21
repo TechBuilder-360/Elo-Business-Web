@@ -144,7 +144,7 @@ const handleComplianceNavigation = () => {
     <!-- Header -->
     <header class="border-b bg-card sticky top-0 z-10">
       <div
-        class="container max-w-6xl mx-auto flex items-center justify-between py-3 px-4"
+        class="container max-w-8xl mx-auto flex items-center justify-between py-3 px-4"
       >
         <div class="flex items-center gap-3">
           <div
@@ -199,7 +199,7 @@ const handleComplianceNavigation = () => {
       </div>
     </header>
 
-    <main class="container max-w-6xl mx-auto py-6 px-4 space-y-6">
+    <main class="container max-w-8xl mx-auto py-6 px-4 space-y-6">
       <!-- Summary Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card class="border-0 shadow-md shadow-foreground/5 bg-card">

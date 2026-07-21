@@ -1,7 +1,7 @@
 import { computed, mergeProps, unref, withCtx, createVNode, createTextVNode, ref, toDisplayString, openBlock, createBlock, h, useSSRContext } from 'vue';
-import { ssrRenderAttrs, ssrRenderComponent, ssrInterpolate, ssrRenderList } from 'vue/server-renderer';
+import { ssrRenderAttrs, ssrRenderComponent, ssrRenderAttr, ssrInterpolate, ssrRenderList } from 'vue/server-renderer';
 import { T as Tabs, b as TabsList, c as TabsTrigger, a as TabsContent } from './tabs-1FqyMY98.mjs';
-import { ArrowLeft, Building2, Info, Users, ChevronRight, Lock, UserPlus, Shield, Trash2 } from 'lucide-vue-next';
+import { ArrowLeft, Info, Users, ChevronRight, Lock, UserPlus, Shield, Trash2 } from 'lucide-vue-next';
 import { B as Button } from './button-Bxu1RhCi.mjs';
 import { C as Card, a as CardContent } from './card-Cq6gP5nL.mjs';
 import { B as Badge } from './badge-gp1MX3La.mjs';
@@ -613,9 +613,7 @@ const _sfc_main = {
         }),
         _: 1
       }, _parent));
-      _push(`<div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">`);
-      _push(ssrRenderComponent(unref(Building2), { class: "w-5 h-5 text-primary-foreground" }, null, _parent));
-      _push(`</div><div><h1 class="text-lg font-bold leading-tight">Settings</h1><p class="text-xs text-muted-foreground">${ssrInterpolate(businessName.value)}</p></div></div></div></header><main class="container max-w-6xl mx-auto py-6 px-4">`);
+      _push(`<div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center overflow-hidden"><img${ssrRenderAttr("src", "/favicon_io/favicon_io/apple-touch-icon.png")} class="w-full h-full object-cover" alt="ELO"></div><div><h1 class="text-lg font-bold leading-tight">Settings</h1><p class="text-xs text-muted-foreground">${ssrInterpolate(businessName.value)}</p></div></div></div></header><main class="container max-w-6xl mx-auto py-6 px-4">`);
       _push(ssrRenderComponent(unref(Tabs), { defaultValue: "business-info" }, {
         default: withCtx((_, _push2, _parent2, _scopeId) => {
           if (_push2) {
@@ -858,4 +856,4 @@ _sfc_main.setup = (props, ctx) => {
 };
 
 export { _sfc_main as default };
-//# sourceMappingURL=settings-BnJ5miHF.mjs.map
+//# sourceMappingURL=settings-hTkL9R4v.mjs.map

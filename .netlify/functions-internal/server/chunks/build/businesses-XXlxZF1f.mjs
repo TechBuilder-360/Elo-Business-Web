@@ -1,8 +1,8 @@
 import { computed, ref, watch, mergeProps, unref, withCtx, createTextVNode, createVNode, openBlock, createBlock, useSSRContext } from 'vue';
 import { ssrRenderAttrs, ssrRenderComponent, ssrRenderAttr, ssrInterpolate, ssrRenderList, ssrRenderClass } from 'vue/server-renderer';
 import { B as Button } from './button-Bxu1RhCi.mjs';
-import { ShieldAlert, Building2, Plus, LogOut, Loader2, RotateCcw, ChevronRight } from 'lucide-vue-next';
-import { u as useBusiness } from './useBusiness-DUTOJ7No.mjs';
+import { ShieldAlert, Plus, LogOut, Loader2, RotateCcw, Building2, ChevronRight } from 'lucide-vue-next';
+import { u as useBusiness } from './useBusiness-BCRRRkfq.mjs';
 import { a as useGQLQuery, u as useGQLMutation } from './useGraphQL-Bw_Hbd5v.mjs';
 import { u as useAuth } from './useAuth-CFqBlum2.mjs';
 import { t as toast } from './alert-D7s0TqQ8.mjs';
@@ -191,9 +191,7 @@ const _sfc_main = {
       } else {
         _push(`<!---->`);
       }
-      _push(`<header class="sticky top-0 z-40 border-b bg-card/80 backdrop-blur-sm"><div class="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 py-3"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">`);
-      _push(ssrRenderComponent(unref(Building2), { class: "w-4 h-4 text-primary-foreground" }, null, _parent));
-      _push(`</div><span class="font-bold text-foreground text-sm sm:text-base">ELO Business</span></div><div class="flex items-center gap-2">`);
+      _push(`<header class="sticky top-0 z-40 border-b bg-card/80 backdrop-blur-sm"><div class="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 py-3"><div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center overflow-hidden"><img${ssrRenderAttr("src", "/favicon_io/favicon_io/apple-touch-icon.png")} class="w-full h-full object-cover" alt="ELO"></div><span class="font-bold text-foreground text-sm sm:text-base">ELO Business</span></div><div class="flex items-center gap-2">`);
       if (isUserVerified.value && businesses.value.length > 0) {
         _push(ssrRenderComponent(unref(Button), {
           size: "sm",
@@ -390,4 +388,4 @@ _sfc_main.setup = (props, ctx) => {
 };
 
 export { _sfc_main as default };
-//# sourceMappingURL=businesses-CoT5MTyV.mjs.map
+//# sourceMappingURL=businesses-XXlxZF1f.mjs.map

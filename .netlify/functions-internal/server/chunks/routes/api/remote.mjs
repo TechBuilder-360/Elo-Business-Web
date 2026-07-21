@@ -1,4 +1,4 @@
-import { a as defineEventHandler, y as readBody, l as getHeaders, k as getCookie, C as useRuntimeConfig, A as setCookie, c as createError } from '../../nitro/nitro.mjs';
+import { a as defineEventHandler, y as readBody, l as getHeaders, k as getCookie, A as setCookie, c as createError } from '../../nitro/nitro.mjs';
 import 'node:http';
 import 'node:https';
 import 'node:events';
@@ -23,11 +23,11 @@ const remote = defineEventHandler(async (event) => {
   if (authCookie && !reqHeaders.Authorization) {
     reqHeaders.Authorization = `Bearer ${authCookie}`;
   }
+  process.env.BACKEND_URL;
   try {
-    const config = useRuntimeConfig();
-    const backendUrl = `${config.backendUrl}/api`;
+    const backendUrl2 = `${process.env.BACKEND_URL}/api`;
     const response = await $fetch(
-      backendUrl,
+      backendUrl2,
       {
         method: "POST",
         body,

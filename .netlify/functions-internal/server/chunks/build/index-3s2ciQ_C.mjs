@@ -1,11 +1,11 @@
 import { _ as __nuxt_component_0 } from './nuxt-link-CFAdaFZb.mjs';
 import { ref, mergeProps, unref, withCtx, createTextVNode, openBlock, createBlock, createVNode, useSSRContext } from 'vue';
-import { ssrRenderAttrs, ssrRenderStyle, ssrRenderComponent, ssrInterpolate } from 'vue/server-renderer';
+import { ssrRenderAttrs, ssrRenderStyle, ssrRenderAttr, ssrInterpolate, ssrRenderComponent } from 'vue/server-renderer';
 import { u as useAuth } from './useAuth-CFqBlum2.mjs';
 import { B as Button } from './button-Bxu1RhCi.mjs';
 import { I as Input } from './input-C1C1FSk7.mjs';
 import { L as Label } from './label-CU-twOy-.mjs';
-import { Building2, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-vue-next';
+import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-vue-next';
 import '../nitro/nitro.mjs';
 import 'node:http';
 import 'node:https';
@@ -36,13 +36,7 @@ const _sfc_main = {
     const isPending = requestOtp.isPending;
     return (_ctx, _push, _parent, _attrs) => {
       const _component_NuxtLink = __nuxt_component_0;
-      _push(`<div${ssrRenderAttrs(mergeProps({ class: "min-h-screen flex w-full bg-background" }, _attrs))}><div class="hidden lg:flex flex-1 relative bg-zinc-950 text-white overflow-hidden flex-col justify-between p-12"><div class="absolute inset-0 bg-cover bg-center opacity-70 z-0" style="${ssrRenderStyle({ "background-image": "url('/elo_login_bg.svg')" })}"></div><div class="relative z-10 flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">`);
-      _push(ssrRenderComponent(unref(Building2), { class: "w-6 h-6 text-primary-foreground" }, null, _parent));
-      _push(`</div><span class="text-xl font-bold tracking-tight">ELO Business</span></div><div class="relative z-10 max-w-lg"><div class="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center mb-8 ring-1 ring-white/20 shadow-2xl">`);
-      _push(ssrRenderComponent(unref(Building2), { class: "w-10 h-10 text-white/80" }, null, _parent));
-      _push(`</div><h2 class="text-4xl font-extrabold tracking-tight">ELO Business</h2></div><div class="relative z-10 text-sm text-zinc-500 font-medium"> © ${ssrInterpolate((/* @__PURE__ */ new Date()).getFullYear())} ELO. All rights reserved. </div></div><div class="flex-1 flex items-center justify-center p-6 lg:p-12 relative"><div class="absolute top-8 left-8 lg:hidden flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">`);
-      _push(ssrRenderComponent(unref(Building2), { class: "w-5 h-5 text-primary-foreground" }, null, _parent));
-      _push(`</div><span class="font-bold">ELO</span></div><div class="w-full max-w-sm space-y-8"><div class="text-center lg:text-left"><h1 class="text-3xl font-bold tracking-tight text-foreground"> Welcome back </h1><p class="text-sm text-muted-foreground mt-2"> Enter your credentials to access your account </p></div><form class="space-y-6"><div class="space-y-4"><div class="space-y-2 group">`);
+      _push(`<div${ssrRenderAttrs(mergeProps({ class: "min-h-screen flex w-full bg-background" }, _attrs))}><div class="hidden lg:flex flex-1 relative bg-zinc-950 text-white overflow-hidden flex-col justify-between p-12"><div class="absolute inset-0 bg-cover bg-center opacity-70 z-0" style="${ssrRenderStyle({ "background-image": "url('/elo_login_bg.svg')" })}"></div><div class="relative z-10 flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 overflow-hidden"><img${ssrRenderAttr("src", "/favicon_io/favicon_io/apple-touch-icon.png")} class="w-full h-full object-cover" alt="ELO"></div><span class="text-xl font-bold tracking-tight">ELO Business</span></div><div class="relative z-10 max-w-lg"><div class="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center mb-8 ring-1 ring-white/20 shadow-2xl overflow-hidden"><img${ssrRenderAttr("src", "/favicon_io/favicon_io/apple-touch-icon.png")} class="w-full h-full object-cover" alt="ELO"></div><h2 class="text-4xl font-extrabold tracking-tight">ELO Business</h2></div><div class="relative z-10 text-sm text-zinc-500 font-medium"> © ${ssrInterpolate((/* @__PURE__ */ new Date()).getFullYear())} ELO. All rights reserved. </div></div><div class="flex-1 flex items-center justify-center p-6 lg:p-12 relative"><div class="absolute top-8 left-8 lg:hidden flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center overflow-hidden"><img${ssrRenderAttr("src", "/favicon_io/favicon_io/apple-touch-icon.png")} class="w-full h-full object-cover" alt="ELO"></div><span class="font-bold">ELO</span></div><div class="w-full max-w-sm space-y-8"><div class="text-center lg:text-left"><h1 class="text-3xl font-bold tracking-tight text-foreground"> Welcome back </h1><p class="text-sm text-muted-foreground mt-2"> Enter your credentials to access your account </p></div><form class="space-y-6"><div class="space-y-4"><div class="space-y-2 group">`);
       _push(ssrRenderComponent(unref(Label), {
         for: "email",
         class: "text-sm font-medium transition-colors group-focus-within:text-primary"
@@ -182,4 +176,4 @@ _sfc_main.setup = (props, ctx) => {
 };
 
 export { _sfc_main as default };
-//# sourceMappingURL=index-BQ5OmzC2.mjs.map
+//# sourceMappingURL=index-3s2ciQ_C.mjs.map

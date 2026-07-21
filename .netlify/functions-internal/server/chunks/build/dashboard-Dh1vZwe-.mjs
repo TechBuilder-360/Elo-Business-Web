@@ -1,10 +1,10 @@
 import { computed, ref, mergeProps, unref, withCtx, createVNode, createTextVNode, toDisplayString, provide, h, inject, useSSRContext } from 'vue';
-import { ssrRenderAttrs, ssrRenderComponent, ssrInterpolate } from 'vue/server-renderer';
+import { ssrRenderAttrs, ssrRenderAttr, ssrInterpolate, ssrRenderComponent } from 'vue/server-renderer';
 import { C as Card, a as CardContent, c as CardHeader, d as CardTitle } from './card-Cq6gP5nL.mjs';
 import { B as Badge } from './badge-gp1MX3La.mjs';
 import { B as Button } from './button-Bxu1RhCi.mjs';
 import { T as Tabs, b as TabsList, c as TabsTrigger } from './tabs-1FqyMY98.mjs';
-import { Building2, Wallet, ShieldCheck, Settings, Eye, TrendingUp, Users } from 'lucide-vue-next';
+import { Wallet, ShieldCheck, Settings, Eye, TrendingUp, Users } from 'lucide-vue-next';
 import { b as useRoute$1, n as navigateTo } from './server.mjs';
 import '../nitro/nitro.mjs';
 import 'node:http';
@@ -450,9 +450,7 @@ const _sfc_main = {
       });
     };
     return (_ctx, _push, _parent, _attrs) => {
-      _push(`<div${ssrRenderAttrs(mergeProps({ class: "min-h-screen bg-background text-foreground" }, _attrs))}><header class="border-b bg-card sticky top-0 z-10"><div class="container max-w-6xl mx-auto flex items-center justify-between py-3 px-4"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">`);
-      _push(ssrRenderComponent(unref(Building2), { class: "w-5 h-5 text-primary-foreground" }, null, _parent));
-      _push(`</div><div><h1 class="text-lg font-bold leading-tight">${ssrInterpolate(businessName.value)}</h1><p class="text-xs text-muted-foreground">Dashboard</p></div></div><div class="flex items-center gap-2">`);
+      _push(`<div${ssrRenderAttrs(mergeProps({ class: "min-h-screen bg-background text-foreground" }, _attrs))}><header class="border-b bg-card sticky top-0 z-10"><div class="container max-w-6xl mx-auto flex items-center justify-between py-3 px-4"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center overflow-hidden"><img${ssrRenderAttr("src", "/favicon_io/favicon_io/apple-touch-icon.png")} class="w-full h-full object-cover" alt="ELO"></div><div><h1 class="text-lg font-bold leading-tight">${ssrInterpolate(businessName.value)}</h1><p class="text-xs text-muted-foreground">Dashboard</p></div></div><div class="flex items-center gap-2">`);
       _push(ssrRenderComponent(unref(Badge), {
         variant: "outline",
         class: "border-[hsl(var(--warning))] text-[hsl(var(--warning-foreground))] bg-[hsl(var(--warning)/0.1)] gap-1.5 py-1"
@@ -531,14 +529,14 @@ const _sfc_main = {
                 if (_push3) {
                   _push3(`<div class="w-10 h-10 rounded-lg bg-accent flex items-center justify-center shrink-0"${_scopeId2}>`);
                   _push3(ssrRenderComponent(unref(Eye), { class: "w-5 h-5 text-accent-foreground" }, null, _parent3, _scopeId2));
-                  _push3(`</div><div${_scopeId2}><p class="text-xs text-muted-foreground font-medium"${_scopeId2}>Total Visits</p><p class="text-2xl font-bold text-foreground"${_scopeId2}>${ssrInterpolate(totalVisits.value.toLocaleString())}</p></div>`);
+                  _push3(`</div><div${_scopeId2}><p class="text-xs text-muted-foreground font-medium"${_scopeId2}> Total Visits </p><p class="text-2xl font-bold text-foreground"${_scopeId2}>${ssrInterpolate(totalVisits.value.toLocaleString())}</p></div>`);
                 } else {
                   return [
                     createVNode("div", { class: "w-10 h-10 rounded-lg bg-accent flex items-center justify-center shrink-0" }, [
                       createVNode(unref(Eye), { class: "w-5 h-5 text-accent-foreground" })
                     ]),
                     createVNode("div", null, [
-                      createVNode("p", { class: "text-xs text-muted-foreground font-medium" }, "Total Visits"),
+                      createVNode("p", { class: "text-xs text-muted-foreground font-medium" }, " Total Visits "),
                       createVNode("p", { class: "text-2xl font-bold text-foreground" }, toDisplayString(totalVisits.value.toLocaleString()), 1)
                     ])
                   ];
@@ -554,7 +552,7 @@ const _sfc_main = {
                     createVNode(unref(Eye), { class: "w-5 h-5 text-accent-foreground" })
                   ]),
                   createVNode("div", null, [
-                    createVNode("p", { class: "text-xs text-muted-foreground font-medium" }, "Total Visits"),
+                    createVNode("p", { class: "text-xs text-muted-foreground font-medium" }, " Total Visits "),
                     createVNode("p", { class: "text-2xl font-bold text-foreground" }, toDisplayString(totalVisits.value.toLocaleString()), 1)
                   ])
                 ]),
@@ -573,14 +571,14 @@ const _sfc_main = {
                 if (_push3) {
                   _push3(`<div class="w-10 h-10 rounded-lg bg-accent flex items-center justify-center shrink-0"${_scopeId2}>`);
                   _push3(ssrRenderComponent(unref(TrendingUp), { class: "w-5 h-5 text-accent-foreground" }, null, _parent3, _scopeId2));
-                  _push3(`</div><div${_scopeId2}><p class="text-xs text-muted-foreground font-medium"${_scopeId2}>Latest Revenue</p><p class="text-2xl font-bold text-foreground"${_scopeId2}> $${ssrInterpolate(latestRevenue.value.toLocaleString())}</p></div>`);
+                  _push3(`</div><div${_scopeId2}><p class="text-xs text-muted-foreground font-medium"${_scopeId2}> Latest Revenue </p><p class="text-2xl font-bold text-foreground"${_scopeId2}> $${ssrInterpolate(latestRevenue.value.toLocaleString())}</p></div>`);
                 } else {
                   return [
                     createVNode("div", { class: "w-10 h-10 rounded-lg bg-accent flex items-center justify-center shrink-0" }, [
                       createVNode(unref(TrendingUp), { class: "w-5 h-5 text-accent-foreground" })
                     ]),
                     createVNode("div", null, [
-                      createVNode("p", { class: "text-xs text-muted-foreground font-medium" }, "Latest Revenue"),
+                      createVNode("p", { class: "text-xs text-muted-foreground font-medium" }, " Latest Revenue "),
                       createVNode("p", { class: "text-2xl font-bold text-foreground" }, " $" + toDisplayString(latestRevenue.value.toLocaleString()), 1)
                     ])
                   ];
@@ -596,7 +594,7 @@ const _sfc_main = {
                     createVNode(unref(TrendingUp), { class: "w-5 h-5 text-accent-foreground" })
                   ]),
                   createVNode("div", null, [
-                    createVNode("p", { class: "text-xs text-muted-foreground font-medium" }, "Latest Revenue"),
+                    createVNode("p", { class: "text-xs text-muted-foreground font-medium" }, " Latest Revenue "),
                     createVNode("p", { class: "text-2xl font-bold text-foreground" }, " $" + toDisplayString(latestRevenue.value.toLocaleString()), 1)
                   ])
                 ]),
@@ -615,14 +613,14 @@ const _sfc_main = {
                 if (_push3) {
                   _push3(`<div class="w-10 h-10 rounded-lg bg-accent flex items-center justify-center shrink-0"${_scopeId2}>`);
                   _push3(ssrRenderComponent(unref(Users), { class: "w-5 h-5 text-accent-foreground" }, null, _parent3, _scopeId2));
-                  _push3(`</div><div${_scopeId2}><p class="text-xs text-muted-foreground font-medium"${_scopeId2}>Total Customers</p><p class="text-2xl font-bold text-foreground"${_scopeId2}>${ssrInterpolate(totalCustomers.value)}</p></div>`);
+                  _push3(`</div><div${_scopeId2}><p class="text-xs text-muted-foreground font-medium"${_scopeId2}> Total Customers </p><p class="text-2xl font-bold text-foreground"${_scopeId2}>${ssrInterpolate(totalCustomers.value)}</p></div>`);
                 } else {
                   return [
                     createVNode("div", { class: "w-10 h-10 rounded-lg bg-accent flex items-center justify-center shrink-0" }, [
                       createVNode(unref(Users), { class: "w-5 h-5 text-accent-foreground" })
                     ]),
                     createVNode("div", null, [
-                      createVNode("p", { class: "text-xs text-muted-foreground font-medium" }, "Total Customers"),
+                      createVNode("p", { class: "text-xs text-muted-foreground font-medium" }, " Total Customers "),
                       createVNode("p", { class: "text-2xl font-bold text-foreground" }, toDisplayString(totalCustomers.value), 1)
                     ])
                   ];
@@ -638,7 +636,7 @@ const _sfc_main = {
                     createVNode(unref(Users), { class: "w-5 h-5 text-accent-foreground" })
                   ]),
                   createVNode("div", null, [
-                    createVNode("p", { class: "text-xs text-muted-foreground font-medium" }, "Total Customers"),
+                    createVNode("p", { class: "text-xs text-muted-foreground font-medium" }, " Total Customers "),
                     createVNode("p", { class: "text-2xl font-bold text-foreground" }, toDisplayString(totalCustomers.value), 1)
                   ])
                 ]),
@@ -1404,4 +1402,4 @@ _sfc_main.setup = (props, ctx) => {
 };
 
 export { _sfc_main as default };
-//# sourceMappingURL=dashboard-DiE1Mrva.mjs.map
+//# sourceMappingURL=dashboard-Dh1vZwe-.mjs.map

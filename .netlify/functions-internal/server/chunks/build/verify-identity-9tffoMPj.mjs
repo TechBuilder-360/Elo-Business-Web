@@ -1,8 +1,8 @@
 import { mergeProps, unref, withCtx, createTextVNode, createVNode, useSSRContext } from 'vue';
-import { ssrRenderAttrs, ssrRenderComponent } from 'vue/server-renderer';
+import { ssrRenderAttrs, ssrRenderAttr, ssrRenderComponent } from 'vue/server-renderer';
 import { C as Card, c as CardHeader, d as CardTitle, b as CardDescription, a as CardContent } from './card-Cq6gP5nL.mjs';
 import { B as Button } from './button-Bxu1RhCi.mjs';
-import { Building2, ShieldCheck, ExternalLink } from 'lucide-vue-next';
+import { ShieldCheck, ExternalLink } from 'lucide-vue-next';
 
 const _sfc_main = {
   __name: "verify-identity",
@@ -12,9 +12,7 @@ const _sfc_main = {
       (void 0).open("https://example.com/verify", "_blank");
     };
     return (_ctx, _push, _parent, _attrs) => {
-      _push(`<div${ssrRenderAttrs(mergeProps({ class: "min-h-screen bg-background flex items-center justify-center px-4" }, _attrs))}><div class="w-full max-w-md"><div class="flex flex-col items-center mb-8"><div class="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center mb-4">`);
-      _push(ssrRenderComponent(unref(Building2), { class: "w-7 h-7 text-primary-foreground" }, null, _parent));
-      _push(`</div><h1 class="text-2xl font-bold text-foreground">Verify your identity</h1><p class="text-sm text-muted-foreground mt-1"> Complete identity verification to continue </p></div>`);
+      _push(`<div${ssrRenderAttrs(mergeProps({ class: "min-h-screen bg-background flex items-center justify-center px-4" }, _attrs))}><div class="w-full max-w-md"><div class="flex flex-col items-center mb-8"><div class="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center mb-4 overflow-hidden"><img${ssrRenderAttr("src", "/favicon_io/favicon_io/apple-touch-icon.png")} class="w-full h-full object-cover" alt="ELO"></div><h1 class="text-2xl font-bold text-foreground">Verify your identity</h1><p class="text-sm text-muted-foreground mt-1"> Complete identity verification to continue </p></div>`);
       _push(ssrRenderComponent(unref(Card), { class: "shadow-lg border-0 shadow-foreground/5" }, {
         default: withCtx((_, _push2, _parent2, _scopeId) => {
           if (_push2) {
@@ -184,4 +182,4 @@ _sfc_main.setup = (props, ctx) => {
 };
 
 export { _sfc_main as default };
-//# sourceMappingURL=verify-identity-jQT-5yLh.mjs.map
+//# sourceMappingURL=verify-identity-9tffoMPj.mjs.map

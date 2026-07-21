@@ -32,7 +32,7 @@ const handleEditBusinessInfo = () => {
   <div class="min-h-screen bg-background text-foreground">
     <header class="border-b bg-card sticky top-0 z-10">
       <div
-        class="container max-w-6xl mx-auto flex items-center justify-between py-3 px-4"
+        class="container max-w-8xl mx-auto flex items-center justify-between py-3 px-4"
       >
         <div class="flex items-center gap-3">
           <Button
@@ -56,7 +56,7 @@ const handleEditBusinessInfo = () => {
       </div>
     </header>
 
-    <main class="container max-w-6xl mx-auto py-6 px-4">
+    <main class="container max-w-8xl mx-auto py-6 px-4">
       <Tabs defaultValue="business-info">
         <TabsList class="mb-6 flex-wrap h-auto gap-1 p-1">
           <TabsTrigger value="business-info" class="gap-1.5 text-xs">

@@ -1,11 +1,14 @@
-import { computed, ref, mergeProps, unref, withCtx, createVNode, createTextVNode, openBlock, createBlock, toDisplayString, Fragment, renderList, createCommentVNode, h, useSSRContext } from 'vue';
-import { ssrRenderAttrs, ssrRenderComponent, ssrInterpolate, ssrRenderList, ssrRenderClass } from 'vue/server-renderer';
+import { computed, ref, mergeProps, unref, withCtx, createVNode, createTextVNode, openBlock, createBlock, toDisplayString, Fragment, renderList, withDirectives, vModelSelect, createCommentVNode, h, useSSRContext } from 'vue';
+import { ssrRenderAttrs, ssrRenderComponent, ssrInterpolate, ssrRenderList, ssrRenderClass, ssrRenderTeleport, ssrIncludeBooleanAttr, ssrLooseContain, ssrLooseEqual, ssrRenderAttr } from 'vue/server-renderer';
+import { u as useBusiness } from './useBusiness-BCRRRkfq.mjs';
+import { useQueryClient } from '@tanstack/vue-query';
 import { C as Card, a as CardContent, c as CardHeader, d as CardTitle } from './card-Cq6gP5nL.mjs';
 import { B as Button } from './button-Bxu1RhCi.mjs';
 import { B as Badge } from './badge-gp1MX3La.mjs';
 import { T as Tabs, b as TabsList, c as TabsTrigger } from './tabs-1FqyMY98.mjs';
 import { ArrowLeft, Wallet, EyeOff, Eye, ArrowDownLeft, ArrowUpRight, TrendingUp, ChevronRight, Landmark, Check, Copy } from 'lucide-vue-next';
 import { b as useRoute$1, n as navigateTo } from './server.mjs';
+import './useGraphQL-Bw_Hbd5v.mjs';
 import '../nitro/nitro.mjs';
 import 'node:http';
 import 'node:https';
@@ -21,7 +24,6 @@ import 'devalue';
 import 'unhead/utils';
 import 'perfect-debounce';
 import '@vue/shared';
-import '@tanstack/vue-query';
 
 const Table = {
   name: "Table",
@@ -553,166 +555,80 @@ const _sfc_main = {
     const selectedWallet = ref(null);
     const showBalance = ref(true);
     const txFilter = ref("all");
-    const ngnTransactions = [
-      {
-        id: "1",
-        type: "credit",
-        description: "Payment from Adewale B.",
-        amount: 125e3,
-        date: "2026-03-18",
-        status: "completed",
-        reference: "TXN-NGN-8271"
-      },
-      {
-        id: "2",
-        type: "debit",
-        description: "Supplier — Kemi Fabrics",
-        amount: 45e3,
-        date: "2026-03-17",
-        status: "completed",
-        reference: "TXN-NGN-8270"
-      },
-      {
-        id: "3",
-        type: "credit",
-        description: "Service fee — Hair styling",
-        amount: 18500,
-        date: "2026-03-16",
-        status: "completed",
-        reference: "TXN-NGN-8269"
-      },
-      {
-        id: "4",
-        type: "credit",
-        description: "Product sale — Skincare set",
-        amount: 32e3,
-        date: "2026-03-15",
-        status: "pending",
-        reference: "TXN-NGN-8268"
-      },
-      {
-        id: "5",
-        type: "debit",
-        description: "Withdrawal to GTBank",
-        amount: 2e5,
-        date: "2026-03-14",
-        status: "completed",
-        reference: "TXN-NGN-8267"
-      },
-      {
-        id: "6",
-        type: "credit",
-        description: "Payment from Tunde M.",
-        amount: 67e3,
-        date: "2026-03-12",
-        status: "completed",
-        reference: "TXN-NGN-8266"
-      },
-      {
-        id: "7",
-        type: "debit",
-        description: "Electricity — EKEDC",
-        amount: 15800,
-        date: "2026-03-10",
-        status: "failed",
-        reference: "TXN-NGN-8265"
-      }
-    ];
-    const usdTransactions = [
-      {
-        id: "1",
-        type: "credit",
-        description: "Freelance — Morgan & Co.",
-        amount: 2400,
-        date: "2026-03-19",
-        status: "completed",
-        reference: "TXN-USD-4102"
-      },
-      {
-        id: "2",
-        type: "debit",
-        description: "SaaS subscription — Notion",
-        amount: 96,
-        date: "2026-03-17",
-        status: "completed",
-        reference: "TXN-USD-4101"
-      },
-      {
-        id: "3",
-        type: "credit",
-        description: "Consulting fee — Harper Ltd",
-        amount: 1750,
-        date: "2026-03-14",
-        status: "completed",
-        reference: "TXN-USD-4100"
-      },
-      {
-        id: "4",
-        type: "debit",
-        description: "Domain renewal",
-        amount: 14.99,
-        date: "2026-03-12",
-        status: "completed",
-        reference: "TXN-USD-4099"
-      },
-      {
-        id: "5",
-        type: "credit",
-        description: "Product sale — Int'l order",
-        amount: 385,
-        date: "2026-03-10",
-        status: "pending",
-        reference: "TXN-USD-4098"
-      }
-    ];
-    const wallets = [
-      {
-        currency: "NGN",
-        symbol: "₦",
-        balance: 184732055e-2,
-        totalRevenue: 3240500,
-        totalSpent: 139317945e-2,
-        pendingAmount: 32e3,
-        transactions: ngnTransactions,
-        accounts: [
+    const { getWalletsQuery, getCurrenciesQuery, addWallet } = useBusiness();
+    const qc = useQueryClient();
+    const {
+      data: walletsData,
+      isPending: isWalletsPending,
+      isError: isWalletsError,
+      error: walletsError
+    } = getWalletsQuery("TREASURY");
+    const { data: currenciesData } = getCurrenciesQuery();
+    const showAddWalletModal = ref(false);
+    const selectedCurrencyCode = ref("");
+    const isAddingWallet = ref(false);
+    const fiatCurrencies = computed(
+      () => currenciesData.value?.currencies?.filter((c) => c.is_fiat) || []
+    );
+    const handleAddWallet = async () => {
+      if (!selectedCurrencyCode.value) return;
+      isAddingWallet.value = true;
+      const curr = fiatCurrencies.value.find((c) => c.code === selectedCurrencyCode.value) || {};
+      const optimisticWallet = {
+        id: `optimistic-${Date.now()}`,
+        currency: selectedCurrencyCode.value,
+        symbol: curr.symbol || selectedCurrencyCode.value
+      };
+      qc.setQueryData(["wallets", "TREASURY"], (old) => ({
+        wallets: [
+          ...old?.wallets || [],
           {
-            id: "ngn-1",
-            bankName: "GTBank",
-            accountName: "Chidi Ventures Ltd",
-            accountNumber: "0123456789",
-            sortCode: "058",
-            isPrimary: true
-          },
-          {
-            id: "ngn-2",
-            bankName: "Access Bank",
-            accountName: "Chidi Ventures Ltd",
-            accountNumber: "9876543210",
-            sortCode: "044",
-            isPrimary: false
+            id: optimisticWallet.id,
+            currency: optimisticWallet.currency,
+            available_balance: 0,
+            ledger_balance: 0,
+            holding_balance: 0,
+            type: "TREASURY",
+            active: true
           }
         ]
-      },
-      {
-        currency: "USD",
-        symbol: "$",
-        balance: 8274.01,
-        totalRevenue: 14535,
-        totalSpent: 6260.99,
-        pendingAmount: 385,
-        transactions: usdTransactions,
-        accounts: [
-          {
-            id: "usd-1",
-            bankName: "Mercury",
-            accountName: "Chidi Ventures Inc",
-            accountNumber: "1928374650",
-            routingNumber: "084009519",
-            isPrimary: true
-          }
-        ]
+      }));
+      showAddWalletModal.value = false;
+      try {
+        await addWallet.mutateAsync({
+          currency_code: selectedCurrencyCode.value,
+          wallet_type: "TREASURY"
+        });
+        qc.invalidateQueries({ queryKey: ["wallets", "TREASURY"] });
+        selectedCurrencyCode.value = "";
+      } catch (err) {
+        qc.invalidateQueries({ queryKey: ["wallets", "TREASURY"] });
+        console.error("Add wallet failed:", err);
+      } finally {
+        isAddingWallet.value = false;
       }
-    ];
+    };
+    const wallets = computed(() => {
+      const fetchedWallets = walletsData.value?.wallets;
+      if (!fetchedWallets) return [];
+      const currList = currenciesData.value?.currencies || [];
+      return fetchedWallets.map((w) => {
+        const curr = currList.find((c) => c.code === w.currency) || {};
+        const symbol = curr.symbol || w.currency;
+        return {
+          id: w.id,
+          currency: w.currency,
+          symbol,
+          balance: w.available_balance || 0,
+          totalRevenue: w.ledger_balance || 0,
+          totalSpent: 0,
+          pendingAmount: w.holding_balance || 0,
+          transactions: [],
+          // will wire up once transaction query is available
+          accounts: []
+        };
+      });
+    });
     const formatAmount = (amount, symbol) => {
       return `${symbol}${amount.toLocaleString(void 0, {
         minimumFractionDigits: 2,
@@ -858,7 +774,10 @@ const _sfc_main = {
                   if (_push3) {
                     _push3(`<div class="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0"${_scopeId2}>`);
                     _push3(ssrRenderComponent(unref(ArrowDownLeft), { class: "w-4 h-4 text-emerald-600" }, null, _parent3, _scopeId2));
-                    _push3(`</div><div${_scopeId2}><p class="text-xs text-muted-foreground"${_scopeId2}>Total Revenue</p><p class="text-lg font-bold tabular-nums text-foreground"${_scopeId2}>${ssrInterpolate(formatAmount(selectedWallet.value.totalRevenue, selectedWallet.value.symbol))}</p></div>`);
+                    _push3(`</div><div${_scopeId2}><p class="text-xs text-muted-foreground"${_scopeId2}>Total Revenue</p><p class="text-lg font-bold tabular-nums text-foreground"${_scopeId2}>${ssrInterpolate(formatAmount(
+                      selectedWallet.value.totalRevenue,
+                      selectedWallet.value.symbol
+                    ))}</p></div>`);
                   } else {
                     return [
                       createVNode("div", { class: "w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0" }, [
@@ -866,7 +785,10 @@ const _sfc_main = {
                       ]),
                       createVNode("div", null, [
                         createVNode("p", { class: "text-xs text-muted-foreground" }, "Total Revenue"),
-                        createVNode("p", { class: "text-lg font-bold tabular-nums text-foreground" }, toDisplayString(formatAmount(selectedWallet.value.totalRevenue, selectedWallet.value.symbol)), 1)
+                        createVNode("p", { class: "text-lg font-bold tabular-nums text-foreground" }, toDisplayString(formatAmount(
+                          selectedWallet.value.totalRevenue,
+                          selectedWallet.value.symbol
+                        )), 1)
                       ])
                     ];
                   }
@@ -882,7 +804,10 @@ const _sfc_main = {
                     ]),
                     createVNode("div", null, [
                       createVNode("p", { class: "text-xs text-muted-foreground" }, "Total Revenue"),
-                      createVNode("p", { class: "text-lg font-bold tabular-nums text-foreground" }, toDisplayString(formatAmount(selectedWallet.value.totalRevenue, selectedWallet.value.symbol)), 1)
+                      createVNode("p", { class: "text-lg font-bold tabular-nums text-foreground" }, toDisplayString(formatAmount(
+                        selectedWallet.value.totalRevenue,
+                        selectedWallet.value.symbol
+                      )), 1)
                     ])
                   ]),
                   _: 1
@@ -900,7 +825,10 @@ const _sfc_main = {
                   if (_push3) {
                     _push3(`<div class="w-9 h-9 rounded-lg bg-red-500/10 flex items-center justify-center shrink-0"${_scopeId2}>`);
                     _push3(ssrRenderComponent(unref(ArrowUpRight), { class: "w-4 h-4 text-red-600" }, null, _parent3, _scopeId2));
-                    _push3(`</div><div${_scopeId2}><p class="text-xs text-muted-foreground"${_scopeId2}>Total Spent</p><p class="text-lg font-bold tabular-nums text-foreground"${_scopeId2}>${ssrInterpolate(formatAmount(selectedWallet.value.totalSpent, selectedWallet.value.symbol))}</p></div>`);
+                    _push3(`</div><div${_scopeId2}><p class="text-xs text-muted-foreground"${_scopeId2}>Total Spent</p><p class="text-lg font-bold tabular-nums text-foreground"${_scopeId2}>${ssrInterpolate(formatAmount(
+                      selectedWallet.value.totalSpent,
+                      selectedWallet.value.symbol
+                    ))}</p></div>`);
                   } else {
                     return [
                       createVNode("div", { class: "w-9 h-9 rounded-lg bg-red-500/10 flex items-center justify-center shrink-0" }, [
@@ -908,7 +836,10 @@ const _sfc_main = {
                       ]),
                       createVNode("div", null, [
                         createVNode("p", { class: "text-xs text-muted-foreground" }, "Total Spent"),
-                        createVNode("p", { class: "text-lg font-bold tabular-nums text-foreground" }, toDisplayString(formatAmount(selectedWallet.value.totalSpent, selectedWallet.value.symbol)), 1)
+                        createVNode("p", { class: "text-lg font-bold tabular-nums text-foreground" }, toDisplayString(formatAmount(
+                          selectedWallet.value.totalSpent,
+                          selectedWallet.value.symbol
+                        )), 1)
                       ])
                     ];
                   }
@@ -924,7 +855,10 @@ const _sfc_main = {
                     ]),
                     createVNode("div", null, [
                       createVNode("p", { class: "text-xs text-muted-foreground" }, "Total Spent"),
-                      createVNode("p", { class: "text-lg font-bold tabular-nums text-foreground" }, toDisplayString(formatAmount(selectedWallet.value.totalSpent, selectedWallet.value.symbol)), 1)
+                      createVNode("p", { class: "text-lg font-bold tabular-nums text-foreground" }, toDisplayString(formatAmount(
+                        selectedWallet.value.totalSpent,
+                        selectedWallet.value.symbol
+                      )), 1)
                     ])
                   ]),
                   _: 1
@@ -942,7 +876,10 @@ const _sfc_main = {
                   if (_push3) {
                     _push3(`<div class="w-9 h-9 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0"${_scopeId2}>`);
                     _push3(ssrRenderComponent(unref(TrendingUp), { class: "w-4 h-4 text-amber-600" }, null, _parent3, _scopeId2));
-                    _push3(`</div><div${_scopeId2}><p class="text-xs text-muted-foreground"${_scopeId2}>Pending</p><p class="text-lg font-bold tabular-nums text-foreground"${_scopeId2}>${ssrInterpolate(formatAmount(selectedWallet.value.pendingAmount, selectedWallet.value.symbol))}</p></div>`);
+                    _push3(`</div><div${_scopeId2}><p class="text-xs text-muted-foreground"${_scopeId2}>Pending</p><p class="text-lg font-bold tabular-nums text-foreground"${_scopeId2}>${ssrInterpolate(formatAmount(
+                      selectedWallet.value.pendingAmount,
+                      selectedWallet.value.symbol
+                    ))}</p></div>`);
                   } else {
                     return [
                       createVNode("div", { class: "w-9 h-9 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0" }, [
@@ -950,7 +887,10 @@ const _sfc_main = {
                       ]),
                       createVNode("div", null, [
                         createVNode("p", { class: "text-xs text-muted-foreground" }, "Pending"),
-                        createVNode("p", { class: "text-lg font-bold tabular-nums text-foreground" }, toDisplayString(formatAmount(selectedWallet.value.pendingAmount, selectedWallet.value.symbol)), 1)
+                        createVNode("p", { class: "text-lg font-bold tabular-nums text-foreground" }, toDisplayString(formatAmount(
+                          selectedWallet.value.pendingAmount,
+                          selectedWallet.value.symbol
+                        )), 1)
                       ])
                     ];
                   }
@@ -966,7 +906,10 @@ const _sfc_main = {
                     ]),
                     createVNode("div", null, [
                       createVNode("p", { class: "text-xs text-muted-foreground" }, "Pending"),
-                      createVNode("p", { class: "text-lg font-bold tabular-nums text-foreground" }, toDisplayString(formatAmount(selectedWallet.value.pendingAmount, selectedWallet.value.symbol)), 1)
+                      createVNode("p", { class: "text-lg font-bold tabular-nums text-foreground" }, toDisplayString(formatAmount(
+                        selectedWallet.value.pendingAmount,
+                        selectedWallet.value.symbol
+                      )), 1)
                     ])
                   ]),
                   _: 1
@@ -2063,9 +2006,40 @@ const _sfc_main = {
           _: 1
         }, _parent));
         _push(`</div>`);
+      } else if (unref(isWalletsPending)) {
+        _push(`<div class="space-y-4"><div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><!--[-->`);
+        ssrRenderList(2, (i) => {
+          _push(`<div class="rounded-xl border-0 bg-card shadow-md shadow-foreground/5 p-5 animate-pulse"><div class="h-5 w-16 bg-muted rounded mb-4"></div><div class="h-3 w-24 bg-muted rounded mb-2"></div><div class="h-8 w-40 bg-muted rounded mb-4"></div><div class="flex gap-4 pt-3 border-t border-border/50"><div class="h-3 w-20 bg-muted rounded"></div><div class="h-3 w-20 bg-muted rounded"></div></div></div>`);
+        });
+        _push(`<!--]--></div></div>`);
       } else {
-        _push(`<div class="space-y-6 animate-in fade-in duration-300"><div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><!--[-->`);
-        ssrRenderList(wallets, (w) => {
+        _push(`<div class="space-y-6 animate-in fade-in duration-300"><div class="grid grid-cols-1 sm:grid-cols-2 gap-4">`);
+        if (wallets.value.length === 0) {
+          _push(`<div class="col-span-2 flex flex-col items-center justify-center py-20 text-muted-foreground"><div class="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">`);
+          _push(ssrRenderComponent(unref(Wallet), { class: "w-8 h-8 text-primary" }, null, _parent));
+          _push(`</div><p class="text-base font-semibold text-foreground mb-1">No wallets yet</p><p class="text-sm mb-5">Create your first Treasury wallet to start transacting.</p>`);
+          _push(ssrRenderComponent(unref(Button), {
+            onClick: ($event) => showAddWalletModal.value = true,
+            class: "gap-2"
+          }, {
+            default: withCtx((_, _push2, _parent2, _scopeId) => {
+              if (_push2) {
+                _push2(`<span class="text-lg leading-none"${_scopeId}>+</span> Add Wallet `);
+              } else {
+                return [
+                  createVNode("span", { class: "text-lg leading-none" }, "+"),
+                  createTextVNode(" Add Wallet ")
+                ];
+              }
+            }),
+            _: 1
+          }, _parent));
+          _push(`</div>`);
+        } else {
+          _push(`<!---->`);
+        }
+        _push(`<!--[-->`);
+        ssrRenderList(wallets.value, (w) => {
           _push(ssrRenderComponent(unref(Card), {
             key: w.currency,
             class: "border-0 shadow-md shadow-foreground/5 cursor-pointer hover:shadow-lg transition-shadow active:scale-[0.98] transition-transform bg-card",
@@ -2166,9 +2140,235 @@ const _sfc_main = {
             _: 2
           }, _parent));
         });
-        _push(`<!--]--></div></div>`);
+        _push(`<!--]--></div>`);
+        if (wallets.value.length > 0) {
+          _push(`<div class="flex justify-end">`);
+          _push(ssrRenderComponent(unref(Button), {
+            variant: "outline",
+            class: "gap-2",
+            onClick: ($event) => showAddWalletModal.value = true
+          }, {
+            default: withCtx((_, _push2, _parent2, _scopeId) => {
+              if (_push2) {
+                _push2(`<span class="text-lg leading-none"${_scopeId}>+</span> Add Wallet `);
+              } else {
+                return [
+                  createVNode("span", { class: "text-lg leading-none" }, "+"),
+                  createTextVNode(" Add Wallet ")
+                ];
+              }
+            }),
+            _: 1
+          }, _parent));
+          _push(`</div>`);
+        } else {
+          _push(`<!---->`);
+        }
+        _push(`</div>`);
       }
-      _push(`</main></div>`);
+      _push(`</main>`);
+      ssrRenderTeleport(_push, (_push2) => {
+        if (showAddWalletModal.value) {
+          _push2(`<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">`);
+          _push2(ssrRenderComponent(unref(Card), { class: "w-full max-w-sm border-0 shadow-2xl bg-card" }, {
+            default: withCtx((_, _push3, _parent2, _scopeId) => {
+              if (_push3) {
+                _push3(ssrRenderComponent(unref(CardHeader), { class: "pb-3" }, {
+                  default: withCtx((_2, _push4, _parent3, _scopeId2) => {
+                    if (_push4) {
+                      _push4(ssrRenderComponent(unref(CardTitle), { class: "text-base text-foreground" }, {
+                        default: withCtx((_3, _push5, _parent4, _scopeId3) => {
+                          if (_push5) {
+                            _push5(`Add Treasury Wallet`);
+                          } else {
+                            return [
+                              createTextVNode("Add Treasury Wallet")
+                            ];
+                          }
+                        }),
+                        _: 1
+                      }, _parent3, _scopeId2));
+                      _push4(`<p class="text-xs text-muted-foreground mt-1"${_scopeId2}>Select a currency to create your wallet</p>`);
+                    } else {
+                      return [
+                        createVNode(unref(CardTitle), { class: "text-base text-foreground" }, {
+                          default: withCtx(() => [
+                            createTextVNode("Add Treasury Wallet")
+                          ]),
+                          _: 1
+                        }),
+                        createVNode("p", { class: "text-xs text-muted-foreground mt-1" }, "Select a currency to create your wallet")
+                      ];
+                    }
+                  }),
+                  _: 1
+                }, _parent2, _scopeId));
+                _push3(ssrRenderComponent(unref(CardContent), { class: "space-y-4" }, {
+                  default: withCtx((_2, _push4, _parent3, _scopeId2) => {
+                    if (_push4) {
+                      _push4(`<div class="space-y-2"${_scopeId2}><label class="text-sm font-medium text-foreground"${_scopeId2}>Currency</label><select class="w-full h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"${_scopeId2}><option value="" disabled${ssrIncludeBooleanAttr(Array.isArray(selectedCurrencyCode.value) ? ssrLooseContain(selectedCurrencyCode.value, "") : ssrLooseEqual(selectedCurrencyCode.value, "")) ? " selected" : ""}${_scopeId2}>Select currency...</option><!--[-->`);
+                      ssrRenderList(fiatCurrencies.value, (c) => {
+                        _push4(`<option${ssrRenderAttr("value", c.code)}${ssrIncludeBooleanAttr(Array.isArray(selectedCurrencyCode.value) ? ssrLooseContain(selectedCurrencyCode.value, c.code) : ssrLooseEqual(selectedCurrencyCode.value, c.code)) ? " selected" : ""}${_scopeId2}>${ssrInterpolate(c.symbol)} ${ssrInterpolate(c.name)} (${ssrInterpolate(c.code)}) </option>`);
+                      });
+                      _push4(`<!--]--></select></div><div class="flex gap-3 pt-2"${_scopeId2}>`);
+                      _push4(ssrRenderComponent(unref(Button), {
+                        variant: "outline",
+                        class: "flex-1",
+                        onClick: ($event) => showAddWalletModal.value = false
+                      }, {
+                        default: withCtx((_3, _push5, _parent4, _scopeId3) => {
+                          if (_push5) {
+                            _push5(` Cancel `);
+                          } else {
+                            return [
+                              createTextVNode(" Cancel ")
+                            ];
+                          }
+                        }),
+                        _: 1
+                      }, _parent3, _scopeId2));
+                      _push4(ssrRenderComponent(unref(Button), {
+                        class: "flex-1",
+                        disabled: !selectedCurrencyCode.value || isAddingWallet.value,
+                        onClick: handleAddWallet
+                      }, {
+                        default: withCtx((_3, _push5, _parent4, _scopeId3) => {
+                          if (_push5) {
+                            if (isAddingWallet.value) {
+                              _push5(`<span${_scopeId3}>Creating...</span>`);
+                            } else {
+                              _push5(`<span${_scopeId3}>Create Wallet</span>`);
+                            }
+                          } else {
+                            return [
+                              isAddingWallet.value ? (openBlock(), createBlock("span", { key: 0 }, "Creating...")) : (openBlock(), createBlock("span", { key: 1 }, "Create Wallet"))
+                            ];
+                          }
+                        }),
+                        _: 1
+                      }, _parent3, _scopeId2));
+                      _push4(`</div>`);
+                    } else {
+                      return [
+                        createVNode("div", { class: "space-y-2" }, [
+                          createVNode("label", { class: "text-sm font-medium text-foreground" }, "Currency"),
+                          withDirectives(createVNode("select", {
+                            "onUpdate:modelValue": ($event) => selectedCurrencyCode.value = $event,
+                            class: "w-full h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                          }, [
+                            createVNode("option", {
+                              value: "",
+                              disabled: ""
+                            }, "Select currency..."),
+                            (openBlock(true), createBlock(Fragment, null, renderList(fiatCurrencies.value, (c) => {
+                              return openBlock(), createBlock("option", {
+                                key: c.code,
+                                value: c.code
+                              }, toDisplayString(c.symbol) + " " + toDisplayString(c.name) + " (" + toDisplayString(c.code) + ") ", 9, ["value"]);
+                            }), 128))
+                          ], 8, ["onUpdate:modelValue"]), [
+                            [vModelSelect, selectedCurrencyCode.value]
+                          ])
+                        ]),
+                        createVNode("div", { class: "flex gap-3 pt-2" }, [
+                          createVNode(unref(Button), {
+                            variant: "outline",
+                            class: "flex-1",
+                            onClick: ($event) => showAddWalletModal.value = false
+                          }, {
+                            default: withCtx(() => [
+                              createTextVNode(" Cancel ")
+                            ]),
+                            _: 1
+                          }, 8, ["onClick"]),
+                          createVNode(unref(Button), {
+                            class: "flex-1",
+                            disabled: !selectedCurrencyCode.value || isAddingWallet.value,
+                            onClick: handleAddWallet
+                          }, {
+                            default: withCtx(() => [
+                              isAddingWallet.value ? (openBlock(), createBlock("span", { key: 0 }, "Creating...")) : (openBlock(), createBlock("span", { key: 1 }, "Create Wallet"))
+                            ]),
+                            _: 1
+                          }, 8, ["disabled"])
+                        ])
+                      ];
+                    }
+                  }),
+                  _: 1
+                }, _parent2, _scopeId));
+              } else {
+                return [
+                  createVNode(unref(CardHeader), { class: "pb-3" }, {
+                    default: withCtx(() => [
+                      createVNode(unref(CardTitle), { class: "text-base text-foreground" }, {
+                        default: withCtx(() => [
+                          createTextVNode("Add Treasury Wallet")
+                        ]),
+                        _: 1
+                      }),
+                      createVNode("p", { class: "text-xs text-muted-foreground mt-1" }, "Select a currency to create your wallet")
+                    ]),
+                    _: 1
+                  }),
+                  createVNode(unref(CardContent), { class: "space-y-4" }, {
+                    default: withCtx(() => [
+                      createVNode("div", { class: "space-y-2" }, [
+                        createVNode("label", { class: "text-sm font-medium text-foreground" }, "Currency"),
+                        withDirectives(createVNode("select", {
+                          "onUpdate:modelValue": ($event) => selectedCurrencyCode.value = $event,
+                          class: "w-full h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                        }, [
+                          createVNode("option", {
+                            value: "",
+                            disabled: ""
+                          }, "Select currency..."),
+                          (openBlock(true), createBlock(Fragment, null, renderList(fiatCurrencies.value, (c) => {
+                            return openBlock(), createBlock("option", {
+                              key: c.code,
+                              value: c.code
+                            }, toDisplayString(c.symbol) + " " + toDisplayString(c.name) + " (" + toDisplayString(c.code) + ") ", 9, ["value"]);
+                          }), 128))
+                        ], 8, ["onUpdate:modelValue"]), [
+                          [vModelSelect, selectedCurrencyCode.value]
+                        ])
+                      ]),
+                      createVNode("div", { class: "flex gap-3 pt-2" }, [
+                        createVNode(unref(Button), {
+                          variant: "outline",
+                          class: "flex-1",
+                          onClick: ($event) => showAddWalletModal.value = false
+                        }, {
+                          default: withCtx(() => [
+                            createTextVNode(" Cancel ")
+                          ]),
+                          _: 1
+                        }, 8, ["onClick"]),
+                        createVNode(unref(Button), {
+                          class: "flex-1",
+                          disabled: !selectedCurrencyCode.value || isAddingWallet.value,
+                          onClick: handleAddWallet
+                        }, {
+                          default: withCtx(() => [
+                            isAddingWallet.value ? (openBlock(), createBlock("span", { key: 0 }, "Creating...")) : (openBlock(), createBlock("span", { key: 1 }, "Create Wallet"))
+                          ]),
+                          _: 1
+                        }, 8, ["disabled"])
+                      ])
+                    ]),
+                    _: 1
+                  })
+                ];
+              }
+            }),
+            _: 1
+          }, _parent));
+          _push2(`</div>`);
+        } else {
+          _push2(`<!---->`);
+        }
+      }, "body", false, _parent);
+      _push(`</div>`);
     };
   }
 };
@@ -2180,4 +2380,4 @@ _sfc_main.setup = (props, ctx) => {
 };
 
 export { _sfc_main as default };
-//# sourceMappingURL=wallet-DxqACR4-.mjs.map
+//# sourceMappingURL=wallet-B23wld1-.mjs.map

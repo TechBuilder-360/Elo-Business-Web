@@ -1,6 +1,6 @@
 import { computed, ref, mergeProps, unref, withCtx, createVNode, createTextVNode, toDisplayString, openBlock, createBlock, Fragment, renderList, createCommentVNode, h, useSSRContext } from 'vue';
-import { ssrRenderAttrs, ssrRenderComponent, ssrInterpolate, ssrRenderList, ssrRenderAttr, ssrRenderStyle } from 'vue/server-renderer';
-import { ArrowLeft, Building2, Info, Palette, Package, MapPin, Clock, MessageSquare, Save, Camera, ImageIcon, Upload, Trash2, Wrench, X, ImagePlus, Plus, Star, Phone, ThumbsUp } from 'lucide-vue-next';
+import { ssrRenderAttrs, ssrRenderComponent, ssrRenderAttr, ssrInterpolate, ssrRenderList, ssrRenderStyle } from 'vue/server-renderer';
+import { ArrowLeft, Info, Palette, Package, MapPin, Clock, MessageSquare, Save, Camera, ImageIcon, Upload, Trash2, Wrench, X, ImagePlus, Plus, Star, Phone, ThumbsUp } from 'lucide-vue-next';
 import { B as Button } from './button-Bxu1RhCi.mjs';
 import { C as Card, c as CardHeader, d as CardTitle, a as CardContent, b as CardDescription } from './card-Cq6gP5nL.mjs';
 import { I as Input } from './input-C1C1FSk7.mjs';
@@ -4032,9 +4032,7 @@ const _sfc_main = {
         }),
         _: 1
       }, _parent));
-      _push(`<div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">`);
-      _push(ssrRenderComponent(unref(Building2), { class: "w-5 h-5 text-primary-foreground" }, null, _parent));
-      _push(`</div><div><h1 class="text-lg font-bold leading-tight"> Business Information </h1><p class="text-xs text-muted-foreground">${ssrInterpolate(businessName.value)}</p></div></div></div></header><main class="container max-w-6xl mx-auto py-6 px-4">`);
+      _push(`<div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center overflow-hidden"><img${ssrRenderAttr("src", "/favicon_io/favicon_io/apple-touch-icon.png")} class="w-full h-full object-cover" alt="ELO"></div><div><h1 class="text-lg font-bold leading-tight"> Business Information </h1><p class="text-xs text-muted-foreground">${ssrInterpolate(businessName.value)}</p></div></div></div></header><main class="container max-w-6xl mx-auto py-6 px-4">`);
       _push(ssrRenderComponent(unref(Tabs), { defaultValue: "details" }, {
         default: withCtx((_, _push2, _parent2, _scopeId) => {
           if (_push2) {
@@ -5725,4 +5723,4 @@ _sfc_main.setup = (props, ctx) => {
 };
 
 export { _sfc_main as default };
-//# sourceMappingURL=business-info-DnTO2PlJ.mjs.map
+//# sourceMappingURL=business-info-Bq_qjLt7.mjs.map

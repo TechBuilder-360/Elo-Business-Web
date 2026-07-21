@@ -61,8 +61,16 @@ if (import.meta.client) {
   activeBusinessId.value = localStorage.getItem("activeBusinessId");
 }
 
+const activeBusinessData = computed(() => {
+  const list = userBusinesses.data.value?.myBusinesses || [];
+  if (activeBusinessId.value)
+    return list.find((b) => b.id === activeBusinessId.value) || null;
+  return list[0] || null;
+});
+
+const computedActiveId = computed(() => activeBusinessData.value?.id || activeBusinessId.value);
 const { data: fullBusinessDataResult, isPending: isDetailPending } =
-  getBusinessDetailQuery(activeBusinessId);
+  getBusinessDetailQuery(computedActiveId);
 const fullBusinessData = computed(
   () => fullBusinessDataResult.value?.business || null,
 );
@@ -115,15 +123,7 @@ const uploadData = ref({
 
 const fileInput = ref(null);
 
-// ──────────────────────────────────────────────
-// Derive active business from already-fetched list
-// ──────────────────────────────────────────────
-const activeBusinessData = computed(() => {
-  const list = userBusinesses.data.value?.myBusinesses || [];
-  if (activeBusinessId.value)
-    return list.find((b) => b.id === activeBusinessId.value) || null;
-  return list[0] || null;
-});
+// activeBusinessData moved up
 
 // Pre-fill infoData from the live API response
 import { watch } from "vue";
@@ -315,7 +315,7 @@ const navigateBack = () => {
     <!-- Header -->
     <header class="border-b bg-background sticky top-0 z-20">
       <div
-        class="container max-w-6xl mx-auto flex items-center justify-between py-4 px-4 sm:px-6 lg:px-8"
+        class="container max-w-8xl mx-auto flex items-center justify-between py-4 px-4 sm:px-6 lg:px-8"
       >
         <div class="flex items-center gap-4">
           <Button
@@ -353,7 +353,7 @@ const navigateBack = () => {
       </div>
     </header>
 
-    <main class="container max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <main class="container max-w-8xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
       <div class="flex flex-col md:flex-row gap-8">
         <!-- Sidebar Navigation -->
         <aside class="md:w-64 shrink-0">

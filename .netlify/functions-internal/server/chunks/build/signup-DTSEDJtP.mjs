@@ -1,13 +1,13 @@
 import { _ as __nuxt_component_0 } from './nuxt-link-CFAdaFZb.mjs';
 import { ref, mergeProps, unref, withCtx, createTextVNode, createVNode, toDisplayString, openBlock, createBlock, createCommentVNode, withModifiers, useSSRContext } from 'vue';
-import { ssrRenderAttrs, ssrRenderComponent, ssrInterpolate } from 'vue/server-renderer';
+import { ssrRenderAttrs, ssrRenderAttr, ssrRenderComponent, ssrInterpolate } from 'vue/server-renderer';
 import { u as useAuth } from './useAuth-CFqBlum2.mjs';
 import { C as Card, c as CardHeader, d as CardTitle, b as CardDescription, a as CardContent } from './card-Cq6gP5nL.mjs';
 import { B as Button } from './button-Bxu1RhCi.mjs';
 import { I as Input } from './input-C1C1FSk7.mjs';
 import { L as Label } from './label-CU-twOy-.mjs';
 import { t as toast } from './alert-D7s0TqQ8.mjs';
-import { Building2, Lock, ArrowRight } from 'lucide-vue-next';
+import { Lock, ArrowRight } from 'lucide-vue-next';
 import { n as navigateTo } from './server.mjs';
 import '../nitro/nitro.mjs';
 import 'node:http';
@@ -93,9 +93,7 @@ const _sfc_main = {
     };
     return (_ctx, _push, _parent, _attrs) => {
       const _component_NuxtLink = __nuxt_component_0;
-      _push(`<div${ssrRenderAttrs(mergeProps({ class: "h-[100dvh] overflow-y-auto bg-background flex items-center justify-center px-4 py-8" }, _attrs))}><div class="w-full max-w-md"><div class="flex flex-col items-center mb-8"><div class="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center mb-4">`);
-      _push(ssrRenderComponent(unref(Building2), { class: "w-7 h-7 text-primary-foreground" }, null, _parent));
-      _push(`</div><h1 class="text-2xl font-bold text-foreground">Create your account</h1><p class="text-sm text-muted-foreground mt-1"> Get started in just a moment </p></div>`);
+      _push(`<div${ssrRenderAttrs(mergeProps({ class: "h-[100dvh] overflow-y-auto bg-background flex items-center justify-center px-4 py-8" }, _attrs))}><div class="w-full max-w-md"><div class="flex flex-col items-center mb-8"><div class="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center mb-4 overflow-hidden"><img${ssrRenderAttr("src", "/favicon_io/favicon_io/apple-touch-icon.png")} class="w-full h-full object-cover" alt="ELO"></div><h1 class="text-2xl font-bold text-foreground">Create your account</h1><p class="text-sm text-muted-foreground mt-1"> Get started in just a moment </p></div>`);
       _push(ssrRenderComponent(unref(Card), { class: "shadow-lg border-0 shadow-foreground/5" }, {
         default: withCtx((_, _push2, _parent2, _scopeId) => {
           if (_push2) {
@@ -571,4 +569,4 @@ _sfc_main.setup = (props, ctx) => {
 };
 
 export { _sfc_main as default };
-//# sourceMappingURL=signup-CnlWKpFC.mjs.map
+//# sourceMappingURL=signup-DTSEDJtP.mjs.map

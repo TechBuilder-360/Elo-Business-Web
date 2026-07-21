@@ -170,7 +170,7 @@ const handleBackToDashboard = () => {
   <div class="min-h-screen bg-background text-foreground">
     <header class="border-b bg-card sticky top-0 z-10">
       <div
-        class="container max-w-6xl mx-auto flex items-center justify-between py-3 px-4"
+        class="container max-w-8xl mx-auto flex items-center justify-between py-3 px-4"
       >
         <div class="flex items-center gap-3">
           <Button
@@ -194,7 +194,7 @@ const handleBackToDashboard = () => {
       </div>
     </header>
 
-    <main class="container max-w-6xl mx-auto py-6 px-4">
+    <main class="container max-w-8xl mx-auto py-6 px-4">
       <div v-if="selectedWallet" class="space-y-6">
         <Button
           variant="ghost"

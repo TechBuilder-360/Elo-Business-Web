@@ -1957,61 +1957,61 @@ const _routes = [
     name: "business-info",
     path: "/business-info",
     meta: __nuxt_page_meta$b || {},
-    component: () => import('./business-info-DnTO2PlJ.mjs')
+    component: () => import('./business-info-Bq_qjLt7.mjs')
   },
   {
     name: "businesses",
     path: "/businesses",
     meta: __nuxt_page_meta$a || {},
-    component: () => import('./businesses-CoT5MTyV.mjs')
+    component: () => import('./businesses-XXlxZF1f.mjs')
   },
   {
     name: "compliance",
     path: "/compliance",
     meta: __nuxt_page_meta$9 || {},
-    component: () => import('./compliance-DkEKTs-p.mjs')
+    component: () => import('./compliance-Coy2-FN8.mjs')
   },
   {
     name: "dashboard",
     path: "/dashboard",
     meta: __nuxt_page_meta$8 || {},
-    component: () => import('./dashboard-DiE1Mrva.mjs')
+    component: () => import('./dashboard-Dh1vZwe-.mjs')
   },
   {
     name: "onboard",
     path: "/onboard",
     meta: __nuxt_page_meta$7 || {},
-    component: () => import('./onboard-Bce16RW1.mjs')
+    component: () => import('./onboard-CwtraWmc.mjs')
   },
   {
     name: "settings",
     path: "/settings",
     meta: __nuxt_page_meta$6 || {},
-    component: () => import('./settings-BnJ5miHF.mjs')
+    component: () => import('./settings-hTkL9R4v.mjs')
   },
   {
     name: "signup",
     path: "/signup",
     meta: __nuxt_page_meta$5 || {},
-    component: () => import('./signup-CnlWKpFC.mjs')
+    component: () => import('./signup-DTSEDJtP.mjs')
   },
   {
     name: "verify-identity",
     path: "/verify-identity",
     meta: __nuxt_page_meta$4 || {},
-    component: () => import('./verify-identity-jQT-5yLh.mjs')
+    component: () => import('./verify-identity-9tffoMPj.mjs')
   },
   {
     name: "verify-otp",
     path: "/verify-otp",
     meta: __nuxt_page_meta$3 || {},
-    component: () => import('./verify-otp-FFr3X5BJ.mjs')
+    component: () => import('./verify-otp-Bn38Dr2i.mjs')
   },
   {
     name: "wallet",
     path: "/wallet",
     meta: __nuxt_page_meta$2 || {},
-    component: () => import('./wallet-DxqACR4-.mjs')
+    component: () => import('./wallet-B23wld1-.mjs')
   },
   {
     name: "slug",
@@ -2023,7 +2023,7 @@ const _routes = [
     name: "index",
     path: "/",
     meta: __nuxt_page_meta || {},
-    component: () => import('./index-BQ5OmzC2.mjs')
+    component: () => import('./index-3s2ciQ_C.mjs')
   }
 ];
 const ROUTE_KEY_PARENTHESES_RE = /(:\w+)\([^)]+\)/g;

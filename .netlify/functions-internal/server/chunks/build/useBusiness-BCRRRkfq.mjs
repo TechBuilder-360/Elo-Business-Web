@@ -1,5 +1,6 @@
 import { a as useGQLQuery, u as useGQLMutation } from './useGraphQL-Bw_Hbd5v.mjs';
 import { useQueryClient } from '@tanstack/vue-query';
+import { computed, unref } from 'vue';
 
 const useBusiness = (options = {}) => {
   const qc = useQueryClient();
@@ -46,6 +47,7 @@ const useBusiness = (options = {}) => {
   const businessDetailMutation = useGQLMutation(BUSINESS_DETAIL_MUTATION, {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["userBusinesses"] });
+      qc.invalidateQueries({ queryKey: ["activeBusiness"] });
     }
   });
   const businessDetailOriginal = businessDetailMutation.mutateAsync.bind(
@@ -103,7 +105,7 @@ const useBusiness = (options = {}) => {
   );
   const GET_BUSINESS_DOCUMENTS_QUERY = `
     query GetBusinessDocuments {
-      businessDocuments {
+      getDocuments {
         id
         description
         url
@@ -117,6 +119,88 @@ const useBusiness = (options = {}) => {
     {},
     options
   );
+  const getBusinessDetailQuery = (id, queryOptions = {}) => {
+    const GET_BUSINESS_DETAIL_QUERY = `
+      query GetBusinessDetail($id: String!) {
+        business(id: $id) {
+          id
+          name
+          logo
+          email
+          on_site
+          about
+          industry
+          number
+          country_of_incorporation
+          date_of_incorporation
+          tax_identification_number
+          address {
+            number
+            city
+            street
+            state
+            country
+            zip_code
+          }
+        }
+      }
+    `;
+    return useGQLQuery(
+      ["businessDetail", id],
+      GET_BUSINESS_DETAIL_QUERY,
+      computed(() => ({ id: unref(id) })),
+      { enabled: computed(() => !!unref(id)), ...queryOptions }
+    );
+  };
+  const GET_WALLETS_QUERY = `
+    query GetWallets($wallet_type: WalletType! = TREASURY) {
+      wallets(wallet_type: $wallet_type) {
+        id
+        type
+        available_balance
+        ledger_balance
+        holding_balance
+        currency
+        active
+      }
+    }
+  `;
+  const getWalletsQuery = (walletType = "TREASURY", queryOptions = {}) => {
+    return useGQLQuery(
+      ["wallets", walletType],
+      GET_WALLETS_QUERY,
+      { wallet_type: walletType },
+      queryOptions
+    );
+  };
+  const GET_CURRENCIES_QUERY = `
+    query GetCurrencies {
+      currencies {
+        id
+        code
+        name
+        symbol
+        is_fiat
+      }
+    }
+  `;
+  const getCurrenciesQuery = (queryOptions = {}) => {
+    return useGQLQuery(["currencies"], GET_CURRENCIES_QUERY, {}, queryOptions);
+  };
+  const ADD_WALLET_MUTATION = `
+    mutation AddWallet($currency_code: String!, $wallet_type: WalletType!) {
+      add_wallet(currency_code: $currency_code, wallet_type: $wallet_type) {
+        id
+        type
+        available_balance
+        ledger_balance
+        holding_balance
+        currency
+        active
+      }
+    }
+  `;
+  const addWalletMutation = useGQLMutation(ADD_WALLET_MUTATION);
   return {
     userBusinesses: userBusinessesQuery,
     registerBusiness: registerBusinessMutation,
@@ -124,9 +208,13 @@ const useBusiness = (options = {}) => {
     uploadDocument: uploadDocumentMutation,
     deleteDocument: deleteDocumentMutation,
     kybDocuments: kybDocumentsQuery,
-    businessDocuments: businessDocumentsQuery
+    businessDocuments: businessDocumentsQuery,
+    getBusinessDetailQuery,
+    getWalletsQuery,
+    getCurrenciesQuery,
+    addWallet: addWalletMutation
   };
 };
 
 export { useBusiness as u };
-//# sourceMappingURL=useBusiness-DUTOJ7No.mjs.map
+//# sourceMappingURL=useBusiness-BCRRRkfq.mjs.map

@@ -1,11 +1,11 @@
 import { ref, mergeProps, unref, withCtx, openBlock, createBlock, Fragment, renderList, createVNode, createTextVNode, toDisplayString, computed, provide, h, inject, useSSRContext } from 'vue';
-import { ssrRenderAttrs, ssrRenderStyle, ssrRenderComponent, ssrInterpolate, ssrRenderList } from 'vue/server-renderer';
+import { ssrRenderAttrs, ssrRenderStyle, ssrRenderAttr, ssrRenderComponent, ssrInterpolate, ssrRenderList } from 'vue/server-renderer';
 import { u as useAuth } from './useAuth-CFqBlum2.mjs';
 import { B as Button } from './button-Bxu1RhCi.mjs';
 import { I as Input } from './input-C1C1FSk7.mjs';
 import { L as Label } from './label-CU-twOy-.mjs';
 import { t as toast } from './alert-D7s0TqQ8.mjs';
-import { Building2, Lock, ArrowRight, X, Eye, EyeOff, RotateCcw } from 'lucide-vue-next';
+import { Lock, ArrowRight, X, Eye, EyeOff, RotateCcw } from 'lucide-vue-next';
 import { b as useRoute$1, n as navigateTo } from './server.mjs';
 import './useGraphQL-Bw_Hbd5v.mjs';
 import '@tanstack/vue-query';
@@ -148,13 +148,9 @@ const _sfc_main = {
       }
     };
     return (_ctx, _push, _parent, _attrs) => {
-      _push(`<div${ssrRenderAttrs(mergeProps({ class: "min-h-screen flex w-full bg-background" }, _attrs))}><div class="hidden lg:flex flex-1 relative bg-zinc-950 text-white overflow-hidden flex-col justify-between p-12"><div class="absolute inset-0 bg-cover bg-center opacity-70 z-0" style="${ssrRenderStyle({ "background-image": 'url("/elo_login_bg.svg")' })}"></div><div class="relative z-10 flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">`);
-      _push(ssrRenderComponent(unref(Building2), { class: "w-6 h-6 text-primary-foreground" }, null, _parent));
-      _push(`</div><span class="text-xl font-bold tracking-tight">ELO Business</span></div><div class="relative z-10 max-w-lg"><div class="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center mb-8 ring-1 ring-white/20 shadow-2xl">`);
+      _push(`<div${ssrRenderAttrs(mergeProps({ class: "min-h-screen flex w-full bg-background" }, _attrs))}><div class="hidden lg:flex flex-1 relative bg-zinc-950 text-white overflow-hidden flex-col justify-between p-12"><div class="absolute inset-0 bg-cover bg-center opacity-70 z-0" style="${ssrRenderStyle({ "background-image": 'url("/elo_login_bg.svg")' })}"></div><div class="relative z-10 flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 overflow-hidden"><img${ssrRenderAttr("src", "/favicon_io/favicon_io/apple-touch-icon.png")} class="w-full h-full object-cover" alt="ELO"></div><span class="text-xl font-bold tracking-tight">ELO Business</span></div><div class="relative z-10 max-w-lg"><div class="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center mb-8 ring-1 ring-white/20 shadow-2xl">`);
       _push(ssrRenderComponent(unref(Lock), { class: "w-10 h-10 text-white/80" }, null, _parent));
-      _push(`</div><h2 class="text-4xl font-extrabold tracking-tight mb-4"> One step away. </h2><p class="text-lg text-zinc-400"> Enter your 6-digit code to confirm your identity and access your account. </p></div><div class="relative z-10 text-sm text-zinc-500 font-medium"> © ${ssrInterpolate((/* @__PURE__ */ new Date()).getFullYear())} ELO. All rights reserved. </div></div><div class="flex-1 flex items-center justify-center p-6 lg:p-12 relative"><div class="absolute top-8 left-8 lg:hidden flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">`);
-      _push(ssrRenderComponent(unref(Building2), { class: "w-5 h-5 text-primary-foreground" }, null, _parent));
-      _push(`</div><span class="font-bold">ELO</span></div><div class="w-full max-w-sm space-y-8"><div class="text-center lg:text-left"><div class="lg:hidden w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-primary/10">`);
+      _push(`</div><h2 class="text-4xl font-extrabold tracking-tight mb-4"> One step away. </h2><p class="text-lg text-zinc-400"> Enter your 6-digit code to confirm your identity and access your account. </p></div><div class="relative z-10 text-sm text-zinc-500 font-medium"> © ${ssrInterpolate((/* @__PURE__ */ new Date()).getFullYear())} ELO. All rights reserved. </div></div><div class="flex-1 flex items-center justify-center p-6 lg:p-12 relative"><div class="absolute top-8 left-8 lg:hidden flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center overflow-hidden"><img${ssrRenderAttr("src", "/favicon_io/favicon_io/apple-touch-icon.png")} class="w-full h-full object-cover" alt="ELO"></div><span class="font-bold">ELO</span></div><div class="w-full max-w-sm space-y-8"><div class="text-center lg:text-left"><div class="lg:hidden w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-primary/10">`);
       _push(ssrRenderComponent(unref(Lock), { class: "w-8 h-8 text-primary" }, null, _parent));
       _push(`</div><h1 class="text-3xl font-bold tracking-tight text-foreground"> Check your inbox </h1><p class="text-sm text-muted-foreground mt-2"> We sent a 6-digit code to <span class="font-semibold text-foreground">${ssrInterpolate(unref(email))}</span></p></div><div class="space-y-6"><div class="flex justify-center lg:justify-start">`);
       _push(ssrRenderComponent(unref(InputOTP), {
@@ -385,4 +381,4 @@ _sfc_main.setup = (props, ctx) => {
 };
 
 export { _sfc_main as default };
-//# sourceMappingURL=verify-otp-FFr3X5BJ.mjs.map
+//# sourceMappingURL=verify-otp-Bn38Dr2i.mjs.map
