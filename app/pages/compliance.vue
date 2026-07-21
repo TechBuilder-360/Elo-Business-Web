@@ -36,6 +36,8 @@ import {
   CheckCircle2,
   Pencil,
   Eye,
+  Moon,
+  Sun,
 } from "lucide-vue-next";
 
 definePageMeta({
@@ -45,6 +47,7 @@ definePageMeta({
 const route = useRoute();
 const router = useRouter();
 const businessName = computed(() => route.query.name || "Business");
+const { isDark, toggleTheme } = useTheme();
 
 const {
   userBusinesses,
@@ -341,6 +344,15 @@ const navigateBack = () => {
         </div>
 
         <div class="hidden sm:flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            class="h-8 w-8 text-foreground shrink-0"
+            @click="toggleTheme"
+          >
+            <Moon v-if="isDark" class="w-4 h-4" />
+            <Sun v-else class="w-4 h-4" />
+          </Button>
           <div class="text-sm text-right">
             <p class="font-medium">Profile Completion</p>
             <p class="text-xs text-muted-foreground">

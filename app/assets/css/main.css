@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -53,50 +53,56 @@
   }
 
   .dark {
-    /* Auto-generate dark mode colors using reverse logic from standard shadcn if user didn't provide them */
-    --background: 200 50% 10%;
-    --foreground: 210 20% 98%;
+    /* Rich deep navy-charcoal background — feels premium like Linear, Vercel, Raycast */
+    --background: 224 20% 9%;
+    --foreground: 215 25% 94%;
 
-    --card: 200 50% 10%;
-    --card-foreground: 210 20% 98%;
+    /* Cards slightly elevated above the background for depth */
+    --card: 222 18% 12%;
+    --card-foreground: 215 25% 94%;
 
-    --popover: 200 50% 10%;
-    --popover-foreground: 210 20% 98%;
+    --popover: 222 18% 12%;
+    --popover-foreground: 215 25% 94%;
 
-    --primary: 321 8% 49%;
+    /* Primary: vibrant rose-mauve — stands out beautifully on dark backgrounds */
+    --primary: 321 70% 60%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 321 12% 30%;
-    --secondary-foreground: 321 8% 94%;
+    /* Secondary: subtle warm slate */
+    --secondary: 222 16% 18%;
+    --secondary-foreground: 215 20% 78%;
 
-    --muted: 321 5% 45%;
-    --muted-foreground: 321 6% 93%;
+    /* Muted: for subdued surfaces and placeholders */
+    --muted: 222 14% 16%;
+    --muted-foreground: 215 14% 52%;
 
-    --accent: 321 12% 30%;
-    --accent-foreground: 321 10% 90%;
+    /* Accent: a brighter glass-like tint */
+    --accent: 222 16% 20%;
+    --accent-foreground: 215 25% 90%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 72% 58%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 321 12% 30%;
-    --input: 321 12% 30%;
-    --ring: 321 8% 49%;
+    /* Borders: subtle glassy lines */
+    --border: 222 16% 18%;
+    --input: 222 16% 18%;
+    --ring: 321 70% 60%;
 
-    --warning: 45 93% 47%;
-    --warning-foreground: 45 93% 30%;
+    --warning: 43 96% 56%;
+    --warning-foreground: 43 80% 25%;
 
-    --step-active: 321 8% 49%;
-    --step-complete: 321 8% 49%;
-    --step-inactive: 321 5% 45%;
+    --step-active: 321 70% 60%;
+    --step-complete: 321 70% 60%;
+    --step-inactive: 222 12% 30%;
 
-    --sidebar-background: 200 50% 10%;
-    --sidebar-foreground: 240 5.3% 86.1%;
-    --sidebar-primary: 240 5.9% 90%;
-    --sidebar-primary-foreground: 0 0% 10%;
-    --sidebar-accent: 240 4.8% 15.9%;
-    --sidebar-accent-foreground: 240 5.9% 90%;
-    --sidebar-border: 220 13% 15%;
-    --sidebar-ring: 321 8% 49%;
+    --sidebar-background: 224 22% 7%;
+    --sidebar-foreground: 215 18% 72%;
+    --sidebar-primary: 321 70% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 222 16% 14%;
+    --sidebar-accent-foreground: 215 25% 90%;
+    --sidebar-border: 222 16% 15%;
+    --sidebar-ring: 321 70% 60%;
   }
 }
 

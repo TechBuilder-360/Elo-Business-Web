@@ -24,6 +24,8 @@ import {
   ChevronRight,
   Eye,
   EyeOff,
+  Moon,
+  Sun,
 } from "lucide-vue-next";
 import AccountDetails from "@/components/wallet/AccountDetails.vue";
 
@@ -39,6 +41,7 @@ const showBalance = ref(true);
 const txFilter = ref("all");
 
 const { getWalletsQuery, getCurrenciesQuery, addWallet } = useBusiness();
+const { isDark, toggleTheme } = useTheme();
 const qc = useQueryClient();
 const {
   data: walletsData,
@@ -240,6 +243,15 @@ const handleBackToDashboard = () => {
             <p class="text-xs text-muted-foreground">{{ businessName }}</p>
           </div>
         </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          class="h-8 w-8 text-foreground shrink-0"
+          @click="toggleTheme"
+        >
+          <Moon v-if="isDark" class="w-4 h-4" />
+          <Sun v-else class="w-4 h-4" />
+        </Button>
       </div>
     </header>
 

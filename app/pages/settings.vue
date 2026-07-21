@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from "vue";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Building2, ArrowLeft, Users, Info, ChevronRight } from "lucide-vue-next";
+import { Building2, ArrowLeft, Users, Info, ChevronRight, Moon, Sun } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import TeamMembersTab from "@/components/settings/TeamMembersTab.vue";
@@ -12,6 +12,7 @@ definePageMeta({
 
 const route = useRoute();
 const businessName = computed(() => route.query.name || "My Business");
+const { isDark, toggleTheme } = useTheme();
 
 const handleBack = () => {
   navigateTo({
@@ -53,6 +54,15 @@ const handleEditBusinessInfo = () => {
             <p class="text-xs text-muted-foreground">{{ businessName }}</p>
           </div>
         </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          class="h-8 w-8 text-foreground shrink-0"
+          @click="toggleTheme"
+        >
+          <Moon v-if="isDark" class="w-4 h-4" />
+          <Sun v-else class="w-4 h-4" />
+        </Button>
       </div>
     </header>
 
