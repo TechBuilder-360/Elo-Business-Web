@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useBusiness } from "@/composables/useBusiness";
+import { useQueryClient } from "@tanstack/vue-query";
 import { toast } from "@/utils/alert";
 import {
   ArrowLeft,
@@ -58,6 +59,7 @@ const {
   businessDocuments,
   getBusinessDetailQuery,
 } = useBusiness();
+const qc = useQueryClient();
 
 const activeBusinessId = ref(null);
 if (import.meta.client) {
@@ -244,6 +246,8 @@ const handleSaveProfile = async () => {
     toast.success("Profile saved successfully");
     isEditingProfile.value = false;
     profileStep.value = 1;
+    // Invalidate the businessDetail query so the UI immediately reflects the new data
+    qc.invalidateQueries({ queryKey: ["businessDetail", computedActiveId.value] });
   } catch (error) {
     toast.error(error.message || "Failed to save profile");
   }

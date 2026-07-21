@@ -117,7 +117,16 @@ async function gqlRequest({ query, variables = {} }) {
 export function useGQLQuery(key, query, variables = {}, opts = {}) {
   return useQuery({
     queryKey: key,
-    queryFn: () => gqlRequest({ query, variables }),
+    queryFn: () => {
+      // Always unref variables at execution time so computed refs are resolved
+      const resolvedVars =
+        typeof variables === "function"
+          ? variables()
+          : variables && typeof variables.value !== "undefined"
+            ? variables.value
+            : variables;
+      return gqlRequest({ query, variables: resolvedVars });
+    },
     ...opts,
   });
 }
