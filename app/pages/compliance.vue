@@ -68,7 +68,9 @@ const activeBusinessData = computed(() => {
   return list[0] || null;
 });
 
-const computedActiveId = computed(() => activeBusinessData.value?.id || activeBusinessId.value);
+const computedActiveId = computed(
+  () => activeBusinessData.value?.id || activeBusinessId.value,
+);
 const { data: fullBusinessDataResult, isPending: isDetailPending } =
   getBusinessDetailQuery(computedActiveId);
 const fullBusinessData = computed(
@@ -173,6 +175,8 @@ watch(
     if (!pending) {
       if (!fullBusinessData.value || !fullBusinessData.value.number) {
         isEditingProfile.value = true;
+      } else {
+        isEditingProfile.value = false;
       }
     }
   },
@@ -669,7 +673,7 @@ const navigateBack = () => {
 
                   <div class="flex justify-end pt-6 border-t">
                     <Button @click="profileStep = 2" class="min-w-[140px]">
-                      Next Step: Registration
+                      Next Step
                       <ArrowLeft class="w-4 h-4 ml-2 rotate-180" />
                     </Button>
                   </div>

@@ -12,6 +12,8 @@ import {
   Settings,
   Wallet,
   ShieldCheck,
+  Moon,
+  Sun
 } from "lucide-vue-next";
 import {
   ChartContainer,
@@ -29,6 +31,8 @@ import {
 definePageMeta({
   layout: false,
 });
+
+const { isDark, toggleTheme } = useTheme();
 
 const route = useRoute();
 const businessName = computed(() => route.query.name || "My Business");
@@ -160,6 +164,15 @@ const handleComplianceNavigation = () => {
           </div>
         </div>
         <div class="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            class="h-8 w-8 text-foreground shrink-0"
+            @click="toggleTheme"
+          >
+            <Moon v-if="isDark" class="w-4 h-4" />
+            <Sun v-else class="w-4 h-4" />
+          </Button>
           <Badge
             variant="outline"
             class="border-[hsl(var(--warning))] text-[hsl(var(--warning-foreground))] bg-[hsl(var(--warning)/0.1)] gap-1.5 py-1"
