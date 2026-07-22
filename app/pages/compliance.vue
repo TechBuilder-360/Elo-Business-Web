@@ -234,7 +234,6 @@ const handleSaveProfile = async () => {
     const formattedDate = `${day}-${month}-${year}`;
 
     await businessDetail.mutateAsync({
-      name: infoData.value.name,
       about: infoData.value.about,
       industry: infoData.value.industry,
       website: infoData.value.website,

@@ -195,7 +195,7 @@ const handleRefreshStatus = () => {
     <!-- Top Navigation Bar -->
     <header class="sticky top-0 z-40 border-b bg-card/80 backdrop-blur-sm">
       <div
-        class="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 py-3"
+        class="max-w-8xl mx-auto flex items-center justify-between px-4 sm:px-6 py-3"
       >
         <div class="flex items-center gap-3">
           <div
@@ -231,7 +231,7 @@ const handleRefreshStatus = () => {
     </header>
 
     <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <main class="max-w-8xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
       <!-- User Loading -->
       <div
         v-if="userLoading"

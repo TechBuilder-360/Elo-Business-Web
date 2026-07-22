@@ -5,6 +5,8 @@ import {
   Building2,
   Save,
   Palette,
+  Moon,
+  Sun,
   Info,
   Package,
   MapPin,
@@ -35,8 +37,11 @@ definePageMeta({
   layout: false,
 });
 
+import { useTheme } from "@/composables/useTheme";
+
 const route = useRoute();
 const businessName = computed(() => route.query.name || "My Business");
+const { isDark, toggleTheme } = useTheme();
 
 const info = ref({
   name: businessName.value,
@@ -100,6 +105,15 @@ const handleBack = () => {
             <p class="text-xs text-muted-foreground">{{ businessName }}</p>
           </div>
         </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          class="h-8 w-8 text-foreground shrink-0"
+          @click="toggleTheme"
+        >
+          <Moon v-if="isDark" class="w-4 h-4" />
+          <Sun v-else class="w-4 h-4" />
+        </Button>
       </div>
     </header>
 

@@ -15,14 +15,18 @@ import {
   Send,
   Building2,
   Loader2,
+  Moon,
+  Sun
 } from "lucide-vue-next";
 import BusinessInfoStep from "@/components/onboarding/BusinessInfoStep.vue";
 import { useBusiness } from "@/composables/useBusiness";
+import { useTheme } from "@/composables/useTheme";
 
 definePageMeta({
   layout: false,
 });
 
+const { isDark, toggleTheme } = useTheme();
 const { registerBusiness } = useBusiness();
 const isSubmitting = registerBusiness.isPending;
 
@@ -144,12 +148,21 @@ const handleSubmit = async () => {
         >
           <img :src="'/favicon_io/favicon_io/apple-touch-icon.png'" class="w-full h-full object-cover" alt="ELO" />
         </div>
-        <div>
+        <div class="flex-1">
           <h1 class="text-lg font-bold text-foreground">Business Onboarding</h1>
           <p class="text-xs text-muted-foreground">
             Complete your business registration
           </p>
         </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          class="h-8 w-8 text-foreground shrink-0"
+          @click="toggleTheme"
+        >
+          <Moon v-if="isDark" class="w-4 h-4" />
+          <Sun v-else class="w-4 h-4" />
+        </Button>
       </div>
     </header>
 
