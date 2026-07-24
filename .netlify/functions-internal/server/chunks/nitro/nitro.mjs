@@ -3617,6 +3617,16 @@ function useStorage(base = "") {
 
 function serialize$1(o){return typeof o=="string"?`'${o}'`:new c().serialize(o)}const c=/*@__PURE__*/function(){class o{#t=new Map;compare(t,r){const e=typeof t,n=typeof r;return e==="string"&&n==="string"?t.localeCompare(r):e==="number"&&n==="number"?t-r:String.prototype.localeCompare.call(this.serialize(t,true),this.serialize(r,true))}serialize(t,r){if(t===null)return "null";switch(typeof t){case "string":return r?t:`'${t}'`;case "bigint":return `${t}n`;case "object":return this.$object(t);case "function":return this.$function(t)}return String(t)}serializeObject(t){const r=Object.prototype.toString.call(t);if(r!=="[object Object]")return this.serializeBuiltInType(r.length<10?`unknown:${r}`:r.slice(8,-1),t);const e=t.constructor,n=e===Object||e===void 0?"":e.name;if(n!==""&&globalThis[n]===e)return this.serializeBuiltInType(n,t);if(typeof t.toJSON=="function"){const i=t.toJSON();return n+(i!==null&&typeof i=="object"?this.$object(i):`(${this.serialize(i)})`)}return this.serializeObjectEntries(n,Object.entries(t))}serializeBuiltInType(t,r){const e=this["$"+t];if(e)return e.call(this,r);if(typeof r?.entries=="function")return this.serializeObjectEntries(t,r.entries());throw new Error(`Cannot serialize ${t}`)}serializeObjectEntries(t,r){const e=Array.from(r).sort((i,a)=>this.compare(i[0],a[0]));let n=`${t}{`;for(let i=0;i<e.length;i++){const[a,l]=e[i];n+=`${this.serialize(a,true)}:${this.serialize(l)}`,i<e.length-1&&(n+=",");}return n+"}"}$object(t){let r=this.#t.get(t);return r===void 0&&(this.#t.set(t,`#${this.#t.size}`),r=this.serializeObject(t),this.#t.set(t,r)),r}$function(t){const r=Function.prototype.toString.call(t);return r.slice(-15)==="[native code] }"?`${t.name||""}()[native]`:`${t.name}(${t.length})${r.replace(/\s*\n\s*/g,"")}`}$Array(t){let r="[";for(let e=0;e<t.length;e++)r+=this.serialize(t[e]),e<t.length-1&&(r+=",");return r+"]"}$Date(t){try{return `Date(${t.toISOString()})`}catch{return "Date(null)"}}$ArrayBuffer(t){return `ArrayBuffer[${new Uint8Array(t).join(",")}]`}$Set(t){return `Set${this.$Array(Array.from(t).sort((r,e)=>this.compare(r,e)))}`}$Map(t){return this.serializeObjectEntries("Map",t.entries())}}for(const s of ["Error","RegExp","URL"])o.prototype["$"+s]=function(t){return `${s}(${t})`};for(const s of ["Int8Array","Uint8Array","Uint8ClampedArray","Int16Array","Uint16Array","Int32Array","Uint32Array","Float32Array","Float64Array"])o.prototype["$"+s]=function(t){return `${s}[${t.join(",")}]`};for(const s of ["BigInt64Array","BigUint64Array"])o.prototype["$"+s]=function(t){return `${s}[${t.join("n,")}${t.length>0?"n":""}]`};return o}();
 
+function isEqual(object1, object2) {
+  if (object1 === object2) {
+    return true;
+  }
+  if (serialize$1(object1) === serialize$1(object2)) {
+    return true;
+  }
+  return false;
+}
+
 const e=globalThis.process?.getBuiltinModule?.("crypto")?.hash,r="sha256",s="base64url";function digest(t){if(e)return e(r,t,s);const o=createHash(r).update(t);return globalThis.process?.versions?.webcontainer?o.digest().toString(s):o.digest(s)}
 
 function hash$1(input) {
@@ -4327,7 +4337,7 @@ function _expandFromEnv(value) {
 const _inlineRuntimeConfig = {
   "app": {
     "baseURL": "/",
-    "buildId": "874808d6-9b98-4fda-8b0c-8c07d2ee6c3c",
+    "buildId": "21b727c6-0518-4954-89a4-83b9588ae323",
     "buildAssetsDir": "/_nuxt/",
     "cdnURL": ""
   },
@@ -5040,5 +5050,5 @@ function getCacheHeaders(url) {
   return {};
 }
 
-export { $fetch as $, setCookie as A, useNitroApp as B, useRuntimeConfig as C, withQuery as D, withTrailingSlash as E, withoutTrailingSlash as F, defineEventHandler as a, defineRenderHandler as b, createError$1 as c, decodePath as d, defu as e, deleteCookie as f, destr as g, encodePath as h, executeAsync as i, getContext as j, getCookie as k, getHeaders as l, getQuery as m, getResponseStatus as n, getResponseStatusText as o, getRouteRules as p, handler as q, hasProtocol as r, hash$1 as s, isScriptProtocol as t, joinRelativeURL as u, joinURL as v, parseQuery as w, parseURL as x, readBody as y, sanitizeStatusCode as z };
+export { $fetch as $, parseURL as A, readBody as B, sanitizeStatusCode as C, setCookie as D, useNitroApp as E, useRuntimeConfig as F, withQuery as G, withTrailingSlash as H, withoutTrailingSlash as I, defineEventHandler as a, defineRenderHandler as b, createError$1 as c, decodePath as d, defu as e, deleteCookie as f, destr as g, encodePath as h, executeAsync as i, getContext as j, getCookie as k, getHeaders as l, getQuery as m, getRequestHeader as n, getResponseStatus as o, getResponseStatusText as p, getRouteRules as q, handler as r, hasProtocol as s, hash$1 as t, isEqual as u, isScriptProtocol as v, joinRelativeURL as w, joinURL as x, klona as y, parseQuery as z };
 //# sourceMappingURL=nitro.mjs.map

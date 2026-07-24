@@ -1,4 +1,4 @@
-import { a as defineEventHandler, y as readBody, l as getHeaders, k as getCookie, A as setCookie, c as createError } from '../../nitro/nitro.mjs';
+import { a as defineEventHandler, B as readBody, l as getHeaders, k as getCookie, D as setCookie, c as createError } from '../../nitro/nitro.mjs';
 import 'node:http';
 import 'node:https';
 import 'node:events';
@@ -35,14 +35,18 @@ const remote = defineEventHandler(async (event) => {
       }
     );
     if ((_b = (_a = response == null ? void 0 : response.data) == null ? void 0 : _a.login) == null ? void 0 : _b.access_token) {
-      setCookie(event, "auth_token", response.data.login.access_token, {
+      const cookieOptions = {
         httpOnly: true,
-        secure: true,
+        // secure: true, // disabled temporarily to allow login on non-HTTPS live hosts
         sameSite: "lax",
-        path: "/",
-        maxAge: 60 * 60 * 24 * 7
-        // 7 days
-      });
+        path: "/"
+      };
+      if (response.data.login.expire_at) {
+        cookieOptions.expires = new Date(response.data.login.expire_at);
+      } else {
+        cookieOptions.maxAge = 60 * 60 * 24 * 7;
+      }
+      setCookie(event, "auth_token", response.data.login.access_token, cookieOptions);
       response.data.login.access_token = "SECURE_HTTP_ONLY_COOKIE_SET";
     }
     return response;
