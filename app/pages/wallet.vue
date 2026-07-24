@@ -39,6 +39,7 @@ const businessName = computed(() => route.query.name || "My Business");
 const selectedWallet = ref(null);
 const showBalance = ref(true);
 const txFilter = ref("all");
+const activeTab = ref("fiat");
 
 const { getWalletsQuery, getCurrenciesQuery, addWallet } = useBusiness();
 const { isDark, toggleTheme } = useTheme();
@@ -62,6 +63,11 @@ const groupedCurrencies = computed(() => {
     fiat: all.filter((c) => c.is_fiat),
     crypto: all.filter((c) => !c.is_fiat),
   };
+});
+
+const activeCurrencies = computed(() => {
+  if (activeTab.value === 'fiat') return groupedCurrencies.value.fiat;
+  return groupedCurrencies.value.crypto;
 });
 
 const handleAddWallet = async () => {
@@ -180,6 +186,11 @@ const wallets = computed(() => {
       accounts: mockAccounts,
     };
   });
+});
+
+const filteredWallets = computed(() => {
+  if (activeTab.value === 'fiat') return wallets.value.filter(w => w.is_fiat);
+  return wallets.value.filter(w => !w.is_fiat);
 });
 
 const formatAmount = (amount, symbol) => {
@@ -488,10 +499,17 @@ const handleBackToDashboard = () => {
       </div>
 
       <div v-else class="space-y-6 animate-in fade-in duration-300">
+        <Tabs :modelValue="activeTab" @update:modelValue="(val) => activeTab = val" class="w-full">
+          <TabsList class="mb-4">
+            <TabsTrigger value="fiat">Fiat Wallets</TabsTrigger>
+            <TabsTrigger value="crypto">Crypto Wallets</TabsTrigger>
+          </TabsList>
+        </Tabs>
+
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <!-- Empty state if no wallets after loading -->
           <div
-            v-if="wallets.length === 0"
+            v-if="filteredWallets.length === 0"
             class="col-span-2 flex flex-col items-center justify-center py-20 text-muted-foreground"
           >
             <div
@@ -506,11 +524,11 @@ const handleBackToDashboard = () => {
               Create your first Treasury wallet to start transacting.
             </p>
             <Button @click="showAddWalletModal = true" class="gap-2">
-              <span class="text-lg leading-none">+</span> Add Wallet
+              <span class="text-lg leading-none">+</span> Add {{ activeTab === 'fiat' ? 'Fiat' : 'Crypto' }} Wallet
             </Button>
           </div>
           <Card
-            v-for="w in wallets"
+            v-for="w in filteredWallets"
             :key="w.currency"
             class="border-0 shadow-md shadow-foreground/5 cursor-pointer hover:shadow-lg transition-shadow active:scale-[0.98] transition-transform bg-card"
             @click="selectedWallet = w"
@@ -554,13 +572,13 @@ const handleBackToDashboard = () => {
         </div>
 
         <!-- Add Wallet button shown when wallets exist -->
-        <div v-if="wallets.length > 0" class="flex justify-end">
+        <div v-if="filteredWallets.length > 0" class="flex justify-end">
           <Button
             variant="outline"
             class="gap-2"
             @click="showAddWalletModal = true"
           >
-            <span class="text-lg leading-none">+</span> Add Wallet
+            <span class="text-lg leading-none">+</span> Add {{ activeTab === 'fiat' ? 'Fiat' : 'Crypto' }} Wallet
           </Button>
         </div>
       </div>
@@ -576,7 +594,7 @@ const handleBackToDashboard = () => {
         <Card class="w-full max-w-sm border-0 shadow-2xl bg-card">
           <CardHeader class="pb-3">
             <CardTitle class="text-base text-foreground"
-              >Add Treasury Wallet</CardTitle
+              >Add {{ activeTab === 'fiat' ? 'Fiat' : 'Crypto' }} Wallet</CardTitle
             >
             <p class="text-xs text-muted-foreground mt-1">
               Select a currency to create your wallet
@@ -592,30 +610,13 @@ const handleBackToDashboard = () => {
                 class="w-full h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
               >
                 <option value="" disabled>Select currency...</option>
-                <optgroup
-                  label="Fiat Currencies"
-                  v-if="groupedCurrencies.fiat?.length"
+                <option
+                  v-for="c in activeCurrencies"
+                  :key="c.code"
+                  :value="c.code"
                 >
-                  <option
-                    v-for="c in groupedCurrencies.fiat"
-                    :key="c.code"
-                    :value="c.code"
-                  >
-                    {{ c.symbol }} {{ c.name }} ({{ c.code }})
-                  </option>
-                </optgroup>
-                <optgroup
-                  label="Crypto Currencies"
-                  v-if="groupedCurrencies.crypto?.length"
-                >
-                  <option
-                    v-for="c in groupedCurrencies.crypto"
-                    :key="c.code"
-                    :value="c.code"
-                  >
-                    {{ c.symbol }} {{ c.name }} ({{ c.code }})
-                  </option>
-                </optgroup>
+                  {{ c.symbol }} {{ c.name }} ({{ c.code }})
+                </option>
               </select>
             </div>
             <div class="flex gap-3 pt-2">

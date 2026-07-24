@@ -61,10 +61,9 @@ const {
 } = useBusiness();
 const qc = useQueryClient();
 
-const activeBusinessId = ref(null);
-if (import.meta.client) {
-  activeBusinessId.value = localStorage.getItem("activeBusinessId");
-}
+const activeBusinessId = computed(() => {
+  return route.query.id || (import.meta.client ? localStorage.getItem("activeBusinessId") : null);
+});
 
 const activeBusinessData = computed(() => {
   const list = userBusinesses.data.value?.myBusinesses || [];
@@ -234,6 +233,7 @@ const handleSaveProfile = async () => {
     const formattedDate = `${day}-${month}-${year}`;
 
     await businessDetail.mutateAsync({
+      id: computedActiveId.value,
       about: infoData.value.about,
       industry: infoData.value.industry,
       website: infoData.value.website,
@@ -490,7 +490,54 @@ const navigateBack = () => {
             </div>
 
             <!-- Read-only Business Detail View -->
-            <div v-if="!isEditingProfile">
+            <div v-if="isDetailPending" class="space-y-6">
+              <Card class="border-0 shadow-md shadow-foreground/5 bg-card overflow-hidden">
+                <CardContent class="p-6">
+                  <!-- Header skeleton -->
+                  <div class="flex items-center gap-4 mb-6 pb-6 border-b border-border/50">
+                    <div class="w-14 h-14 rounded-xl bg-muted/60 animate-pulse shrink-0"></div>
+                    <div class="space-y-2.5 flex-1 max-w-sm">
+                      <div class="h-5 w-3/4 bg-muted/80 animate-pulse rounded-md"></div>
+                      <div class="h-5 w-24 bg-primary/10 animate-pulse rounded-full"></div>
+                    </div>
+                  </div>
+                  <!-- Info grid skeleton -->
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="space-y-2">
+                      <div class="h-3 w-20 bg-muted/50 animate-pulse rounded-sm"></div>
+                      <div class="h-4 w-40 bg-muted/80 animate-pulse rounded-md"></div>
+                    </div>
+                    <div class="space-y-2">
+                      <div class="h-3 w-20 bg-muted/50 animate-pulse rounded-sm"></div>
+                      <div class="h-4 w-48 bg-muted/80 animate-pulse rounded-md"></div>
+                    </div>
+                    <div class="space-y-2 md:col-span-2">
+                      <div class="h-3 w-20 bg-muted/50 animate-pulse rounded-sm"></div>
+                      <div class="space-y-2 mt-2">
+                        <div class="h-4 w-full bg-muted/60 animate-pulse rounded-md"></div>
+                        <div class="h-4 w-[90%] bg-muted/60 animate-pulse rounded-md"></div>
+                        <div class="h-4 w-[75%] bg-muted/60 animate-pulse rounded-md"></div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card class="border-0 shadow-md shadow-foreground/5 bg-card">
+                <CardHeader class="pb-4">
+                  <div class="flex items-center gap-3">
+                    <div class="w-5 h-5 rounded bg-primary/20 animate-pulse"></div>
+                    <div class="h-5 w-48 bg-muted/80 animate-pulse rounded-md"></div>
+                  </div>
+                </CardHeader>
+                <CardContent class="p-6 pt-0 grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div v-for="i in 4" :key="i" class="space-y-2">
+                    <div class="h-3 w-24 bg-muted/50 animate-pulse rounded-sm"></div>
+                    <div class="h-4 w-36 bg-muted/80 animate-pulse rounded-md"></div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            <div v-else-if="!isEditingProfile">
               <Card class="border shadow-sm mb-4">
                 <CardContent class="p-6">
                   <!-- Header with logo -->

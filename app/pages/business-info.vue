@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import {
   ArrowLeft,
   Building2,
@@ -12,6 +12,7 @@ import {
   MapPin,
   Clock,
   MessageSquare,
+  Loader2,
 } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,10 +39,18 @@ definePageMeta({
 });
 
 import { useTheme } from "@/composables/useTheme";
+import { useBusiness } from "@/composables/useBusiness";
 
 const route = useRoute();
 const businessName = computed(() => route.query.name || "My Business");
 const { isDark, toggleTheme } = useTheme();
+const { getBusinessDetailQuery, businessDetail } = useBusiness();
+
+const activeBusinessId = computed(() => {
+  return route.query.id || (import.meta.client ? localStorage.getItem("activeBusinessId") : null);
+});
+
+const { data: detailData, isPending } = getBusinessDetailQuery(activeBusinessId);
 
 const info = ref({
   name: businessName.value,
@@ -50,7 +59,7 @@ const info = ref({
   phone: "",
   website: "",
   industry: "",
-  taxId: "TAX-12345678",
+  taxId: "",
   address: "",
   city: "",
   state: "",
@@ -58,22 +67,61 @@ const info = ref({
   zipCode: "",
 });
 
+watch(detailData, (newData) => {
+  if (newData?.business) {
+    const biz = newData.business;
+    info.value = {
+      name: biz.name || businessName.value,
+      description: biz.about || "",
+      email: biz.email || "",
+      phone: biz.phone || "",
+      website: biz.website || "",
+      industry: biz.industry || "",
+      taxId: biz.tax_identification_number || "",
+      address: biz.address?.street || "",
+      city: biz.address?.city || "",
+      state: biz.address?.state || "",
+      country: biz.address?.country || "",
+      zipCode: biz.address?.zip_code || "",
+    };
+  }
+}, { immediate: true });
+
 const update = (key, value) => {
   info.value[key] = value;
 };
 
-const handleSave = () => {
+const handleSave = async () => {
   if (!info.value.name.trim()) {
     toast.error("Business name is required");
     return;
   }
-  toast.success("Business information updated");
+  
+  try {
+    await businessDetail.mutateAsync({
+      id: activeBusinessId.value,
+      about: info.value.description,
+      industry: info.value.industry,
+      email: info.value.email,
+      website: info.value.website,
+      address: {
+        street: info.value.address,
+        city: info.value.city,
+        state: info.value.state,
+        country: info.value.country,
+        zip_code: info.value.zipCode,
+      }
+    });
+    toast.success("Business information updated");
+  } catch (error) {
+    toast.error(error.message || "Failed to update business information");
+  }
 };
 
 const handleBack = () => {
   navigateTo({
     path: "/settings",
-    query: { name: businessName.value },
+    query: { name: businessName.value, id: activeBusinessId.value },
   });
 };
 </script>
