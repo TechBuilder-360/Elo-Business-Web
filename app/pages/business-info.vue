@@ -60,6 +60,9 @@ const info = ref({
   website: "",
   industry: "",
   taxId: "",
+  rcNumber: "",
+  countryOfInc: "",
+  dateOfInc: "",
   address: "",
   city: "",
   state: "",
@@ -78,6 +81,11 @@ watch(detailData, (newData) => {
       website: biz.website || "",
       industry: biz.industry || "",
       taxId: biz.tax_identification_number || "",
+      rcNumber: biz.number || "",
+      countryOfInc: biz.country_of_incorporation || "",
+      dateOfInc: biz.date_of_incorporation 
+        ? biz.date_of_incorporation.split("-").reverse().join("-") 
+        : "",
       address: biz.address?.street || "",
       city: biz.address?.city || "",
       state: biz.address?.state || "",
@@ -98,11 +106,20 @@ const handleSave = async () => {
   }
   
   try {
+    const parts = info.value.dateOfInc ? info.value.dateOfInc.split("-") : [];
+    const formattedDate = parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : "";
+
     await businessDetail.mutateAsync({
       name: info.value.name,
       about: info.value.description,
       industry: info.value.industry,
       website: info.value.website,
+      registration_detail: {
+        number: info.value.rcNumber,
+        country_of_incorporation: info.value.countryOfInc,
+        date_of_incorporation: formattedDate,
+        tax_identification_number: info.value.taxId,
+      }
     });
     toast.success("Business information updated");
   } catch (error) {
@@ -263,13 +280,36 @@ const handleBack = () => {
                   />
                 </div>
               </div>
-              <div class="space-y-1.5">
-                <Label>Tax ID / Registration Number</Label>
-                <Input
-                  :modelValue="info.taxId"
-                  disabled
-                  class="disabled:bg-muted"
-                />
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-1.5">
+                  <Label>Registration Number (RC)</Label>
+                  <Input
+                    :modelValue="info.rcNumber"
+                    @update:modelValue="(v) => update('rcNumber', v)"
+                  />
+                </div>
+                <div class="space-y-1.5">
+                  <Label>Tax ID (TIN)</Label>
+                  <Input
+                    :modelValue="info.taxId"
+                    @update:modelValue="(v) => update('taxId', v)"
+                  />
+                </div>
+                <div class="space-y-1.5">
+                  <Label>Country of Incorporation</Label>
+                  <Input
+                    :modelValue="info.countryOfInc"
+                    @update:modelValue="(v) => update('countryOfInc', v)"
+                  />
+                </div>
+                <div class="space-y-1.5">
+                  <Label>Date of Incorporation</Label>
+                  <Input
+                    type="date"
+                    :modelValue="info.dateOfInc"
+                    @update:modelValue="(v) => update('dateOfInc', v)"
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>
