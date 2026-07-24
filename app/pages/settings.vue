@@ -21,6 +21,10 @@ const handleBack = () => {
   });
 };
 
+const handleSwitchBusiness = () => {
+  navigateTo("/businesses");
+};
+
 const handleEditBusinessInfo = () => {
   navigateTo({
     path: "/business-info",
@@ -54,15 +58,26 @@ const handleEditBusinessInfo = () => {
             <p class="text-xs text-muted-foreground">{{ businessName }}</p>
           </div>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          class="h-8 w-8 text-foreground shrink-0"
-          @click="toggleTheme"
-        >
-          <Moon v-if="isDark" class="w-4 h-4" />
-          <Sun v-else class="w-4 h-4" />
-        </Button>
+        <div class="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            class="gap-2 text-muted-foreground hover:text-foreground"
+            @click="handleSwitchBusiness"
+          >
+            <Building2 class="w-4 h-4" />
+            <span class="hidden sm:inline">Switch Business</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            class="h-8 w-8 text-foreground shrink-0"
+            @click="toggleTheme"
+          >
+            <Moon v-if="isDark" class="w-4 h-4" />
+            <Sun v-else class="w-4 h-4" />
+          </Button>
+        </div>
       </div>
     </header>
 
