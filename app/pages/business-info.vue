@@ -204,7 +204,67 @@ const handleBack = () => {
         </TabsList>
 
         <TabsContent value="details" class="space-y-6">
-          <Card class="border-0 shadow-md shadow-foreground/5 bg-card">
+          <!-- Details Skeleton -->
+          <div v-if="isPending" class="space-y-6">
+            <Card class="border-0 shadow-md shadow-foreground/5 bg-card overflow-hidden">
+              <CardHeader class="pb-3 border-b border-border/50">
+                <div class="h-5 w-48 bg-muted/80 animate-pulse rounded-md"></div>
+              </CardHeader>
+              <CardContent class="p-6 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div class="space-y-2.5">
+                    <div class="h-4 w-28 bg-muted/50 animate-pulse rounded-sm"></div>
+                    <div class="h-10 w-full bg-muted/80 animate-pulse rounded-md"></div>
+                  </div>
+                  <div class="space-y-2.5">
+                    <div class="h-4 w-24 bg-muted/50 animate-pulse rounded-sm"></div>
+                    <div class="h-10 w-full bg-muted/80 animate-pulse rounded-md"></div>
+                  </div>
+                </div>
+                <div class="space-y-2.5">
+                  <div class="h-4 w-32 bg-muted/50 animate-pulse rounded-sm"></div>
+                  <div class="h-24 w-full bg-muted/80 animate-pulse rounded-md"></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div v-for="i in 3" :key="i" class="space-y-2.5">
+                    <div class="h-4 w-20 bg-muted/50 animate-pulse rounded-sm"></div>
+                    <div class="h-10 w-full bg-muted/80 animate-pulse rounded-md"></div>
+                  </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div v-for="i in 4" :key="i" class="space-y-2.5">
+                    <div class="h-4 w-36 bg-muted/50 animate-pulse rounded-sm"></div>
+                    <div class="h-10 w-full bg-muted/80 animate-pulse rounded-md"></div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card class="border-0 shadow-md shadow-foreground/5 bg-card">
+              <CardHeader class="pb-3 border-b border-border/50">
+                <div class="h-5 w-40 bg-muted/80 animate-pulse rounded-md"></div>
+              </CardHeader>
+              <CardContent class="p-6 space-y-6">
+                <div class="space-y-2.5">
+                  <div class="h-4 w-32 bg-muted/50 animate-pulse rounded-sm"></div>
+                  <div class="h-10 w-full bg-muted/80 animate-pulse rounded-md"></div>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                  <div v-for="i in 4" :key="i" class="space-y-2.5">
+                    <div class="h-4 w-24 bg-muted/50 animate-pulse rounded-sm"></div>
+                    <div class="h-10 w-full bg-muted/80 animate-pulse rounded-md"></div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div class="flex justify-end">
+              <div class="h-10 w-32 bg-primary/20 animate-pulse rounded-md"></div>
+            </div>
+          </div>
+          <!-- Actual Content -->
+          <div v-else class="space-y-6 animate-in fade-in duration-500">
+            <Card class="border-0 shadow-md shadow-foreground/5 bg-card">
             <CardHeader class="pb-3">
               <CardTitle class="text-base text-foreground">General Information</CardTitle>
             </CardHeader>
@@ -364,6 +424,7 @@ const handleBack = () => {
               <Save class="w-4 h-4 mr-2" />
               Save Changes
             </Button>
+          </div>
           </div>
         </TabsContent>
 
