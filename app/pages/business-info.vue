@@ -99,18 +99,10 @@ const handleSave = async () => {
   
   try {
     await businessDetail.mutateAsync({
-      id: activeBusinessId.value,
+      name: info.value.name,
       about: info.value.description,
       industry: info.value.industry,
-      email: info.value.email,
       website: info.value.website,
-      address: {
-        street: info.value.address,
-        city: info.value.city,
-        state: info.value.state,
-        country: info.value.country,
-        zip_code: info.value.zipCode,
-      }
     });
     toast.success("Business information updated");
   } catch (error) {
