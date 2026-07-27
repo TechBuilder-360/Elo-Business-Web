@@ -1,15 +1,18 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import {
   ArrowLeft,
   Building2,
   Save,
   Palette,
+  Moon,
+  Sun,
   Info,
   Package,
   MapPin,
   Clock,
   MessageSquare,
+  Loader2,
 } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,8 +38,19 @@ definePageMeta({
   layout: false,
 });
 
+import { useTheme } from "@/composables/useTheme";
+import { useBusiness } from "@/composables/useBusiness";
+
 const route = useRoute();
 const businessName = computed(() => route.query.name || "My Business");
+const { isDark, toggleTheme } = useTheme();
+const { getBusinessDetailQuery, businessDetail } = useBusiness();
+
+const activeBusinessId = computed(() => {
+  return route.query.id || (import.meta.client ? localStorage.getItem("activeBusinessId") : null);
+});
+
+const { data: detailData, isPending } = getBusinessDetailQuery(activeBusinessId);
 
 const info = ref({
   name: businessName.value,
@@ -45,7 +59,10 @@ const info = ref({
   phone: "",
   website: "",
   industry: "",
-  taxId: "TAX-12345678",
+  taxId: "",
+  rcNumber: "",
+  countryOfInc: "",
+  dateOfInc: "",
   address: "",
   city: "",
   state: "",
@@ -53,22 +70,67 @@ const info = ref({
   zipCode: "",
 });
 
+watch(detailData, (newData) => {
+  if (newData?.business) {
+    const biz = newData.business;
+    info.value = {
+      name: biz.name || businessName.value,
+      description: biz.about || "",
+      email: biz.email || "",
+      phone: biz.phone || "",
+      website: biz.website || "",
+      industry: biz.industry || "",
+      taxId: biz.tax_identification_number || "",
+      rcNumber: biz.number || "",
+      countryOfInc: biz.country_of_incorporation || "",
+      dateOfInc: biz.date_of_incorporation 
+        ? biz.date_of_incorporation.split("-").reverse().join("-") 
+        : "",
+      address: biz.address?.street || "",
+      city: biz.address?.city || "",
+      state: biz.address?.state || "",
+      country: biz.address?.country || "",
+      zipCode: biz.address?.zip_code || "",
+    };
+  }
+}, { immediate: true });
+
 const update = (key, value) => {
   info.value[key] = value;
 };
 
-const handleSave = () => {
+const handleSave = async () => {
   if (!info.value.name.trim()) {
     toast.error("Business name is required");
     return;
   }
-  toast.success("Business information updated");
+  
+  try {
+    const parts = info.value.dateOfInc ? info.value.dateOfInc.split("-") : [];
+    const formattedDate = parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : "";
+
+    await businessDetail.mutateAsync({
+      name: info.value.name,
+      about: info.value.description,
+      industry: info.value.industry,
+      website: info.value.website,
+      registration_detail: {
+        number: info.value.rcNumber,
+        country_of_incorporation: info.value.countryOfInc,
+        date_of_incorporation: formattedDate,
+        tax_identification_number: info.value.taxId,
+      }
+    });
+    toast.success("Business information updated");
+  } catch (error) {
+    toast.error(error.message || "Failed to update business information");
+  }
 };
 
 const handleBack = () => {
   navigateTo({
     path: "/settings",
-    query: { name: businessName.value },
+    query: { name: businessName.value, id: activeBusinessId.value },
   });
 };
 </script>
@@ -77,7 +139,7 @@ const handleBack = () => {
   <div class="min-h-screen bg-background text-foreground">
     <header class="border-b bg-card sticky top-0 z-10">
       <div
-        class="container max-w-6xl mx-auto flex items-center justify-between py-3 px-4"
+        class="container max-w-8xl mx-auto flex items-center justify-between py-3 px-4"
       >
         <div class="flex items-center gap-3">
           <Button
@@ -100,10 +162,19 @@ const handleBack = () => {
             <p class="text-xs text-muted-foreground">{{ businessName }}</p>
           </div>
         </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          class="h-8 w-8 text-foreground shrink-0"
+          @click="toggleTheme"
+        >
+          <Moon v-if="isDark" class="w-4 h-4" />
+          <Sun v-else class="w-4 h-4" />
+        </Button>
       </div>
     </header>
 
-    <main class="container max-w-6xl mx-auto py-6 px-4">
+    <main class="container max-w-8xl mx-auto py-6 px-4">
       <Tabs defaultValue="details">
         <TabsList class="mb-6 flex-wrap h-auto gap-1 p-1">
           <TabsTrigger value="details" class="gap-1.5 text-xs">
@@ -133,7 +204,67 @@ const handleBack = () => {
         </TabsList>
 
         <TabsContent value="details" class="space-y-6">
-          <Card class="border-0 shadow-md shadow-foreground/5 bg-card">
+          <!-- Details Skeleton -->
+          <div v-if="isPending" class="space-y-6">
+            <Card class="border-0 shadow-md shadow-foreground/5 bg-card overflow-hidden">
+              <CardHeader class="pb-3 border-b border-border/50">
+                <div class="h-5 w-48 bg-muted/80 animate-pulse rounded-md"></div>
+              </CardHeader>
+              <CardContent class="p-6 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div class="space-y-2.5">
+                    <div class="h-4 w-28 bg-muted/50 animate-pulse rounded-sm"></div>
+                    <div class="h-10 w-full bg-muted/80 animate-pulse rounded-md"></div>
+                  </div>
+                  <div class="space-y-2.5">
+                    <div class="h-4 w-24 bg-muted/50 animate-pulse rounded-sm"></div>
+                    <div class="h-10 w-full bg-muted/80 animate-pulse rounded-md"></div>
+                  </div>
+                </div>
+                <div class="space-y-2.5">
+                  <div class="h-4 w-32 bg-muted/50 animate-pulse rounded-sm"></div>
+                  <div class="h-24 w-full bg-muted/80 animate-pulse rounded-md"></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div v-for="i in 3" :key="i" class="space-y-2.5">
+                    <div class="h-4 w-20 bg-muted/50 animate-pulse rounded-sm"></div>
+                    <div class="h-10 w-full bg-muted/80 animate-pulse rounded-md"></div>
+                  </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div v-for="i in 4" :key="i" class="space-y-2.5">
+                    <div class="h-4 w-36 bg-muted/50 animate-pulse rounded-sm"></div>
+                    <div class="h-10 w-full bg-muted/80 animate-pulse rounded-md"></div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card class="border-0 shadow-md shadow-foreground/5 bg-card">
+              <CardHeader class="pb-3 border-b border-border/50">
+                <div class="h-5 w-40 bg-muted/80 animate-pulse rounded-md"></div>
+              </CardHeader>
+              <CardContent class="p-6 space-y-6">
+                <div class="space-y-2.5">
+                  <div class="h-4 w-32 bg-muted/50 animate-pulse rounded-sm"></div>
+                  <div class="h-10 w-full bg-muted/80 animate-pulse rounded-md"></div>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                  <div v-for="i in 4" :key="i" class="space-y-2.5">
+                    <div class="h-4 w-24 bg-muted/50 animate-pulse rounded-sm"></div>
+                    <div class="h-10 w-full bg-muted/80 animate-pulse rounded-md"></div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <div class="flex justify-end">
+              <div class="h-10 w-32 bg-primary/20 animate-pulse rounded-md"></div>
+            </div>
+          </div>
+          <!-- Actual Content -->
+          <div v-else class="space-y-6 animate-in fade-in duration-500">
+            <Card class="border-0 shadow-md shadow-foreground/5 bg-card">
             <CardHeader class="pb-3">
               <CardTitle class="text-base text-foreground">General Information</CardTitle>
             </CardHeader>
@@ -209,13 +340,36 @@ const handleBack = () => {
                   />
                 </div>
               </div>
-              <div class="space-y-1.5">
-                <Label>Tax ID / Registration Number</Label>
-                <Input
-                  :modelValue="info.taxId"
-                  disabled
-                  class="disabled:bg-muted"
-                />
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-1.5">
+                  <Label>Registration Number (RC)</Label>
+                  <Input
+                    :modelValue="info.rcNumber"
+                    @update:modelValue="(v) => update('rcNumber', v)"
+                  />
+                </div>
+                <div class="space-y-1.5">
+                  <Label>Tax ID (TIN)</Label>
+                  <Input
+                    :modelValue="info.taxId"
+                    @update:modelValue="(v) => update('taxId', v)"
+                  />
+                </div>
+                <div class="space-y-1.5">
+                  <Label>Country of Incorporation</Label>
+                  <Input
+                    :modelValue="info.countryOfInc"
+                    @update:modelValue="(v) => update('countryOfInc', v)"
+                  />
+                </div>
+                <div class="space-y-1.5">
+                  <Label>Date of Incorporation</Label>
+                  <Input
+                    type="date"
+                    :modelValue="info.dateOfInc"
+                    @update:modelValue="(v) => update('dateOfInc', v)"
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -270,6 +424,7 @@ const handleBack = () => {
               <Save class="w-4 h-4 mr-2" />
               Save Changes
             </Button>
+          </div>
           </div>
         </TabsContent>
 

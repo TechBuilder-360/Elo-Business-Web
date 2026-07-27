@@ -40,7 +40,6 @@ export const useBusiness = (options = {}) => {
   const registerBusinessMutation = useGQLMutation(REGISTER_BUSINESS_MUTATION, {
     onSuccess: () => {
       // Invalidate the userBusinesses query so the list refreshes automatically
-      const qc = useQueryClient();
       qc.invalidateQueries({ queryKey: ["userBusinesses"] });
     },
     onError: (err) => {
@@ -170,7 +169,6 @@ export const useBusiness = (options = {}) => {
           date_of_incorporation
           tax_identification_number
           address {
-            number
             city
             street
             state
@@ -180,11 +178,16 @@ export const useBusiness = (options = {}) => {
         }
       }
     `;
+    // Use a computed queryKey so TanStack Query automatically refetches when the id changes
     return useGQLQuery(
-      ["businessDetail", id],
+      computed(() => ["businessDetail", unref(id)]),
       GET_BUSINESS_DETAIL_QUERY,
       computed(() => ({ id: unref(id) })),
-      { enabled: computed(() => !!unref(id)), ...queryOptions },
+      {
+        // Only run the query when we actually have a non-null id
+        enabled: computed(() => !!unref(id)),
+        ...queryOptions,
+      },
     );
   };
 
