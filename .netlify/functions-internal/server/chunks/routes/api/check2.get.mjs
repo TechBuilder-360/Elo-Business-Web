@@ -1,4 +1,4 @@
-import { a as defineEventHandler, C as useRuntimeConfig } from '../../nitro/nitro.mjs';
+import { a as defineEventHandler, F as useRuntimeConfig } from '../../nitro/nitro.mjs';
 import fs from 'fs';
 import 'node:http';
 import 'node:https';

@@ -12,6 +12,8 @@ import {
   Settings,
   Wallet,
   ShieldCheck,
+  Moon,
+  Sun
 } from "lucide-vue-next";
 import {
   ChartContainer,
@@ -29,6 +31,8 @@ import {
 definePageMeta({
   layout: false,
 });
+
+const { isDark, toggleTheme } = useTheme();
 
 const route = useRoute();
 const businessName = computed(() => route.query.name || "My Business");
@@ -144,7 +148,7 @@ const handleComplianceNavigation = () => {
     <!-- Header -->
     <header class="border-b bg-card sticky top-0 z-10">
       <div
-        class="container max-w-6xl mx-auto flex items-center justify-between py-3 px-4"
+        class="container max-w-8xl mx-auto flex items-center justify-between py-3 px-4"
       >
         <div class="flex items-center gap-3">
           <div
@@ -160,6 +164,15 @@ const handleComplianceNavigation = () => {
           </div>
         </div>
         <div class="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            class="h-8 w-8 text-foreground shrink-0"
+            @click="toggleTheme"
+          >
+            <Moon v-if="isDark" class="w-4 h-4" />
+            <Sun v-else class="w-4 h-4" />
+          </Button>
           <Badge
             variant="outline"
             class="border-[hsl(var(--warning))] text-[hsl(var(--warning-foreground))] bg-[hsl(var(--warning)/0.1)] gap-1.5 py-1"
@@ -199,7 +212,7 @@ const handleComplianceNavigation = () => {
       </div>
     </header>
 
-    <main class="container max-w-6xl mx-auto py-6 px-4 space-y-6">
+    <main class="container max-w-8xl mx-auto py-6 px-4 space-y-6">
       <!-- Summary Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card class="border-0 shadow-md shadow-foreground/5 bg-card">
@@ -279,7 +292,7 @@ const handleComplianceNavigation = () => {
           </Tabs>
         </CardHeader>
         <CardContent>
-          <ChartContainer :config="engagementConfig" class="h-[260px] w-full">
+          <ChartContainer :config="engagementConfig" class="h-[400px] w-full">
             <BarChart :data="engagementData">
               <CartesianGrid strokeDasharray="3 3" :vertical="false" />
               <XAxis dataKey="name" />

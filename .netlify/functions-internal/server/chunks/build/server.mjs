@@ -1,6 +1,6 @@
-import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { hasInjectionContext, inject, getCurrentInstance, defineComponent, createElementBlock, shallowRef, provide, cloneVNode, h, ref, Suspense, Fragment, createApp, shallowReactive, computed, unref, watch, onErrorCaptured, onServerPrefetch, createVNode, resolveDynamicComponent, reactive, effectScope, defineAsyncComponent, mergeProps, getCurrentScope, toRef, isReadonly, isRef, toValue, useSSRContext, isShallow, isReactive, toRaw, markRaw, nextTick } from 'vue';
-import { x as parseURL$1, h as encodePath$1, d as decodePath, r as hasProtocol, t as isScriptProtocol, v as joinURL, D as withQuery, z as sanitizeStatusCode, j as getContext, $ as $fetch$1, c as createError$1, i as executeAsync, s as hash, e as defu } from '../nitro/nitro.mjs';
-import { b as baseURL } from '../routes/renderer.mjs';
+import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { hasInjectionContext, inject, getCurrentInstance, ref, customRef, defineComponent, createElementBlock, shallowRef, provide, cloneVNode, h, Suspense, Fragment, createApp, shallowReactive, computed, unref, watch, onErrorCaptured, onServerPrefetch, createVNode, resolveDynamicComponent, reactive, effectScope, defineAsyncComponent, mergeProps, getCurrentScope, toRef, isReadonly, isRef, toValue, useSSRContext, isShallow, isReactive, toRaw, markRaw, nextTick } from 'vue';
+import { A as parseURL$1, h as encodePath$1, d as decodePath, s as hasProtocol, v as isScriptProtocol, x as joinURL, G as withQuery, y as klona, C as sanitizeStatusCode, n as getRequestHeader, u as isEqual, j as getContext, D as setCookie, k as getCookie, f as deleteCookie, $ as $fetch$1, c as createError$1, i as executeAsync, t as hash, e as defu } from '../nitro/nitro.mjs';
+import { u as useHead$1, h as headSymbol, b as baseURL } from '../routes/renderer.mjs';
 import { debounce } from 'perfect-debounce';
 import { isPlainObject } from '@vue/shared';
 import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query';
@@ -188,6 +188,74 @@ var Hookable = class {
 };
 function createHooks() {
 	return new Hookable();
+}
+
+function endIndex(str, min, len) {
+	const index = str.indexOf(";", min);
+	return index === -1 ? len : index;
+}
+function eqIndex(str, min, max) {
+	const index = str.indexOf("=", min);
+	return index < max ? index : -1;
+}
+function valueSlice(str, min, max) {
+	if (min === max) return "";
+	let start = min;
+	let end = max;
+	do {
+		const code = str.charCodeAt(start);
+		if (code !== 32 && code !== 9) break;
+	} while (++start < end);
+	while (end > start) {
+		const code = str.charCodeAt(end - 1);
+		if (code !== 32 && code !== 9) break;
+		end--;
+	}
+	return str.slice(start, end);
+}
+const NullObject = /* @__PURE__ */ (() => {
+	const C = function() {};
+	C.prototype = Object.create(null);
+	return C;
+})();
+function parse(str, options) {
+	const obj = new NullObject();
+	const len = str.length;
+	if (len < 2) return obj;
+	const dec = options?.decode || decode$1;
+	const allowMultiple = options?.allowMultiple || false;
+	let index = 0;
+	do {
+		const eqIdx = eqIndex(str, index, len);
+		if (eqIdx === -1) break;
+		const endIdx = endIndex(str, index, len);
+		if (eqIdx > endIdx) {
+			index = str.lastIndexOf(";", eqIdx - 1) + 1;
+			continue;
+		}
+		const key = valueSlice(str, index, eqIdx);
+		if (options?.filter && !options.filter(key)) {
+			index = endIdx + 1;
+			continue;
+		}
+		const val = dec(valueSlice(str, eqIdx + 1, endIdx));
+		if (allowMultiple) {
+			const existing = obj[key];
+			if (existing === void 0) obj[key] = val;
+			else if (Array.isArray(existing)) existing.push(val);
+			else obj[key] = [existing, val];
+		} else if (obj[key] === void 0) obj[key] = val;
+		index = endIdx + 1;
+	} while (index < len);
+	return obj;
+}
+function decode$1(str) {
+	if (!str.includes("%")) return str;
+	try {
+		return decodeURIComponent(str);
+	} catch {
+		return str;
+	}
 }
 
 if (!globalThis.$fetch) {
@@ -1107,7 +1175,7 @@ function tokensToParser(segments, extraOptions) {
   if (options.end) pattern += "$";
   else if (options.strict && !pattern.endsWith("/")) pattern += "(?:/|$)";
   const re = new RegExp(pattern, options.sensitive ? "" : "i");
-  function parse(path) {
+  function parse2(path) {
     const match = path.match(re);
     const params = {};
     if (!match) return null;
@@ -1143,7 +1211,7 @@ function tokensToParser(segments, extraOptions) {
     re,
     score,
     keys,
-    parse,
+    parse: parse2,
     stringify
   };
 }
@@ -1951,79 +2019,79 @@ const _routes = [
     name: "business",
     path: "/business",
     meta: __nuxt_page_meta$c || {},
-    component: () => import('./business-t0KOt9ra.mjs')
+    component: () => import('./business-CLtVpNst.mjs')
   },
   {
     name: "business-info",
     path: "/business-info",
     meta: __nuxt_page_meta$b || {},
-    component: () => import('./business-info-DnTO2PlJ.mjs')
+    component: () => import('./business-info-CQm6TqS0.mjs')
   },
   {
     name: "businesses",
     path: "/businesses",
     meta: __nuxt_page_meta$a || {},
-    component: () => import('./businesses-CoT5MTyV.mjs')
+    component: () => import('./businesses-DFAd8Scl.mjs')
   },
   {
     name: "compliance",
     path: "/compliance",
     meta: __nuxt_page_meta$9 || {},
-    component: () => import('./compliance-DkEKTs-p.mjs')
+    component: () => import('./compliance-BtrZ-bqO.mjs')
   },
   {
     name: "dashboard",
     path: "/dashboard",
     meta: __nuxt_page_meta$8 || {},
-    component: () => import('./dashboard-DiE1Mrva.mjs')
+    component: () => import('./dashboard-Ds58bTJY.mjs')
   },
   {
     name: "onboard",
     path: "/onboard",
     meta: __nuxt_page_meta$7 || {},
-    component: () => import('./onboard-Bce16RW1.mjs')
+    component: () => import('./onboard-Bcs9uEp7.mjs')
   },
   {
     name: "settings",
     path: "/settings",
     meta: __nuxt_page_meta$6 || {},
-    component: () => import('./settings-BnJ5miHF.mjs')
+    component: () => import('./settings-CPCxmKZT.mjs')
   },
   {
     name: "signup",
     path: "/signup",
     meta: __nuxt_page_meta$5 || {},
-    component: () => import('./signup-CnlWKpFC.mjs')
+    component: () => import('./signup-PRLCSAqr.mjs')
   },
   {
     name: "verify-identity",
     path: "/verify-identity",
     meta: __nuxt_page_meta$4 || {},
-    component: () => import('./verify-identity-jQT-5yLh.mjs')
+    component: () => import('./verify-identity-BboFJVdE.mjs')
   },
   {
     name: "verify-otp",
     path: "/verify-otp",
     meta: __nuxt_page_meta$3 || {},
-    component: () => import('./verify-otp-FFr3X5BJ.mjs')
+    component: () => import('./verify-otp-B9GqA0Ct.mjs')
   },
   {
     name: "wallet",
     path: "/wallet",
     meta: __nuxt_page_meta$2 || {},
-    component: () => import('./wallet-DxqACR4-.mjs')
+    component: () => import('./wallet-CUw0Ka-0.mjs')
   },
   {
     name: "slug",
     path: "/:slug(.*)*",
     meta: __nuxt_page_meta$1 || {},
-    component: () => import('./_...slug_-rR4FbIfi.mjs')
+    component: () => import('./_...slug_-CBVxYBbV.mjs')
   },
   {
     name: "index",
     path: "/",
     meta: __nuxt_page_meta || {},
-    component: () => import('./index-BQ5OmzC2.mjs')
+    component: () => import('./index-D7gDT_hA.mjs')
   }
 ];
 const ROUTE_KEY_PARENTHESES_RE = /(:\w+)\([^)]+\)/g;
@@ -2138,6 +2206,22 @@ const validate = /* @__PURE__ */ defineNuxtRouteMiddleware(async (to, from) => {
   });
   return error;
 });
+function injectHead(nuxtApp) {
+  const nuxt = nuxtApp || useNuxtApp();
+  return nuxt.ssrContext?.head || nuxt.runWithContext(() => {
+    if (hasInjectionContext()) {
+      const head = inject(headSymbol);
+      if (!head) {
+        throw new Error("[nuxt] [unhead] Missing Unhead instance.");
+      }
+      return head;
+    }
+  });
+}
+function useHead(input, options = {}) {
+  const head = options.head || injectHead(options.nuxt);
+  return useHead$1(input, { head, ...options });
+}
 function useRequestEvent(nuxtApp) {
   nuxtApp ||= useNuxtApp();
   return nuxtApp.ssrContext?.event;
@@ -2943,6 +3027,119 @@ createUseFetch.__nuxt_factory({
   // @ts-expect-error private property
   _functionName: "useLazyFetch"
 });
+function parseCookieValue(value) {
+  if (value === "undefined") {
+    return void 0;
+  }
+  try {
+    const parsed = JSON.parse(value);
+    if (typeof parsed === "number" && String(parsed) !== value) {
+      return value;
+    }
+    return parsed;
+  } catch {
+    return value;
+  }
+}
+const CookieDefaults = {
+  path: "/",
+  watch: true,
+  decode: (val) => val ? parseCookieValue(decodeURIComponent(val)) : val,
+  encode: (val) => {
+    if (typeof val !== "string" || val === "undefined") {
+      return encodeURIComponent(JSON.stringify(val));
+    }
+    try {
+      if (typeof JSON.parse(val) !== "string") {
+        return encodeURIComponent(JSON.stringify(val));
+      }
+    } catch {
+    }
+    return encodeURIComponent(val);
+  },
+  refresh: false
+};
+function useCookie(name, _opts) {
+  const opts = { ...CookieDefaults, ..._opts };
+  opts.filter ??= (key) => key === name;
+  const cookies = readRawCookies(opts) || {};
+  let delay;
+  if (opts.maxAge !== void 0) {
+    delay = opts.maxAge * 1e3;
+  } else if (opts.expires) {
+    delay = opts.expires.getTime() - Date.now();
+  }
+  const hasExpired = delay !== void 0 && delay <= 0;
+  const cookieValue = klona(hasExpired ? void 0 : cookies[name] ?? opts.default?.());
+  const cookie = cookieServerRef(name, cookieValue);
+  {
+    const nuxtApp = useNuxtApp();
+    const writeFinalCookieValue = () => {
+      const valueIsSame = isEqual(cookie.value, cookies[name]);
+      if (opts.readonly || valueIsSame && !opts.refresh) {
+        return;
+      }
+      nuxtApp._cookiesChanged ||= {};
+      if (valueIsSame && opts.refresh && !nuxtApp._cookiesChanged[name]) {
+        return;
+      }
+      nuxtApp._cookies ||= {};
+      if (name in nuxtApp._cookies) {
+        if (isEqual(cookie.value, nuxtApp._cookies[name])) {
+          return;
+        }
+      }
+      nuxtApp._cookies[name] = cookie.value;
+      const encoded = cookie.value === null || cookie.value === void 0 ? void 0 : opts.encode(cookie.value);
+      writeServerCookie(useRequestEvent(nuxtApp), name, encoded, opts);
+    };
+    const unhook = nuxtApp.hooks.hookOnce("app:rendered", writeFinalCookieValue);
+    nuxtApp.hooks.hookOnce("app:error", () => {
+      unhook();
+      return writeFinalCookieValue();
+    });
+  }
+  return cookie;
+}
+function readRawCookies(opts = {}) {
+  {
+    return parse(getRequestHeader(useRequestEvent(), "cookie") || "", opts);
+  }
+}
+const identityEncode = (val) => val;
+function toSerializeOptions(opts) {
+  const { encode: _encode, decode: _decode, ...rest } = opts;
+  return { ...rest, encode: identityEncode };
+}
+function writeServerCookie(event, name, value, opts = {}) {
+  if (event) {
+    const serializeOpts = toSerializeOptions(opts);
+    if (value !== void 0) {
+      return setCookie(event, name, value, serializeOpts);
+    }
+    if (getCookie(event, name) !== void 0) {
+      return deleteCookie(event, name, serializeOpts);
+    }
+  }
+}
+function cookieServerRef(name, value) {
+  const internalRef = ref(value);
+  const nuxtApp = useNuxtApp();
+  return customRef((track, trigger) => {
+    return {
+      get() {
+        track();
+        return internalRef.value;
+      },
+      set(newValue) {
+        nuxtApp._cookiesChanged ||= {};
+        nuxtApp._cookiesChanged[name] = true;
+        internalRef.value = newValue;
+        trigger();
+      }
+    };
+  });
+}
 const plugin = /* @__PURE__ */ defineNuxtPlugin({
   name: "pinia",
   setup(nuxtApp) {
@@ -3063,27 +3260,30 @@ function normalizeSlot(slot, data) {
   const slotContent = slot(data);
   return slotContent.length === 1 ? h(slotContent[0]) : h(Fragment, void 0, slotContent);
 }
-const _export_sfc = (sfc, props) => {
-  const target = sfc.__vccOpts || sfc;
-  for (const [key, val] of props) {
-    target[key] = val;
+const _sfc_main$2 = {
+  __name: "app",
+  __ssrInlineRender: true,
+  setup(__props) {
+    const colorMode = useCookie("color-mode", { default: () => "light" });
+    useHead({
+      htmlAttrs: {
+        class: () => colorMode.value === "dark" ? "dark" : ""
+      }
+    });
+    return (_ctx, _push, _parent, _attrs) => {
+      const _component_NuxtPage = __nuxt_component_0;
+      _push(`<div${ssrRenderAttrs(mergeProps({ class: "w-full min-h-screen bg-background text-foreground font-sans antialiased selection:bg-primary/20" }, _attrs))}>`);
+      _push(ssrRenderComponent(_component_NuxtPage, null, null, _parent));
+      _push(`</div>`);
+    };
   }
-  return target;
 };
-const _sfc_main$2 = {};
-function _sfc_ssrRender(_ctx, _push, _parent, _attrs) {
-  const _component_NuxtPage = __nuxt_component_0;
-  _push(`<div${ssrRenderAttrs(mergeProps({ class: "w-full min-h-screen bg-background text-foreground font-sans antialiased selection:bg-primary/20" }, _attrs))}>`);
-  _push(ssrRenderComponent(_component_NuxtPage, null, null, _parent));
-  _push(`</div>`);
-}
 const _sfc_setup$2 = _sfc_main$2.setup;
 _sfc_main$2.setup = (props, ctx) => {
   const ssrContext = useSSRContext();
   (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("app.vue");
   return _sfc_setup$2 ? _sfc_setup$2(props, ctx) : void 0;
 };
-const AppComponent = /* @__PURE__ */ _export_sfc(_sfc_main$2, [["ssrRender", _sfc_ssrRender]]);
 const _sfc_main$1 = {
   __name: "nuxt-error-page",
   __ssrInlineRender: true,
@@ -3098,8 +3298,8 @@ const _sfc_main$1 = {
     const statusText = _error.statusMessage ?? (is404 ? "Page Not Found" : "Internal Server Error");
     const description = _error.message || _error.toString();
     const stack = void 0;
-    const _Error404 = defineAsyncComponent(() => import('./error-404-DEtzTfRG.mjs'));
-    const _Error = defineAsyncComponent(() => import('./error-500-CMuAs_Vb.mjs'));
+    const _Error404 = defineAsyncComponent(() => import('./error-404-DlHJbxKn.mjs'));
+    const _Error = defineAsyncComponent(() => import('./error-500-Cufz-LDn.mjs'));
     const ErrorTemplate = is404 ? _Error404 : _Error;
     return (_ctx, _push, _parent, _attrs) => {
       _push(ssrRenderComponent(unref(ErrorTemplate), mergeProps({ status: unref(status), statusText: unref(statusText), statusCode: unref(status), statusMessage: unref(statusText), description: unref(description), stack: unref(stack) }, _attrs), null, _parent));
@@ -3157,7 +3357,7 @@ const _sfc_main = {
           } else if (unref(SingleRenderer)) {
             ssrRenderVNode(_push, createVNode(resolveDynamicComponent(unref(SingleRenderer)), null, null), _parent);
           } else {
-            _push(ssrRenderComponent(unref(AppComponent), null, null, _parent));
+            _push(ssrRenderComponent(unref(_sfc_main$2), null, null, _parent));
           }
         },
         _: 1
@@ -3191,5 +3391,5 @@ let entry;
 }
 const entry_default = ((ssrContext) => entry(ssrContext));
 
-export { _export_sfc as _, nuxtLinkDefaults as a, useRoute$1 as b, useRoute as c, useRouter$1 as d, entry_default as default, encodeRoutePath as e, useRouter as f, useRuntimeConfig as g, navigateTo as n, resolveRouteObject as r, useNuxtApp as u };
+export { nuxtLinkDefaults as a, useHead as b, useNuxtApp as c, useRoute$1 as d, entry_default as default, encodeRoutePath as e, useRoute as f, useRouter$1 as g, useRouter as h, useRuntimeConfig as i, navigateTo as n, resolveRouteObject as r, useCookie as u };
 //# sourceMappingURL=server.mjs.map

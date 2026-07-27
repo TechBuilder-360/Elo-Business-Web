@@ -2,7 +2,7 @@
 import { ref } from "vue";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Landmark, Copy, Check } from "lucide-vue-next";
+import { Landmark, Copy, Check, Wallet as WalletIcon } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
 
 defineProps({
@@ -10,6 +10,10 @@ defineProps({
     type: Array,
     required: true,
   },
+  isFiat: {
+    type: Boolean,
+    default: true,
+  }
 });
 
 const copiedId = ref(null);
@@ -26,7 +30,7 @@ const handleCopy = (text, id) => {
 </script>
 
 <template>
-  <Card v-if="accounts.length > 0" class="border-0 shadow-md shadow-foreground/5">
+  <Card class="border-0 shadow-md shadow-foreground/5">
     <CardHeader class="pb-3">
       <CardTitle class="text-base flex items-center gap-2">
         <Landmark class="w-4 h-4" />
@@ -42,10 +46,11 @@ const handleCopy = (text, id) => {
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
             <div class="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center">
-              <Landmark class="w-4 h-4 text-primary" />
+              <Landmark v-if="isFiat" class="w-4 h-4 text-primary" />
+              <WalletIcon v-else class="w-4 h-4 text-primary" />
             </div>
             <span class="text-sm font-semibold text-foreground">
-              {{ account.bankName }}
+              {{ isFiat ? account.bankName : account.network + ' Network' }}
             </span>
           </div>
           <Badge v-if="account.isPrimary" variant="secondary" class="text-[10px] text-foreground">
@@ -53,7 +58,7 @@ const handleCopy = (text, id) => {
           </Badge>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div v-if="isFiat" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <!-- Account Name -->
           <div class="flex items-center justify-between gap-2">
             <div>
@@ -121,7 +126,32 @@ const handleCopy = (text, id) => {
             </Button>
           </div>
         </div>
+        <div v-else class="grid grid-cols-1 gap-3">
+          <!-- Crypto Address -->
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex-1 overflow-hidden pr-4">
+              <p class="text-[11px] text-muted-foreground">Wallet Address</p>
+              <p class="text-sm font-medium font-mono text-foreground truncate">
+                {{ account.address }}
+              </p>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              class="h-6 w-6 shrink-0 text-foreground"
+              @click="handleCopy(account.address, account.id + '-addr')"
+            >
+              <Check v-if="copiedId === account.id + '-addr'" class="w-3 h-3 text-emerald-600" />
+              <Copy v-else class="w-3 h-3 text-muted-foreground" />
+            </Button>
+          </div>
+        </div>
       </div>
+      
+      <!-- Add Account Button -->
+      <Button variant="outline" class="w-full border-dashed">
+        <span class="text-lg leading-none mr-2">+</span> {{ isFiat ? 'Add Bank Account' : 'Add Wallet Address' }}
+      </Button>
     </CardContent>
   </Card>
 </template>

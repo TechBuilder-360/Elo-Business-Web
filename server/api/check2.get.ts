@@ -35,8 +35,8 @@ export default defineEventHandler(async () => {
     const backendUrl = `${config.backendUrl}/api`;
 
     const res = await $fetch(backendUrl, {
-      method: "POST",
-      body: { query },
+        method: "POST",
+        body: { query },
     });
 
     fs.writeFileSync("schema_dump.json", JSON.stringify(res, null, 2));
