@@ -166,7 +166,6 @@ export const useBusiness = (options = {}) => {
           date_of_incorporation
           tax_identification_number
           address {
-            number
             city
             street
             state

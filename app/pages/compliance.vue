@@ -112,6 +112,7 @@ const infoData = ref({
   about: "",
   industry: "",
   website: "",
+  email: "",
 });
 
 const regData = ref({
@@ -146,7 +147,8 @@ watch(
       infoData.value.name = full.name || active?.name || "";
       infoData.value.about = full.about || "";
       infoData.value.industry = full.industry || "";
-      infoData.value.website = full.email || ""; // Using email for website slot for now if needed, or map properly
+      infoData.value.website = full.website || "";
+      infoData.value.email = full.email || "";
 
       if (full.number) {
         regData.value.number = full.number;
@@ -233,6 +235,7 @@ const handleSaveProfile = async () => {
     const formattedDate = `${day}-${month}-${year}`;
 
     await businessDetail.mutateAsync({
+      name: infoData.value.name,
       about: infoData.value.about,
       industry: infoData.value.industry,
       website: infoData.value.website,
