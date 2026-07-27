@@ -67,7 +67,8 @@ const validateForm = () => {
       return "Street address is required";
     if (!formData.value.address.city.trim()) return "City is required";
     if (!formData.value.address.state.trim()) return "State is required";
-    if (!formData.value.address.country.trim()) return "Country is required";
+        if (!formData.value.address.country.trim())
+          return "Country is required";
   }
   return null;
 };

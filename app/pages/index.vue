@@ -81,9 +81,8 @@ const handleLogin = async () => {
       <!-- Background SVG Pattern -->
       <div
         class="absolute inset-0 bg-cover bg-center opacity-70 z-0"
-        style="background-image: url('/elo_login_bg.svg');"
+        style="background-image: url(&quot;/elo_login_bg.svg&quot;)"
       ></div>
-
 
       <!-- Top Branding -->
       <div class="relative z-10 flex items-center gap-3">

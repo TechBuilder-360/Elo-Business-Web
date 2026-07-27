@@ -31,7 +31,9 @@ export const useBusiness = (options = {}) => {
   // ──────────────────────────────────────────────
   const REGISTER_BUSINESS_MUTATION = `
     mutation RegisterBusiness($input: RegisterBusinessInput!) {
-      registerBusiness(input: $input)
+      registerBusiness(input: $input) {
+        ok
+      }
     }
   `;
 
@@ -45,6 +47,7 @@ export const useBusiness = (options = {}) => {
     },
   });
 
+  // Wrap mutateAsync for easier calling
   const registerOriginal = registerBusinessMutation.mutateAsync.bind(
     registerBusinessMutation,
   );

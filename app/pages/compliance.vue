@@ -81,6 +81,17 @@ const fullBusinessData = computed(
   () => fullBusinessDataResult.value?.business || null,
 );
 
+const activeBusinessId = ref(null);
+if (import.meta.client) {
+  activeBusinessId.value = localStorage.getItem("activeBusinessId");
+}
+
+const { data: fullBusinessDataResult, isPending: isDetailPending } =
+  getBusinessDetailQuery(activeBusinessId);
+const fullBusinessData = computed(
+  () => fullBusinessDataResult.value?.business || null,
+);
+
 // ──────────────────────────────────────────────
 // Navigation State
 // ──────────────────────────────────────────────
@@ -185,6 +196,69 @@ watch(
         isEditingProfile.value = true;
       } else {
         isEditingProfile.value = false;
+      }
+    }
+  },
+  { immediate: true },
+);
+// ──────────────────────────────────────────────
+// Derive active business from already-fetched list
+// ──────────────────────────────────────────────
+const activeBusinessData = computed(() => {
+  const list = userBusinesses.data.value?.myBusinesses || [];
+  if (activeBusinessId.value)
+    return list.find((b) => b.id === activeBusinessId.value) || null;
+  return list[0] || null;
+});
+
+// Pre-fill infoData from the live API response
+import { watch } from "vue";
+watch(
+  [activeBusinessData, fullBusinessData],
+  ([active, full]) => {
+    if (active) {
+      infoData.value.name = active.name || businessName.value;
+    }
+
+    if (full) {
+      infoData.value.name = full.name || infoData.value.name;
+      infoData.value.about = full.about || "";
+      infoData.value.industry = full.industry || "";
+      infoData.value.website = full.email || ""; // Using email for website slot for now if needed, or map properly
+
+      if (full.number) {
+        regData.value.number = full.number;
+      }
+      if (full.country_of_incorporation) {
+        regData.value.country_of_incorporation = full.country_of_incorporation;
+      }
+      if (full.date_of_incorporation) {
+        const dateParts = full.date_of_incorporation.split("-");
+        if (dateParts.length === 3) {
+          if (dateParts[0].length === 4) {
+            regData.value.date_of_incorporation = full.date_of_incorporation;
+          } else {
+            regData.value.date_of_incorporation = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+          }
+        } else {
+          regData.value.date_of_incorporation = full.date_of_incorporation;
+        }
+      }
+      if (full.tax_identification_number) {
+        regData.value.tax_identification_number =
+          full.tax_identification_number;
+      }
+    }
+  },
+  { immediate: true },
+);
+
+watch(
+  isDetailPending,
+  (pending) => {
+    if (!pending) {
+      if (!fullBusinessData.value || !fullBusinessData.value.number) {
+        isEditingProfile.value = true;
       }
     }
   },
