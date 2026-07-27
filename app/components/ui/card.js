@@ -67,6 +67,6 @@ export const CardContent = {
   props: { class: String },
   setup(props, { slots }) {
     return () =>
-      h("div", { class: ["p-6 pt-0", props.class] }, slots.default?.());
+      h("div", { class: ["p-6", props.class] }, slots.default?.());
   },
 };

@@ -89,11 +89,7 @@ const handleLogin = async () => {
         <div
           class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 overflow-hidden"
         >
-          <img
-            :src="'/favicon_io/favicon_io/apple-touch-icon.png'"
-            class="w-full h-full object-cover"
-            alt="ELO"
-          />
+          <img :src="'/favicon_io/favicon_io/apple-touch-icon.png'" class="w-full h-full object-cover" alt="ELO" />
         </div>
         <span class="text-xl font-bold tracking-tight">ELO Business</span>
       </div>
@@ -103,11 +99,7 @@ const handleLogin = async () => {
         <div
           class="w-20 h-20 rounded-2xl bg-white/10 flex items-center justify-center mb-8 ring-1 ring-white/20 shadow-2xl overflow-hidden"
         >
-          <img
-            :src="'/favicon_io/favicon_io/apple-touch-icon.png'"
-            class="w-full h-full object-cover"
-            alt="ELO"
-          />
+          <img :src="'/favicon_io/favicon_io/apple-touch-icon.png'" class="w-full h-full object-cover" alt="ELO" />
         </div>
         <h2 class="text-4xl font-extrabold tracking-tight">ELO Business</h2>
       </div>
@@ -125,11 +117,7 @@ const handleLogin = async () => {
         <div
           class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center overflow-hidden"
         >
-          <img
-            :src="'/favicon_io/favicon_io/apple-touch-icon.png'"
-            class="w-full h-full object-cover"
-            alt="ELO"
-          />
+          <img :src="'/favicon_io/favicon_io/apple-touch-icon.png'" class="w-full h-full object-cover" alt="ELO" />
         </div>
         <span class="font-bold">ELO</span>
       </div>
