@@ -82,6 +82,115 @@ const fullBusinessData = computed(
 );
 
 // ──────────────────────────────────────────────
+// Navigation State
+// ──────────────────────────────────────────────
+const activeSection = ref("profile"); // 'profile', 'documents'
+const profileStep = ref(1); // 1 for General Info, 2 for Registration Details
+const isUploadingDoc = ref(false); // Toggle for document upload form
+const isEditingProfile = ref(false); // Toggle between view and edit mode for profile
+
+const sections = [
+  {
+    id: "profile",
+    label: "Business Profile",
+    icon: Building2,
+    desc: "General & Registration info",
+  },
+  {
+    id: "documents",
+    label: "Documents",
+    icon: FolderOpen,
+    desc: "Compliance files",
+  },
+];
+
+// ──────────────────────────────────────────────
+// Data Models
+// ──────────────────────────────────────────────
+const infoData = ref({
+  name: "", // will be populated from the backend — never use route.query.name here
+  about: "",
+  industry: "",
+  website: "",
+  email: "",
+});
+
+const regData = ref({
+  number: "",
+  country_of_incorporation: "",
+  date_of_incorporation: "",
+  tax_identification_number: "",
+});
+
+const uploadData = ref({
+  document_id: "",
+  description: "",
+  fileObj: null,
+});
+
+const fileInput = ref(null);
+
+// activeBusinessData moved up
+
+// Pre-fill infoData from the live API response
+import { watch } from "vue";
+watch(
+  [activeBusinessData, fullBusinessData],
+  ([active, full]) => {
+    if (active && !infoData.value.name) {
+      // Only use the list-level name as a temporary placeholder if we have nothing yet
+      infoData.value.name = active.name || "";
+    }
+
+    if (full) {
+      // Always overwrite with the authoritative name from the business detail query
+      infoData.value.name = full.name || active?.name || "";
+      infoData.value.about = full.about || "";
+      infoData.value.industry = full.industry || "";
+      infoData.value.website = full.website || "";
+      infoData.value.email = full.email || "";
+
+      if (full.number) {
+        regData.value.number = full.number;
+      }
+      if (full.country_of_incorporation) {
+        regData.value.country_of_incorporation = full.country_of_incorporation;
+      }
+      if (full.date_of_incorporation) {
+        const dateParts = full.date_of_incorporation.split("-");
+        if (dateParts.length === 3) {
+          if (dateParts[0].length === 4) {
+            regData.value.date_of_incorporation = full.date_of_incorporation;
+          } else {
+            regData.value.date_of_incorporation = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+          }
+        } else {
+          regData.value.date_of_incorporation = full.date_of_incorporation;
+        }
+      }
+      if (full.tax_identification_number) {
+        regData.value.tax_identification_number =
+          full.tax_identification_number;
+      }
+    }
+  },
+  { immediate: true },
+);
+
+watch(
+  isDetailPending,
+  (pending) => {
+    if (!pending) {
+      if (!fullBusinessData.value || !fullBusinessData.value.number) {
+        isEditingProfile.value = true;
+      } else {
+        isEditingProfile.value = false;
+      }
+    }
+  },
+  { immediate: true },
+);
+// ──────────────────────────────────────────────
 // Progress Calculation
 // ──────────────────────────────────────────────
 const completionPercentage = computed(() => {
