@@ -12,6 +12,8 @@ import {
   Settings,
   Wallet,
   ShieldCheck,
+  Moon,
+  Sun
 } from "lucide-vue-next";
 import {
   ChartContainer,
@@ -290,7 +292,7 @@ const handleComplianceNavigation = () => {
           </Tabs>
         </CardHeader>
         <CardContent>
-          <ChartContainer :config="engagementConfig" class="h-[260px] w-full">
+          <ChartContainer :config="engagementConfig" class="h-[400px] w-full">
             <BarChart :data="engagementData">
               <CartesianGrid strokeDasharray="3 3" :vertical="false" />
               <XAxis dataKey="name" />
