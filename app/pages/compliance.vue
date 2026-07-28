@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useBusiness } from "@/composables/useBusiness";
+import { useQueryClient } from "@tanstack/vue-query";
 import { toast } from "@/utils/alert";
 import {
   ArrowLeft,
@@ -36,6 +37,8 @@ import {
   CheckCircle2,
   Pencil,
   Eye,
+  Moon,
+  Sun,
 } from "lucide-vue-next";
 
 definePageMeta({
@@ -45,6 +48,7 @@ definePageMeta({
 const route = useRoute();
 const router = useRouter();
 const businessName = computed(() => route.query.name || "Business");
+const { isDark, toggleTheme } = useTheme();
 
 const {
   userBusinesses,
@@ -55,14 +59,24 @@ const {
   businessDocuments,
   getBusinessDetailQuery,
 } = useBusiness();
+const qc = useQueryClient();
 
-const activeBusinessId = ref(null);
-if (import.meta.client) {
-  activeBusinessId.value = localStorage.getItem("activeBusinessId");
-}
+const activeBusinessId = computed(() => {
+  return route.query.id || (import.meta.client ? localStorage.getItem("activeBusinessId") : null);
+});
 
+const activeBusinessData = computed(() => {
+  const list = userBusinesses.data.value?.myBusinesses || [];
+  if (activeBusinessId.value)
+    return list.find((b) => b.id === activeBusinessId.value) || null;
+  return list[0] || null;
+});
+
+const computedActiveId = computed(
+  () => activeBusinessData.value?.id || activeBusinessId.value,
+);
 const { data: fullBusinessDataResult, isPending: isDetailPending } =
-  getBusinessDetailQuery(activeBusinessId);
+  getBusinessDetailQuery(computedActiveId);
 const fullBusinessData = computed(
   () => fullBusinessDataResult.value?.business || null,
 );
@@ -94,10 +108,11 @@ const sections = [
 // Data Models
 // ──────────────────────────────────────────────
 const infoData = ref({
-  name: businessName.value,
+  name: "", // will be populated from the backend — never use route.query.name here
   about: "",
   industry: "",
   website: "",
+  email: "",
 });
 
 const regData = ref({
@@ -115,30 +130,25 @@ const uploadData = ref({
 
 const fileInput = ref(null);
 
-// ──────────────────────────────────────────────
-// Derive active business from already-fetched list
-// ──────────────────────────────────────────────
-const activeBusinessData = computed(() => {
-  const list = userBusinesses.data.value?.myBusinesses || [];
-  if (activeBusinessId.value)
-    return list.find((b) => b.id === activeBusinessId.value) || null;
-  return list[0] || null;
-});
+// activeBusinessData moved up
 
 // Pre-fill infoData from the live API response
 import { watch } from "vue";
 watch(
   [activeBusinessData, fullBusinessData],
   ([active, full]) => {
-    if (active) {
-      infoData.value.name = active.name || businessName.value;
+    if (active && !infoData.value.name) {
+      // Only use the list-level name as a temporary placeholder if we have nothing yet
+      infoData.value.name = active.name || "";
     }
 
     if (full) {
-      infoData.value.name = full.name || infoData.value.name;
+      // Always overwrite with the authoritative name from the business detail query
+      infoData.value.name = full.name || active?.name || "";
       infoData.value.about = full.about || "";
       infoData.value.industry = full.industry || "";
-      infoData.value.website = full.email || ""; // Using email for website slot for now if needed, or map properly
+      infoData.value.website = full.website || "";
+      infoData.value.email = full.email || "";
 
       if (full.number) {
         regData.value.number = full.number;
@@ -173,6 +183,8 @@ watch(
     if (!pending) {
       if (!fullBusinessData.value || !fullBusinessData.value.number) {
         isEditingProfile.value = true;
+      } else {
+        isEditingProfile.value = false;
       }
     }
   },
@@ -237,6 +249,8 @@ const handleSaveProfile = async () => {
     toast.success("Profile saved successfully");
     isEditingProfile.value = false;
     profileStep.value = 1;
+    // Invalidate the businessDetail query so the UI immediately reflects the new data
+    qc.invalidateQueries({ queryKey: ["businessDetail", computedActiveId.value] });
   } catch (error) {
     toast.error(error.message || "Failed to save profile");
   }
@@ -315,7 +329,7 @@ const navigateBack = () => {
     <!-- Header -->
     <header class="border-b bg-background sticky top-0 z-20">
       <div
-        class="container max-w-6xl mx-auto flex items-center justify-between py-4 px-4 sm:px-6 lg:px-8"
+        class="container max-w-8xl mx-auto flex items-center justify-between py-4 px-4 sm:px-6 lg:px-8"
       >
         <div class="flex items-center gap-4">
           <Button
@@ -337,6 +351,15 @@ const navigateBack = () => {
         </div>
 
         <div class="hidden sm:flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            class="h-8 w-8 text-foreground shrink-0"
+            @click="toggleTheme"
+          >
+            <Moon v-if="isDark" class="w-4 h-4" />
+            <Sun v-else class="w-4 h-4" />
+          </Button>
           <div class="text-sm text-right">
             <p class="font-medium">Profile Completion</p>
             <p class="text-xs text-muted-foreground">
@@ -353,7 +376,7 @@ const navigateBack = () => {
       </div>
     </header>
 
-    <main class="container max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <main class="container max-w-8xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
       <div class="flex flex-col md:flex-row gap-8">
         <!-- Sidebar Navigation -->
         <aside class="md:w-64 shrink-0">
@@ -469,7 +492,54 @@ const navigateBack = () => {
             </div>
 
             <!-- Read-only Business Detail View -->
-            <div v-if="!isEditingProfile">
+            <div v-if="isDetailPending" class="space-y-6">
+              <Card class="border-0 shadow-md shadow-foreground/5 bg-card overflow-hidden">
+                <CardContent class="p-6">
+                  <!-- Header skeleton -->
+                  <div class="flex items-center gap-4 mb-6 pb-6 border-b border-border/50">
+                    <div class="w-14 h-14 rounded-xl bg-muted/60 animate-pulse shrink-0"></div>
+                    <div class="space-y-2.5 flex-1 max-w-sm">
+                      <div class="h-5 w-3/4 bg-muted/80 animate-pulse rounded-md"></div>
+                      <div class="h-5 w-24 bg-primary/10 animate-pulse rounded-full"></div>
+                    </div>
+                  </div>
+                  <!-- Info grid skeleton -->
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="space-y-2">
+                      <div class="h-3 w-20 bg-muted/50 animate-pulse rounded-sm"></div>
+                      <div class="h-4 w-40 bg-muted/80 animate-pulse rounded-md"></div>
+                    </div>
+                    <div class="space-y-2">
+                      <div class="h-3 w-20 bg-muted/50 animate-pulse rounded-sm"></div>
+                      <div class="h-4 w-48 bg-muted/80 animate-pulse rounded-md"></div>
+                    </div>
+                    <div class="space-y-2 md:col-span-2">
+                      <div class="h-3 w-20 bg-muted/50 animate-pulse rounded-sm"></div>
+                      <div class="space-y-2 mt-2">
+                        <div class="h-4 w-full bg-muted/60 animate-pulse rounded-md"></div>
+                        <div class="h-4 w-[90%] bg-muted/60 animate-pulse rounded-md"></div>
+                        <div class="h-4 w-[75%] bg-muted/60 animate-pulse rounded-md"></div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card class="border-0 shadow-md shadow-foreground/5 bg-card">
+                <CardHeader class="pb-4">
+                  <div class="flex items-center gap-3">
+                    <div class="w-5 h-5 rounded bg-primary/20 animate-pulse"></div>
+                    <div class="h-5 w-48 bg-muted/80 animate-pulse rounded-md"></div>
+                  </div>
+                </CardHeader>
+                <CardContent class="p-6 pt-0 grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div v-for="i in 4" :key="i" class="space-y-2">
+                    <div class="h-3 w-24 bg-muted/50 animate-pulse rounded-sm"></div>
+                    <div class="h-4 w-36 bg-muted/80 animate-pulse rounded-md"></div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            <div v-else-if="!isEditingProfile">
               <Card class="border shadow-sm mb-4">
                 <CardContent class="p-6">
                   <!-- Header with logo -->
@@ -669,7 +739,7 @@ const navigateBack = () => {
 
                   <div class="flex justify-end pt-6 border-t">
                     <Button @click="profileStep = 2" class="min-w-[140px]">
-                      Next Step: Registration
+                      Next Step
                       <ArrowLeft class="w-4 h-4 ml-2 rotate-180" />
                     </Button>
                   </div>

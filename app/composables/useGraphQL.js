@@ -91,6 +91,12 @@ async function gqlRequest({ query, variables = {} }) {
       headers,
     });
   } catch (error) {
+    if (error?.response?.status === 401 && import.meta.client) {
+      $fetch("/api/logout", { method: "POST" }).finally(() => {
+        window.location.href = "/";
+      });
+      return new Promise(() => { });
+    }
     // If ofetch throws due to a 4xx/5xx status (like 422 GraphQL error)
     if (error?.response?._data) {
       response = error.response._data;
@@ -99,6 +105,20 @@ async function gqlRequest({ query, variables = {} }) {
     }
   }
   if (response.errors?.length) {
+    const isUnauth = response.errors.some(e =>
+      e.message?.toLowerCase().includes("unauthenticated") ||
+      e.message?.toLowerCase().includes("unauthorized") ||
+      e.message?.toLowerCase().includes("unauthorised") ||
+      e.extensions?.code === "UNAUTHENTICATED" ||
+      e.extensions?.code === "FORBIDDEN"
+    );
+    if (isUnauth && import.meta.client) {
+      $fetch("/api/logout", { method: "POST" }).finally(() => {
+        window.location.href = "/";
+      });
+      return new Promise(() => { }); // hang while redirecting
+    }
+
     const err = new Error(response.errors[0]?.message || "GraphQL error");
     err.graphQLErrors = response.errors;
     throw err;
@@ -117,7 +137,16 @@ async function gqlRequest({ query, variables = {} }) {
 export function useGQLQuery(key, query, variables = {}, opts = {}) {
   return useQuery({
     queryKey: key,
-    queryFn: () => gqlRequest({ query, variables }),
+    queryFn: () => {
+      // Always unref variables at execution time so computed refs are resolved
+      const resolvedVars =
+        typeof variables === "function"
+          ? variables()
+          : variables && typeof variables.value !== "undefined"
+            ? variables.value
+            : variables;
+      return gqlRequest({ query, variables: resolvedVars });
+    },
     ...opts,
   });
 }

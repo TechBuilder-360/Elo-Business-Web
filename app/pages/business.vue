@@ -204,7 +204,7 @@ const handleBack = () => {
           class="w-full h-full object-cover"
         />
       </div>
-      <div class="container max-w-5xl mx-auto px-4">
+      <div class="container max-w-8xl mx-auto px-4">
         <div class="relative -mt-12 flex items-end gap-4 md:gap-6">
           <div
             class="w-24 h-24 md:w-28 md:h-28 rounded-2xl bg-card border-4 border-background shadow-lg flex items-center justify-center shrink-0 overflow-hidden"
@@ -258,7 +258,7 @@ const handleBack = () => {
     </div>
 
     <!-- Back nav -->
-    <div class="container max-w-5xl mx-auto px-4 mt-4">
+    <div class="container max-w-8xl mx-auto px-4 mt-4">
       <Button
         variant="ghost"
         size="sm"
@@ -269,7 +269,7 @@ const handleBack = () => {
       </Button>
     </div>
 
-    <main class="container max-w-5xl mx-auto px-4 py-6 space-y-8">
+    <main class="container max-w-8xl mx-auto px-4 py-6 space-y-8">
       <!-- About -->
       <section>
         <h2 class="text-lg font-semibold text-foreground mb-3">About</h2>
@@ -656,7 +656,7 @@ const handleBack = () => {
 
     <!-- Footer -->
     <footer class="border-t bg-card mt-12">
-      <div class="container max-w-5xl mx-auto px-4 py-6 text-center">
+      <div class="container max-w-8xl mx-auto px-4 py-6 text-center">
         <p class="text-xs text-muted-foreground">
           © {{ new Date().getFullYear() }} {{ business.name }}. All rights
           reserved.

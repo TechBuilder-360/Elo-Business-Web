@@ -32,17 +32,25 @@ export default defineEventHandler(async (event) => {
       method: "POST",
       body,
       headers: reqHeaders,
-    });
+    },
+    );
 
     // Securely extract the token and set the HttpOnly cookie
     if (response?.data?.login?.access_token) {
-      setCookie(event, "auth_token", response.data.login.access_token, {
+      const cookieOptions: any = {
         httpOnly: true,
-        secure: true,
+        // secure: true, // disabled temporarily to allow login on non-HTTPS live hosts
         sameSite: "lax",
         path: "/",
-        maxAge: 60 * 60 * 24 * 7, // 7 days
-      });
+      };
+
+      if (response.data.login.expire_at) {
+        cookieOptions.expires = new Date(response.data.login.expire_at);
+      } else {
+        cookieOptions.maxAge = 60 * 60 * 24 * 7; // 7 days fallback
+      }
+
+      setCookie(event, "auth_token", response.data.login.access_token, cookieOptions);
 
       // Obfuscate token from the JS client to prevent XSS leakage
       response.data.login.access_token = "SECURE_HTTP_ONLY_COOKIE_SET";

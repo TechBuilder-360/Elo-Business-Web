@@ -165,23 +165,6 @@ const industries = [
       </Select>
     </div>
 
-    <div class="space-y-2">
-      <Label>Industry *</Label>
-      <Select
-        :modelValue="data.industry"
-        @update:modelValue="(val) => onChange({ industry: val })"
-      >
-        <SelectTrigger>
-          <SelectValue placeholder="Select industry" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem v-for="ind in industries" :key="ind" :value="ind">
-            {{ ind }}
-          </SelectItem>
-        </SelectContent>
-      </Select>
-    </div>
-
     <div class="space-y-3">
       <Label>Business Type *</Label>
       <RadioGroup
