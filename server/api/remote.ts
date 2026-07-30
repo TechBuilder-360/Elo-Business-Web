@@ -39,7 +39,7 @@ export default defineEventHandler(async (event) => {
     if (response?.data?.login?.access_token) {
       const cookieOptions: any = {
         httpOnly: true,
-        // secure: true, // disabled temporarily to allow login on non-HTTPS live hosts
+        secure: process.env.NODE_ENV === 'production',
         sameSite: "lax",
         path: "/",
       };
