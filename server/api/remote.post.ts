@@ -25,8 +25,8 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    // @ts-ignore
-    const backendUrl = `${process.env.BACKEND_URL}/api`;
+    const config = useRuntimeConfig();
+    const backendUrl = `${config.backendUrl}/api`;
 
     const response: any = await $fetch(backendUrl, {
       method: "POST",
@@ -38,6 +38,8 @@ export default defineEventHandler(async (event) => {
     if (response?.data?.login?.access_token) {
       setCookie(event, "auth_token", response.data.login.access_token, {
         httpOnly: true,
+         secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
         path: "/",
         maxAge: 60 * 60 * 24 * 7, // 7 days
       });
