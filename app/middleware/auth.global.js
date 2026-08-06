@@ -10,7 +10,9 @@ export default defineNuxtRouteMiddleware(async (to) => {
   // reads the HttpOnly auth_token cookie (not accessible to JS directly)
   try {
     const fetcher = import.meta.server ? useRequestFetch() : $fetch;
-    const { authenticated } = await fetcher("/api/auth-check");
+    const { authenticated } = await fetcher("/api/auth-check", {
+      headers: import.meta.server ? useRequestHeaders(['cookie']) : {}
+    });
     if (!authenticated) {
       return navigateTo("/");
     }
