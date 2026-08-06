@@ -44,19 +44,6 @@ const industries = [
   "Entertainment",
   "Other",
 ];
-
-const industries = [
-  "Technology",
-  "Food & Beverage",
-  "Retail",
-  "Healthcare",
-  "Logistics",
-  "Finance",
-  "Education",
-  "Manufacturing",
-  "Entertainment",
-  "Other",
-];
 </script>
 
 <template>
