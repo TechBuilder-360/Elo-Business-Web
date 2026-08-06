@@ -21,12 +21,11 @@ export default defineEventHandler(async (event) => {
     reqHeaders.Authorization = `Bearer ${authCookie}`;
   }
 
-  // @ts-ignore
-  const backendUrl = process.env.BACKEND_URL;
+  // @ts-ignore (unused outer declaration removed)
 
   try {
-    // @ts-ignore
-    const backendUrl = `${process.env.BACKEND_URL}/api`;
+    const config = useRuntimeConfig();
+    const backendUrl = `${config.backendUrl}/api`;
 
     const response: any = await $fetch(backendUrl, {
       method: "POST",
@@ -39,6 +38,8 @@ export default defineEventHandler(async (event) => {
     if (response?.data?.login?.access_token) {
       const cookieOptions: any = {
         httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
         path: "/",
       };
 
