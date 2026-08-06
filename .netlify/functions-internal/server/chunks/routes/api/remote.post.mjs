@@ -1,4 +1,4 @@
-import { a as defineEventHandler, B as readBody, l as getHeaders, k as getCookie, D as setCookie, c as createError } from '../../nitro/nitro.mjs';
+import { a as defineEventHandler, C as readBody, l as getHeaders, k as getCookie, E as setCookie, c as createError } from '../../nitro/nitro.mjs';
 import 'node:http';
 import 'node:https';
 import 'node:events';
@@ -34,8 +34,6 @@ const remote_post = defineEventHandler(async (event) => {
     if ((_b = (_a = response == null ? void 0 : response.data) == null ? void 0 : _a.login) == null ? void 0 : _b.access_token) {
       setCookie(event, "auth_token", response.data.login.access_token, {
         httpOnly: true,
-        secure: true,
-        sameSite: "strict",
         path: "/",
         maxAge: 60 * 60 * 24 * 7
         // 7 days
