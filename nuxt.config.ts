@@ -7,7 +7,7 @@ export default defineNuxtConfig({
     // Private - only available server-side
     backendUrl: process.env.BACKEND_URL || 'https://elo--elo-backend--fwg2j6rrxrkh.code.run',
   },
-  compatibilityDate: '2025-07-15',
+  compatibilityDate: '2026-01-01',
   future: {
     compatibilityVersion: 4,
   },
@@ -15,7 +15,7 @@ export default defineNuxtConfig({
     '@nuxtjs/tailwindcss',
     '@pinia/nuxt',
   ],
-  devtools: { enabled: true },
+  devtools: { enabled: false },
   app: {
     head: {
       htmlAttrs: { class: 'dark' },
