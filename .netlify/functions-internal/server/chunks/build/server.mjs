@@ -1,5 +1,5 @@
 import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { hasInjectionContext, inject, getCurrentInstance, ref, customRef, defineComponent, createElementBlock, shallowRef, provide, cloneVNode, h, Suspense, Fragment, createApp, shallowReactive, computed, unref, watch, onErrorCaptured, onServerPrefetch, createVNode, resolveDynamicComponent, reactive, effectScope, defineAsyncComponent, mergeProps, getCurrentScope, toRef, isReadonly, isRef, toValue, useSSRContext, isShallow, isReactive, toRaw, markRaw, nextTick } from 'vue';
-import { A as parseURL$1, h as encodePath$1, d as decodePath, s as hasProtocol, v as isScriptProtocol, x as joinURL, G as withQuery, y as klona, C as sanitizeStatusCode, n as getRequestHeader, u as isEqual, j as getContext, D as setCookie, k as getCookie, f as deleteCookie, $ as $fetch$1, c as createError$1, i as executeAsync, t as hash, e as defu } from '../nitro/nitro.mjs';
+import { B as parseURL$1, h as encodePath$1, d as decodePath, t as hasProtocol, w as isScriptProtocol, y as joinURL, H as withQuery, z as klona, D as sanitizeStatusCode, n as getRequestHeader, v as isEqual, j as getContext, E as setCookie, k as getCookie, f as deleteCookie, $ as $fetch$1, c as createError$1, i as executeAsync, u as hash, e as defu, o as getRequestHeaders } from '../nitro/nitro.mjs';
 import { u as useHead$1, h as headSymbol, b as baseURL } from '../routes/renderer.mjs';
 import { debounce } from 'perfect-debounce';
 import { isPlainObject } from '@vue/shared';
@@ -2019,67 +2019,67 @@ const _routes = [
     name: "business",
     path: "/business",
     meta: __nuxt_page_meta$c || {},
-    component: () => import('./business-CLtVpNst.mjs')
+    component: () => import('./business-D6fAmKLu.mjs')
   },
   {
     name: "business-info",
     path: "/business-info",
     meta: __nuxt_page_meta$b || {},
-    component: () => import('./business-info-CQm6TqS0.mjs')
+    component: () => import('./business-info-D3MfihFu.mjs')
   },
   {
     name: "businesses",
     path: "/businesses",
     meta: __nuxt_page_meta$a || {},
-    component: () => import('./businesses-DFAd8Scl.mjs')
+    component: () => import('./businesses-BD3-IpGb.mjs')
   },
   {
     name: "compliance",
     path: "/compliance",
     meta: __nuxt_page_meta$9 || {},
-    component: () => import('./compliance-BtrZ-bqO.mjs')
+    component: () => import('./compliance-k6gec8pU.mjs')
   },
   {
     name: "dashboard",
     path: "/dashboard",
     meta: __nuxt_page_meta$8 || {},
-    component: () => import('./dashboard-Ds58bTJY.mjs')
+    component: () => import('./dashboard-JVnwzJMs.mjs')
   },
   {
     name: "onboard",
     path: "/onboard",
     meta: __nuxt_page_meta$7 || {},
-    component: () => import('./onboard-Bcs9uEp7.mjs')
+    component: () => import('./onboard-DcEE92N6.mjs')
   },
   {
     name: "settings",
     path: "/settings",
     meta: __nuxt_page_meta$6 || {},
-    component: () => import('./settings-CPCxmKZT.mjs')
+    component: () => import('./settings-DcJ5oTcK.mjs')
   },
   {
     name: "signup",
     path: "/signup",
     meta: __nuxt_page_meta$5 || {},
-    component: () => import('./signup-PRLCSAqr.mjs')
+    component: () => import('./signup-DxzQYOmO.mjs')
   },
   {
     name: "verify-identity",
     path: "/verify-identity",
     meta: __nuxt_page_meta$4 || {},
-    component: () => import('./verify-identity-BboFJVdE.mjs')
+    component: () => import('./verify-identity-CGJ21DVg.mjs')
   },
   {
     name: "verify-otp",
     path: "/verify-otp",
     meta: __nuxt_page_meta$3 || {},
-    component: () => import('./verify-otp-B9GqA0Ct.mjs')
+    component: () => import('./verify-otp-D_az4Xhu.mjs')
   },
   {
     name: "wallet",
     path: "/wallet",
     meta: __nuxt_page_meta$2 || {},
-    component: () => import('./wallet-CUw0Ka-0.mjs')
+    component: () => import('./wallet-RvXUSEgk.mjs')
   },
   {
     name: "slug",
@@ -2091,7 +2091,7 @@ const _routes = [
     name: "index",
     path: "/",
     meta: __nuxt_page_meta || {},
-    component: () => import('./index-D7gDT_hA.mjs')
+    component: () => import('./index-DH83Mw9C.mjs')
   }
 ];
 const ROUTE_KEY_PARENTHESES_RE = /(:\w+)\([^)]+\)/g;
@@ -2226,6 +2226,22 @@ function useRequestEvent(nuxtApp) {
   nuxtApp ||= useNuxtApp();
   return nuxtApp.ssrContext?.event;
 }
+function useRequestHeaders(include) {
+  const event = useRequestEvent();
+  const _headers = event ? getRequestHeaders(event) : {};
+  if (!include || !event) {
+    return _headers;
+  }
+  const headers = /* @__PURE__ */ Object.create(null);
+  for (const _key of include) {
+    const key = _key.toLowerCase();
+    const header = _headers[key];
+    if (header) {
+      headers[key] = header;
+    }
+  }
+  return headers;
+}
 function useRequestFetch() {
   return useRequestEvent()?.$fetch || globalThis.$fetch;
 }
@@ -2237,7 +2253,9 @@ const auth_45global = /* @__PURE__ */ defineNuxtRouteMiddleware(async (to) => {
   }
   try {
     const fetcher = true ? useRequestFetch() : $fetch;
-    const { authenticated } = ([__temp, __restore] = executeAsync(() => fetcher("/api/auth-check")), __temp = await __temp, __restore(), __temp);
+    const { authenticated } = ([__temp, __restore] = executeAsync(() => fetcher("/api/auth-check", {
+      headers: true ? useRequestHeaders(["cookie"]) : {}
+    })), __temp = await __temp, __restore(), __temp);
     if (!authenticated) {
       return navigateTo("/");
     }

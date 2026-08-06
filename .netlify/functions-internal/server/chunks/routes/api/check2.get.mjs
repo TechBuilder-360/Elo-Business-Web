@@ -1,4 +1,4 @@
-import { a as defineEventHandler, F as useRuntimeConfig } from '../../nitro/nitro.mjs';
+import { a as defineEventHandler, G as useRuntimeConfig } from '../../nitro/nitro.mjs';
 import fs from 'fs';
 import 'node:http';
 import 'node:https';
@@ -40,13 +40,10 @@ const check2_get = defineEventHandler(async () => {
   try {
     const config = useRuntimeConfig();
     const backendUrl = `${config.backendUrl}/api`;
-    const res = await $fetch(
-      backendUrl,
-      {
-        method: "POST",
-        body: { query }
-      }
-    );
+    const res = await $fetch(backendUrl, {
+      method: "POST",
+      body: { query }
+    });
     fs.writeFileSync("schema_dump.json", JSON.stringify(res, null, 2));
     return { success: true };
   } catch (err) {
