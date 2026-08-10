@@ -92,8 +92,9 @@ async function gqlRequest({ query, variables = {}, skipAuthRedirect = false }) {
     });
   } catch (error) {
     if (error?.response?.status === 401 && import.meta.client) {
+      const { showExpiredModal } = useSessionExpired();
       $fetch("/api/logout", { method: "POST" }).finally(() => {
-        window.location.href = "/";
+        showExpiredModal();
       });
       return new Promise(() => { });
     }
@@ -113,10 +114,9 @@ async function gqlRequest({ query, variables = {}, skipAuthRedirect = false }) {
       e.extensions?.code === "FORBIDDEN"
     );
     if (isUnauth && import.meta.client && !skipAuthRedirect) {
-      $fetch("/api/logout", { method: "POST" }).finally(() => {
-        window.location.href = "/";
-      });
-      return new Promise(() => { }); // hang while redirecting
+      const { showExpiredModal } = useSessionExpired();
+      showExpiredModal();
+      return new Promise(() => { }); // hang while modal is shown
     }
 
     const err = new Error(response.errors[0]?.message || "GraphQL error");
