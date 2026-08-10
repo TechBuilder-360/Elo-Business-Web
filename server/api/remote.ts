@@ -1,4 +1,4 @@
-import { getCookie, setCookie } from "h3";
+ import { getCookie, setCookie } from "h3";
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
@@ -21,24 +21,23 @@ export default defineEventHandler(async (event) => {
     reqHeaders.Authorization = `Bearer ${authCookie}`;
   }
 
-  // @ts-ignore
-  const backendUrl = process.env.BACKEND_URL;
-
   try {
-    // @ts-ignore
-    const backendUrl = `${process.env.BACKEND_URL}/api`;
+    const config = useRuntimeConfig();
+    const backendUrl = `${config.backendUrl}/api`;
 
     const response: any = await $fetch(backendUrl, {
       method: "POST",
       body,
       headers: reqHeaders,
-    },
-    );
+    });
 
     // Securely extract the token and set the HttpOnly cookie
     if (response?.data?.login?.access_token) {
       const cookieOptions: any = {
         httpOnly: true,
+        // @ts-ignore
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
         path: "/",
       };
 
@@ -48,7 +47,12 @@ export default defineEventHandler(async (event) => {
         cookieOptions.maxAge = 60 * 60 * 24 * 7; // 7 days fallback
       }
 
-      setCookie(event, "auth_token", response.data.login.access_token, cookieOptions);
+      setCookie(
+        event,
+        "auth_token",
+        response.data.login.access_token,
+        cookieOptions,
+      );
 
       // Obfuscate token from the JS client to prevent XSS leakage
       response.data.login.access_token = "SECURE_HTTP_ONLY_COOKIE_SET";

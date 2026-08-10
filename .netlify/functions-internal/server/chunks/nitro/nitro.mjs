@@ -4337,7 +4337,7 @@ function _expandFromEnv(value) {
 const _inlineRuntimeConfig = {
   "app": {
     "baseURL": "/",
-    "buildId": "9d55a8d0-ba06-4a29-b532-7c37985062d9",
+    "buildId": "21b727c6-0518-4954-89a4-83b9588ae323",
     "buildAssetsDir": "/_nuxt/",
     "cdnURL": ""
   },
@@ -5050,5 +5050,5 @@ function getCacheHeaders(url) {
   return {};
 }
 
-export { $fetch as $, parseQuery as A, parseURL as B, readBody as C, sanitizeStatusCode as D, setCookie as E, useNitroApp as F, useRuntimeConfig as G, withQuery as H, withTrailingSlash as I, withoutTrailingSlash as J, defineEventHandler as a, defineRenderHandler as b, createError$1 as c, decodePath as d, defu as e, deleteCookie as f, destr as g, encodePath as h, executeAsync as i, getContext as j, getCookie as k, getHeaders as l, getQuery as m, getRequestHeader as n, getRequestHeaders as o, getResponseStatus as p, getResponseStatusText as q, getRouteRules as r, handler as s, hasProtocol as t, hash$1 as u, isEqual as v, isScriptProtocol as w, joinRelativeURL as x, joinURL as y, klona as z };
+export { $fetch as $, parseURL as A, readBody as B, sanitizeStatusCode as C, setCookie as D, useNitroApp as E, useRuntimeConfig as F, withQuery as G, withTrailingSlash as H, withoutTrailingSlash as I, defineEventHandler as a, defineRenderHandler as b, createError$1 as c, decodePath as d, defu as e, deleteCookie as f, destr as g, encodePath as h, executeAsync as i, getContext as j, getCookie as k, getHeaders as l, getQuery as m, getRequestHeader as n, getResponseStatus as o, getResponseStatusText as p, getRouteRules as q, handler as r, hasProtocol as s, hash$1 as t, isEqual as u, isScriptProtocol as v, joinRelativeURL as w, joinURL as x, klona as y, parseQuery as z };
 //# sourceMappingURL=nitro.mjs.map
