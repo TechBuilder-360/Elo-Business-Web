@@ -42,7 +42,7 @@ function extractFiles(variables) {
 }
 
 // Core GraphQL request helper
-async function gqlRequest({ query, variables = {} }) {
+async function gqlRequest({ query, variables = {}, skipAuthRedirect = false }) {
   const headers = {
     Accept: "application/json",
   };
@@ -92,8 +92,9 @@ async function gqlRequest({ query, variables = {} }) {
     });
   } catch (error) {
     if (error?.response?.status === 401 && import.meta.client) {
+      const { showExpiredModal } = useSessionExpired();
       $fetch("/api/logout", { method: "POST" }).finally(() => {
-        window.location.href = "/";
+        showExpiredModal();
       });
       return new Promise(() => { });
     }
@@ -112,11 +113,10 @@ async function gqlRequest({ query, variables = {} }) {
       e.extensions?.code === "UNAUTHENTICATED" ||
       e.extensions?.code === "FORBIDDEN"
     );
-    if (isUnauth && import.meta.client) {
-      $fetch("/api/logout", { method: "POST" }).finally(() => {
-        window.location.href = "/";
-      });
-      return new Promise(() => { }); // hang while redirecting
+    if (isUnauth && import.meta.client && !skipAuthRedirect) {
+      const { showExpiredModal } = useSessionExpired();
+      showExpiredModal();
+      return new Promise(() => { }); // hang while modal is shown
     }
 
     const err = new Error(response.errors[0]?.message || "GraphQL error");
@@ -154,8 +154,9 @@ export function useGQLQuery(key, query, variables = {}, opts = {}) {
 // Mutation hook with optimistic update support
 export function useGQLMutation(mutation, opts = {}) {
   const qc = useQueryClient();
+  const { skipAuthRedirect = false, ...mutationOpts } = opts;
   return useMutation({
-    mutationFn: (vars) => gqlRequest({ query: mutation, variables: vars }),
+    mutationFn: (vars) => gqlRequest({ query: mutation, variables: vars, skipAuthRedirect }),
     onMutate: async (newData) => {
       await qc.cancelQueries({ queryKey: ["currentUser"] });
       const previous = qc.getQueryData(["currentUser"]);
@@ -168,7 +169,7 @@ export function useGQLMutation(mutation, opts = {}) {
       }
       console.error(err);
     },
-    ...opts,
+    ...mutationOpts,
   });
 }
 
