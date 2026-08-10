@@ -61,7 +61,7 @@ const handleVerify = async () => {
       identifier: String(identifier.value),
     });
     toast.success("Login successful");
-    await navigateTo("/businesses");
+    window.location.href = "/businesses";
   } catch (error) {
     const gqlMsg = error?.graphQLErrors?.[0]?.message;
     const fallbackMsg =
