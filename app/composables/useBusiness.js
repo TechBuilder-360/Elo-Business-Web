@@ -150,7 +150,7 @@ export const useBusiness = (options = {}) => {
     ["businessDocuments"],
     GET_BUSINESS_DOCUMENTS_QUERY,
     {},
-    options,
+    { ...options, skipAuthRedirect: true },
   );
 
   const getBusinessDetailQuery = (id, queryOptions = {}) => {
