@@ -135,6 +135,7 @@ async function gqlRequest({ query, variables = {}, skipAuthRedirect = false }) {
 
 // Query hook – use anywhere in Vue components
 export function useGQLQuery(key, query, variables = {}, opts = {}) {
+  const { skipAuthRedirect = false, ...queryOpts } = opts;
   return useQuery({
     queryKey: key,
     queryFn: () => {
@@ -145,9 +146,9 @@ export function useGQLQuery(key, query, variables = {}, opts = {}) {
           : variables && typeof variables.value !== "undefined"
             ? variables.value
             : variables;
-      return gqlRequest({ query, variables: resolvedVars });
+      return gqlRequest({ query, variables: resolvedVars, skipAuthRedirect });
     },
-    ...opts,
+    ...queryOpts,
   });
 }
 
