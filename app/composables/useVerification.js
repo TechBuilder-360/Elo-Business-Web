@@ -40,6 +40,7 @@ export const useVerification = () => {
   const requestVerificationMutation = useGQLMutation(
     REQUEST_VERIFICATION_MUTATION,
     {
+      skipAuthRedirect: true,
       onError: (err) => {
         console.error("Verification Request error:", err);
       },
