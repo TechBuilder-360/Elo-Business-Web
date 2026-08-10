@@ -42,7 +42,7 @@ function extractFiles(variables) {
 }
 
 // Core GraphQL request helper
-async function gqlRequest({ query, variables = {} }) {
+async function gqlRequest({ query, variables = {}, skipAuthRedirect = false }) {
   const headers = {
     Accept: "application/json",
   };
@@ -112,7 +112,7 @@ async function gqlRequest({ query, variables = {} }) {
       e.extensions?.code === "UNAUTHENTICATED" ||
       e.extensions?.code === "FORBIDDEN"
     );
-    if (isUnauth && import.meta.client) {
+    if (isUnauth && import.meta.client && !skipAuthRedirect) {
       $fetch("/api/logout", { method: "POST" }).finally(() => {
         window.location.href = "/";
       });
@@ -154,8 +154,9 @@ export function useGQLQuery(key, query, variables = {}, opts = {}) {
 // Mutation hook with optimistic update support
 export function useGQLMutation(mutation, opts = {}) {
   const qc = useQueryClient();
+  const { skipAuthRedirect = false, ...mutationOpts } = opts;
   return useMutation({
-    mutationFn: (vars) => gqlRequest({ query: mutation, variables: vars }),
+    mutationFn: (vars) => gqlRequest({ query: mutation, variables: vars, skipAuthRedirect }),
     onMutate: async (newData) => {
       await qc.cancelQueries({ queryKey: ["currentUser"] });
       const previous = qc.getQueryData(["currentUser"]);
@@ -168,7 +169,7 @@ export function useGQLMutation(mutation, opts = {}) {
       }
       console.error(err);
     },
-    ...opts,
+    ...mutationOpts,
   });
 }
 
