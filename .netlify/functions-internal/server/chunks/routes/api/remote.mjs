@@ -1,4 +1,4 @@
-import { a as defineEventHandler, C as readBody, l as getHeaders, k as getCookie, E as setCookie, c as createError } from '../../nitro/nitro.mjs';
+import { a as defineEventHandler, B as readBody, l as getHeaders, k as getCookie, D as setCookie, c as createError } from '../../nitro/nitro.mjs';
 import 'node:http';
 import 'node:https';
 import 'node:events';
@@ -37,6 +37,8 @@ const remote = defineEventHandler(async (event) => {
     if ((_b = (_a = response == null ? void 0 : response.data) == null ? void 0 : _a.login) == null ? void 0 : _b.access_token) {
       const cookieOptions = {
         httpOnly: true,
+        // secure: true, // disabled temporarily to allow login on non-HTTPS live hosts
+        sameSite: "lax",
         path: "/"
       };
       if (response.data.login.expire_at) {
