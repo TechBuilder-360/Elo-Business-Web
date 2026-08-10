@@ -35,6 +35,7 @@ export default defineEventHandler(async (event) => {
     if (response?.data?.login?.access_token) {
       const cookieOptions: any = {
         httpOnly: true,
+        // @ts-ignore
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         path: "/",
