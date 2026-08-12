@@ -151,24 +151,11 @@ export function useGQLQuery(key, query, variables = {}, opts = {}) {
   });
 }
 
-// Mutation hook with optimistic update support
+// Mutation hook
 export function useGQLMutation(mutation, opts = {}) {
-  const qc = useQueryClient();
   const { skipAuthRedirect = false, ...mutationOpts } = opts;
   return useMutation({
     mutationFn: (vars) => gqlRequest({ query: mutation, variables: vars, skipAuthRedirect }),
-    onMutate: async (newData) => {
-      await qc.cancelQueries({ queryKey: ["currentUser"] });
-      const previous = qc.getQueryData(["currentUser"]);
-      qc.setQueryData(["currentUser"], newData);
-      return { previous };
-    },
-    onError: (err, _vars, context) => {
-      if (context?.previous) {
-        qc.setQueryData(["currentUser"], context.previous);
-      }
-      console.error(err);
-    },
     ...mutationOpts,
   });
 }

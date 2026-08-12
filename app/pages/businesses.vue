@@ -25,32 +25,23 @@ definePageMeta({
 
 const { logout } = useAuth();
 const { currentUser, requestVerification } = useVerification();
-const isUserVerified = computed(() => {
-  const data = currentUser.data?.value || currentUser.data;
-  return data?.currentUserProfile?.is_verified === true;
-});
+
+const isUserVerified = computed(
+  () => currentUser.data.value?.currentUserProfile?.is_verified === true,
+);
 
 const handleLogout = () => {
   logout();
 };
 
-const userLoading = computed(() => {
-  const pending = currentUser.isPending?.value ?? currentUser.isPending;
-  const fetching = currentUser.isFetching?.value ?? currentUser.isFetching;
-  const data = currentUser.data?.value || currentUser.data;
-  return pending || (fetching && !data);
-});
-const userError = computed(() => currentUser.error?.value || currentUser.error);
+const userLoading = computed(() => currentUser.isPending.value);
+const userError = computed(() => currentUser.error.value);
 
 // Only fetch businesses if user is verified
 const { userBusinesses } = useBusiness({ enabled: isUserVerified });
 
-const businesses = computed(() => {
-  const data = userBusinesses.data?.value || userBusinesses.data;
-  return data?.myBusinesses || [];
-});
-
-const bizPending = computed(() => userBusinesses.isPending?.value ?? userBusinesses.isPending);
+const businesses = computed(() => userBusinesses.data.value?.myBusinesses || []);
+const bizPending = computed(() => userBusinesses.isPending.value);
 
 const roleColors = {
   Owner: "bg-primary text-primary-foreground",
