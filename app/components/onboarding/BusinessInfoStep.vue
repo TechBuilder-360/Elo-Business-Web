@@ -87,9 +87,9 @@ const industries = [
         @update:modelValue="(val) => onChange({ residentCountry: val })"
       >
         <SelectTrigger>
-          <SelectValue placeholder="Select country">
+          <span :class="['block truncate flex-1 text-left', !data.residentCountry && 'text-muted-foreground']">
             {{ allCountries.find(c => c.isoCode === data.residentCountry)?.name || 'Select country' }}
-          </SelectValue>
+          </span>
         </SelectTrigger>
         <SelectContent>
           <SelectItem
@@ -181,9 +181,9 @@ const industries = [
             "
           >
             <SelectTrigger id="country">
-              <SelectValue placeholder="Select country">
+              <span :class="['block truncate flex-1 text-left', !data.address.country && 'text-muted-foreground']">
                 {{ allCountries.find(c => c.isoCode === data.address.country)?.name || 'Select country' }}
-              </SelectValue>
+              </span>
             </SelectTrigger>
             <SelectContent>
               <SelectItem

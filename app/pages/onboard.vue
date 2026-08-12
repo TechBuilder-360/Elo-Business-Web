@@ -90,32 +90,14 @@ const handleSubmit = async () => {
       authorized_representative: true,
       authorized_representative_email: formData.value.email
     },
-    address: {
-      number:
-        formData.value.businessType === "onsite"
-          ? formData.value.address.number
-          : "",
-      street:
-        formData.value.businessType === "onsite"
-          ? formData.value.address.street
-          : "",
-      city:
-        formData.value.businessType === "onsite"
-          ? formData.value.address.city
-          : "",
-      state:
-        formData.value.businessType === "onsite"
-          ? formData.value.address.state
-          : "",
-      country:
-        formData.value.businessType === "onsite"
-          ? formData.value.address.country
-          : formData.value.residentCountry,
-      zip_code:
-        formData.value.businessType === "onsite"
-          ? formData.value.address.zipCode
-          : "",
-    },
+    address: formData.value.businessType === "onsite" ? {
+      number: formData.value.address.number,
+      street: formData.value.address.street,
+      city: formData.value.address.city,
+      state: formData.value.address.state,
+      country: formData.value.address.country,
+      zip_code: formData.value.address.zipCode,
+    } : null,
   };
 
   try {
