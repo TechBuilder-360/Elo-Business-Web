@@ -87,7 +87,9 @@ const industries = [
         @update:modelValue="(val) => onChange({ residentCountry: val })"
       >
         <SelectTrigger>
-          <SelectValue placeholder="Select country" />
+          <span :class="['block truncate flex-1 text-left', !data.residentCountry && 'text-muted-foreground']">
+            {{ allCountries.find(c => c.isoCode === data.residentCountry)?.name || 'Select country' }}
+          </span>
         </SelectTrigger>
         <SelectContent>
           <SelectItem
@@ -118,39 +120,6 @@ const industries = [
       </Select>
     </div>
 
-    <div class="space-y-2">
-      <Label>Industry *</Label>
-      <Select
-        :modelValue="data.industry"
-        @update:modelValue="(val) => onChange({ industry: val })"
-      >
-        <SelectTrigger>
-          <SelectValue placeholder="Select industry" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem v-for="ind in industries" :key="ind" :value="ind">
-            {{ ind }}
-          </SelectItem>
-        </SelectContent>
-      </Select>
-    </div>
-
-    <div class="space-y-2">
-      <Label>Industry *</Label>
-      <Select
-        :modelValue="data.industry"
-        @update:modelValue="(val) => onChange({ industry: val })"
-      >
-        <SelectTrigger>
-          <SelectValue placeholder="Select industry" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem v-for="ind in industries" :key="ind" :value="ind">
-            {{ ind }}
-          </SelectItem>
-        </SelectContent>
-      </Select>
-    </div>
 
     <div class="space-y-3">
       <Label>Business Type *</Label>
@@ -171,7 +140,6 @@ const industries = [
     </div>
 
     <div
-      v-if="data.businessType === 'onsite'"
       class="space-y-4 p-4 rounded-lg bg-accent/50 border border-accent"
     >
       <h4 class="text-sm font-semibold text-accent-foreground">
@@ -212,7 +180,9 @@ const industries = [
             "
           >
             <SelectTrigger id="country">
-              <SelectValue placeholder="Select country" />
+              <span :class="['block truncate flex-1 text-left', !data.address.country && 'text-muted-foreground']">
+                {{ allCountries.find(c => c.isoCode === data.address.country)?.name || 'Select country' }}
+              </span>
             </SelectTrigger>
             <SelectContent>
               <SelectItem

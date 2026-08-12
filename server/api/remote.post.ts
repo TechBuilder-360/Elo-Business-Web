@@ -45,6 +45,16 @@ export default defineEventHandler(async (event) => {
         maxAge: 60 * 60 * 24 * 7, // 7 days
       });
 
+      // Set a non-HttpOnly dummy cookie purely for fast synchronous client-side routing checks
+      setCookie(event, "auth_status", "logged_in", {
+        httpOnly: false,
+         // @ts-ignore
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7, // 7 days
+      });
+
       // Obfuscate token from the JS client to prevent XSS leakage
       response.data.login.access_token = "SECURE_HTTP_ONLY_COOKIE_SET";
     }
