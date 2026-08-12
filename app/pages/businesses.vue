@@ -25,6 +25,7 @@ definePageMeta({
 
 const { logout } = useAuth();
 const { currentUser, requestVerification } = useVerification();
+
 const isUserVerified = computed(
   () => currentUser.data.value?.currentUserProfile?.is_verified === true,
 );
@@ -33,15 +34,14 @@ const handleLogout = () => {
   logout();
 };
 
-const userLoading = currentUser.isPending;
+const userLoading = computed(() => currentUser.isPending.value);
+const userError = computed(() => currentUser.error.value);
 
 // Only fetch businesses if user is verified
 const { userBusinesses } = useBusiness({ enabled: isUserVerified });
-const { data, isPending: bizPending, isError } = userBusinesses;
 
-const businesses = computed(() => {
-  return data.value?.myBusinesses || [];
-});
+const businesses = computed(() => userBusinesses.data.value?.myBusinesses || []);
+const bizPending = computed(() => userBusinesses.isPending.value);
 
 const roleColors = {
   Owner: "bg-primary text-primary-foreground",
@@ -243,6 +243,21 @@ const handleRefreshStatus = () => {
           <Loader2 class="w-6 h-6 text-primary animate-spin" />
         </div>
         <p class="text-sm text-muted-foreground">Checking your account...</p>
+      </div>
+
+      <!-- User Error -->
+      <div
+        v-else-if="userError"
+        class="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center px-4"
+      >
+        <div
+          class="w-12 h-12 rounded-2xl bg-destructive/10 flex items-center justify-center"
+        >
+          <ShieldAlert class="w-6 h-6 text-destructive" />
+        </div>
+        <h2 class="text-xl font-bold text-foreground">Error Loading Profile</h2>
+        <p class="text-sm text-muted-foreground">{{ userError?.message || "Failed to fetch user data." }}</p>
+        <Button variant="outline" @click="handleRefreshStatus">Try Again</Button>
       </div>
 
       <!-- Verification: In Progress -->
