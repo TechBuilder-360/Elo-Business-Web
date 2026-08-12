@@ -40,6 +40,7 @@ import {
   Moon,
   Sun,
 } from "lucide-vue-next";
+import { Country } from "country-state-city";
 
 definePageMeta({
   layout: false,
@@ -64,6 +65,20 @@ const qc = useQueryClient();
 const activeBusinessId = computed(() => {
   return route.query.id || (import.meta.client ? localStorage.getItem("activeBusinessId") : null);
 });
+
+const allCountries = Country.getAllCountries();
+
+const isOtherSelected = computed(() => {
+  const selectedDoc = kybDocuments.data.value?.getKYBDocuments?.find(
+    (d) => d.id === uploadData.value.document_id
+  );
+  return selectedDoc?.name?.toLowerCase().includes("other");
+});
+
+const getDocName = (id) => {
+  const doc = kybDocuments.data.value?.getKYBDocuments?.find((d) => d.id === id);
+  return doc ? doc.name : null;
+};
 
 const activeBusinessData = computed(() => {
   const list = userBusinesses.data.value?.myBusinesses || [];
@@ -646,7 +661,7 @@ const navigateBack = () => {
                       Country of Incorporation
                     </p>
                     <p class="text-sm">
-                      {{ regData.country_of_incorporation || "—" }}
+                      {{ allCountries.find(c => c.isoCode === regData.country_of_incorporation)?.name || regData.country_of_incorporation || "—" }}
                     </p>
                   </div>
                   <div class="space-y-1">
@@ -804,10 +819,22 @@ const navigateBack = () => {
                         >Country of Incorporation
                         <span class="text-destructive">*</span></Label
                       >
-                      <Input
-                        v-model="regData.country_of_incorporation"
-                        placeholder="e.g. Nigeria"
-                      />
+                      <Select v-model="regData.country_of_incorporation">
+                        <SelectTrigger class="bg-background">
+                          <span :class="['block truncate flex-1 text-left', !regData.country_of_incorporation && 'text-muted-foreground']">
+                            {{ allCountries.find(c => c.isoCode === regData.country_of_incorporation)?.name || 'Select country' }}
+                          </span>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem
+                            v-for="c in allCountries"
+                            :key="c.isoCode"
+                            :value="c.isoCode"
+                          >
+                            {{ c.name }}
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div class="space-y-2">
                       <Label class="text-sm font-semibold"
@@ -878,7 +905,9 @@ const navigateBack = () => {
                     >
                     <Select v-model="uploadData.document_id">
                       <SelectTrigger class="bg-background">
-                        <SelectValue placeholder="Select document type" />
+                        <span :class="['block truncate flex-1 text-left', !uploadData.document_id && 'text-muted-foreground']">
+                          {{ getDocName(uploadData.document_id) || 'Select document type' }}
+                        </span>
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem
@@ -903,7 +932,7 @@ const navigateBack = () => {
                     </Select>
                   </div>
 
-                  <div class="space-y-2">
+                  <div class="space-y-2" v-if="isOtherSelected">
                     <Label class="text-sm font-semibold"
                       >Description (Optional)</Label
                     >
@@ -1032,7 +1061,7 @@ const navigateBack = () => {
                     </div>
                     <div class="truncate">
                       <p class="font-semibold text-sm text-foreground truncate">
-                        {{ doc.description || doc.document_id }}
+                        {{ getDocName(doc.document_id) || doc.description || doc.document_id }}
                       </p>
                       <a
                         :href="doc.url"

@@ -40,6 +40,9 @@ definePageMeta({
 
 import { useTheme } from "@/composables/useTheme";
 import { useBusiness } from "@/composables/useBusiness";
+import { Country } from "country-state-city";
+
+const allCountries = Country.getAllCountries();
 
 const route = useRoute();
 const businessName = computed(() => route.query.name || "My Business");
@@ -357,10 +360,25 @@ const handleBack = () => {
                 </div>
                 <div class="space-y-1.5">
                   <Label>Country of Incorporation</Label>
-                  <Input
+                  <Select
                     :modelValue="info.countryOfInc"
                     @update:modelValue="(v) => update('countryOfInc', v)"
-                  />
+                  >
+                    <SelectTrigger>
+                      <span :class="['block truncate flex-1 text-left', !info.countryOfInc && 'text-muted-foreground']">
+                        {{ allCountries.find(c => c.isoCode === info.countryOfInc)?.name || 'Select country' }}
+                      </span>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem
+                        v-for="c in allCountries"
+                        :key="c.isoCode"
+                        :value="c.isoCode"
+                      >
+                        {{ c.name }}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div class="space-y-1.5">
                   <Label>Date of Incorporation</Label>
@@ -403,10 +421,25 @@ const handleBack = () => {
                 </div>
                 <div class="space-y-1.5">
                   <Label>Country</Label>
-                  <Input
+                  <Select
                     :modelValue="info.country"
                     @update:modelValue="(v) => update('country', v)"
-                  />
+                  >
+                    <SelectTrigger>
+                      <span :class="['block truncate flex-1 text-left', !info.country && 'text-muted-foreground']">
+                        {{ allCountries.find(c => c.isoCode === info.country)?.name || 'Select country' }}
+                      </span>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem
+                        v-for="c in allCountries"
+                        :key="c.isoCode"
+                        :value="c.isoCode"
+                      >
+                        {{ c.name }}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div class="space-y-1.5">
                   <Label>Zip Code</Label>
