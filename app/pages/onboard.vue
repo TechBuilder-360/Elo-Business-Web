@@ -60,16 +60,13 @@ const validateForm = () => {
     !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.value.email)
   )
     return "A valid email is required";
+  if (!formData.value.industry) return "Please select an industry";
   if (!formData.value.residentCountry) return "Please select a country";
   if (!formData.value.businessType) return "Please select business type";
-  if (formData.value.businessType === "onsite") {
-    if (!formData.value.address.street.trim())
-      return "Street address is required";
-    if (!formData.value.address.city.trim()) return "City is required";
-    if (!formData.value.address.state.trim()) return "State is required";
-        if (!formData.value.address.country.trim())
-          return "Country is required";
-  }
+  if (!formData.value.address.street.trim()) return "Street address is required";
+  if (!formData.value.address.city.trim()) return "City is required";
+  if (!formData.value.address.state.trim()) return "State is required";
+  if (!formData.value.address.country.trim()) return "Address country is required";
   return null;
 };
 
@@ -90,14 +87,14 @@ const handleSubmit = async () => {
       authorized_representative: true,
       authorized_representative_email: formData.value.email
     },
-    address: formData.value.businessType === "onsite" ? {
-      number: formData.value.address.number,
+    address: {
+      number: formData.value.address.number || "",
       street: formData.value.address.street,
       city: formData.value.address.city,
       state: formData.value.address.state,
       country: formData.value.address.country,
-      zip_code: formData.value.address.zipCode,
-    } : null,
+      zip_code: formData.value.address.zipCode || "",
+    },
   };
 
   try {

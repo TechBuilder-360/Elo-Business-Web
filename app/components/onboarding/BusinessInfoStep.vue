@@ -140,7 +140,6 @@ const industries = [
     </div>
 
     <div
-      v-if="data.businessType === 'onsite'"
       class="space-y-4 p-4 rounded-lg bg-accent/50 border border-accent"
     >
       <h4 class="text-sm font-semibold text-accent-foreground">
