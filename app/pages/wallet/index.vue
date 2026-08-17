@@ -29,10 +29,16 @@ const navigatingTo = ref(null);
 const { getWalletsQuery, getCurrenciesQuery, addWallet } = useBusiness();
 const { isDark, toggleTheme } = useTheme();
 const qc = useQueryClient();
+
+// Fetch fiat and crypto wallets separately — backend requires the filter argument
 const {
-  data: walletsData,
-  isPending: isWalletsPending,
-} = getWalletsQuery("TREASURY");
+  data: fiatWalletsData,
+  isPending: isFiatWalletsPending,
+} = getWalletsQuery(true);
+const {
+  data: cryptoWalletsData,
+  isPending: isCryptoWalletsPending,
+} = getWalletsQuery(false);
 const { data: fiatCurrencies } = getCurrenciesQuery(true);
 const { data: cryptoCurrencies } = getCurrenciesQuery(false);
 
@@ -41,6 +47,13 @@ const currenciesData = computed(() => {
   const crypto = cryptoCurrencies.value?.currencies || [];
   return { currencies: [...fiat, ...crypto] };
 });
+
+const isWalletsPending = computed(() => isFiatWalletsPending.value || isCryptoWalletsPending.value);
+
+const allFetchedWallets = computed(() => [
+  ...(fiatWalletsData.value?.business_wallets || []),
+  ...(cryptoWalletsData.value?.business_wallets || []),
+]);
 
 // Add Wallet modal state
 const showAddWalletModal = ref(false);
@@ -61,7 +74,22 @@ const handleAddWallet = async () => {
   isAddingWallet.value = true;
   const allCurr = currenciesData.value?.currencies || [];
   const curr = allCurr.find((c) => c.code === selectedCurrencyCode.value) || {};
-  qc.setQueryData(["wallets", "TREASURY"], (old) => ({
+  // Optimistically update both fiat and crypto cache keys
+  qc.setQueryData(["wallets", true], (old) => ({
+    business_wallets: [
+      ...(old?.business_wallets || []),
+      {
+        id: `optimistic-${Date.now()}`,
+        currency: selectedCurrencyCode.value,
+        available_balance: 0,
+        ledger_balance: 0,
+        holding_balance: 0,
+        is_fiat: curr.is_fiat !== undefined ? curr.is_fiat : true,
+        active: true,
+      },
+    ],
+  }));
+  qc.setQueryData(["wallets", false], (old) => ({
     business_wallets: [
       ...(old?.business_wallets || []),
       {
@@ -92,8 +120,8 @@ const handleAddWallet = async () => {
 };
 
 const wallets = computed(() => {
-  const fetchedWallets = walletsData.value?.business_wallets;
-  if (!fetchedWallets) return [];
+  const fetchedWallets = allFetchedWallets.value;
+  if (!fetchedWallets.length) return [];
   const currList = currenciesData.value?.currencies || [];
   return fetchedWallets.map((w) => {
     const curr = currList.find((c) => c.code === w.currency) || {};

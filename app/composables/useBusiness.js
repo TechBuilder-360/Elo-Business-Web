@@ -189,25 +189,29 @@ export const useBusiness = (options = {}) => {
     );
   };
 
-  const GET_WALLETS_QUERY = `
-    query GetWallets {
-      business_wallets(wallet_type: TREASURY) {
-        id
-        available_balance
-        ledger_balance
-        holding_balance
-        currency
-        active
-        is_fiat
+  const getWalletsQuery = (isFiat = null, queryOptions = {}) => {
+    const hasFilter = isFiat !== null;
+    const query = `
+      query GetWallets${hasFilter ? "($filter: WalletFilter)" : ""} {
+        business_wallets(wallet_type: TREASURY${hasFilter ? ", filter: $filter" : ""}) {
+          id
+          available_balance
+          ledger_balance
+          holding_balance
+          currency
+          active
+          is_fiat
+        }
       }
-    }
-  `;
-  const getWalletsQuery = (walletType = "TREASURY", queryOptions = {}) => {
+    `;
+    
+    const variables = hasFilter ? { filter: { is_fiat: isFiat } } : {};
+    
     return useGQLQuery(
-      ["wallets", walletType],
-      GET_WALLETS_QUERY,
-      {},
-      queryOptions,
+      ["wallets", isFiat],
+      query,
+      variables,
+      queryOptions
     );
   };
 
