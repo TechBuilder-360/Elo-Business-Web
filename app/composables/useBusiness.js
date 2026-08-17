@@ -189,31 +189,57 @@ export const useBusiness = (options = {}) => {
     );
   };
 
-  const GET_WALLETS_QUERY = `
-    query GetWallets($wallet_type: WalletType! = TREASURY) {
-      wallets(wallet_type: $wallet_type) {
+  const getWalletsQuery = (isFiat = null, queryOptions = {}) => {
+    const hasFilter = isFiat !== null;
+    const query = `
+      query GetWallets${hasFilter ? "($filter: WalletFilter)" : ""} {
+        business_wallets(wallet_type: TREASURY${hasFilter ? ", filter: $filter" : ""}) {
+          id
+          available_balance
+          ledger_balance
+          holding_balance
+          currency
+          active
+          is_fiat
+        }
+      }
+    `;
+    
+    const variables = hasFilter ? { filter: { is_fiat: isFiat } } : {};
+    
+    return useGQLQuery(
+      ["wallets", isFiat],
+      query,
+      variables,
+      queryOptions
+    );
+  };
+
+  const GET_BUSINESS_WALLET_QUERY = `
+    query GetBusinessWallet($currencyCode: String!) {
+      business_wallet(currencyCode: $currencyCode, wallet_type: TREASURY) {
         id
-        type
         available_balance
         ledger_balance
         holding_balance
         currency
         active
+        is_fiat
       }
     }
   `;
-  const getWalletsQuery = (walletType = "TREASURY", queryOptions = {}) => {
+  const getBusinessWalletQuery = (currencyCode, queryOptions = {}) => {
     return useGQLQuery(
-      ["wallets", walletType],
-      GET_WALLETS_QUERY,
-      { wallet_type: walletType },
-      queryOptions,
+      ["wallet", currencyCode],
+      GET_BUSINESS_WALLET_QUERY,
+      { currencyCode },
+      queryOptions
     );
   };
 
-  const GET_CURRENCIES_QUERY = `
-    query GetCurrencies {
-      currencies {
+  const GET_FIAT_CURRENCIES_QUERY = `
+    query GetFiatCurrencies {
+      currencies(filter: {is_fiat: true}) {
         id
         code
         name
@@ -222,20 +248,39 @@ export const useBusiness = (options = {}) => {
       }
     }
   `;
-  const getCurrenciesQuery = (queryOptions = {}) => {
-    return useGQLQuery(["currencies"], GET_CURRENCIES_QUERY, {}, queryOptions);
+
+  const GET_CRYPTO_CURRENCIES_QUERY = `
+    query GetCryptoCurrencies {
+      currencies(filter: {is_fiat: false}) {
+        id
+        code
+        name
+        symbol
+        is_fiat
+      }
+    }
+  `;
+
+  const getCurrenciesQuery = (isFiat = true, queryOptions = {}) => {
+    const query = isFiat ? GET_FIAT_CURRENCIES_QUERY : GET_CRYPTO_CURRENCIES_QUERY;
+    return useGQLQuery(
+      ["currencies", isFiat],
+      query,
+      {},
+      queryOptions
+    );
   };
 
   const ADD_WALLET_MUTATION = `
     mutation AddWallet($currency_code: String!, $wallet_type: WalletType!) {
-      add_wallet(currency_code: $currency_code, wallet_type: $wallet_type) {
+      add_business_wallet(currency_code: $currency_code, wallet_type: $wallet_type) {
         id
-        type
         available_balance
         ledger_balance
         holding_balance
         currency
         active
+        is_fiat
       }
     }
   `;
@@ -252,6 +297,7 @@ export const useBusiness = (options = {}) => {
     getBusinessDetailQuery,
     getWalletsQuery,
     getCurrenciesQuery,
+    getBusinessWalletQuery,
     addWallet: addWalletMutation,
   };
 };
