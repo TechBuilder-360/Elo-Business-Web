@@ -204,9 +204,9 @@ export const useBusiness = (options = {}) => {
         }
       }
     `;
-    
+
     const variables = hasFilter ? { filter: { is_fiat: isFiat } } : {};
-    
+
     return useGQLQuery(
       ["wallets", isFiat],
       query,
