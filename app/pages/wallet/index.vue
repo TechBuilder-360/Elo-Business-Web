@@ -65,6 +65,11 @@ const allFetchedWallets = computed(() => [
   ...(cryptoWalletsData.value?.business_wallets || []),
 ]);
 
+// Add Wallet modal state
+const showAddWalletModal = ref(false);
+const selectedCurrencyCode = ref("");
+const isAddingWallet = ref(false);
+
 // Fetch Static NUBAN Accounts & Stablecoins
 const { data: nubanData } = getNubanAccountsQuery();
 const { data: stablecoinsData } = getStablecoinsQuery();
@@ -90,7 +95,12 @@ const handleGenerateAccount = async () => {
     }
   } catch (err) {
     console.error("Generate account error:", err);
-    toast.error(err.message || "Failed to generate account details.");
+    const msg = err?.message || "Failed to generate account details.";
+    if (msg.includes("not implemented")) {
+      toast.error("Static NUBAN generation feature is currently being finalized on the backend server.");
+    } else {
+      toast.error(msg);
+    }
   } finally {
     isGeneratingAccount.value = false;
   }

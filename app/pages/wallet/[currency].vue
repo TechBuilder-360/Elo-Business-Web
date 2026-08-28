@@ -134,7 +134,12 @@ const handleGenerateAccount = async () => {
     }
   } catch (err) {
     console.error("Account generation error:", err);
-    toast.error(err.message || "Failed to generate account details.");
+    const msg = err?.message || "Failed to generate account details.";
+    if (msg.includes("not implemented")) {
+      toast.error("Static NUBAN generation feature is currently being finalized on the backend server.");
+    } else {
+      toast.error(msg);
+    }
   } finally {
     isGeneratingAccount.value = false;
   }
