@@ -286,6 +286,112 @@ export const useBusiness = (options = {}) => {
   `;
   const addWalletMutation = useGQLMutation(ADD_WALLET_MUTATION);
 
+  // ──────────────────────────────────────────────
+  // Static NUBAN Accounts & Stablecoins
+  // ──────────────────────────────────────────────
+  const GET_BUSINESS_NUBAN_ACCOUNTS_QUERY = `
+    query GetBusinessNubanAccounts {
+      business_nuban_accounts {
+        id
+        account_number
+        account_name
+        bank_name
+        currency
+      }
+    }
+  `;
+
+  const getNubanAccountsQuery = (queryOptions = {}) => {
+    return useGQLQuery(
+      ["businessNubanAccounts"],
+      GET_BUSINESS_NUBAN_ACCOUNTS_QUERY,
+      {},
+      queryOptions
+    );
+  };
+
+  const GENERATE_STATIC_NUBAN_ACCOUNT_MUTATION = `
+    mutation GenerateStaticNubanAccount($wallet_type: WalletType!) {
+      generateStaticNubanAccount(wallet_type: $wallet_type) {
+        id
+        account_number
+        account_name
+        bank_name
+        currency
+      }
+    }
+  `;
+
+  const generateNubanAccountMutation = useGQLMutation(
+    GENERATE_STATIC_NUBAN_ACCOUNT_MUTATION,
+    {
+      onSuccess: () => {
+        qc.invalidateQueries({ queryKey: ["businessNubanAccounts"] });
+        qc.invalidateQueries({ queryKey: ["wallets"] });
+      },
+    }
+  );
+
+  const genNubanOriginal = generateNubanAccountMutation.mutateAsync.bind(
+    generateNubanAccountMutation
+  );
+  generateNubanAccountMutation.mutateAsync = async (walletType = "TREASURY") => {
+    const typeVal = typeof walletType === "object"
+      ? (walletType.wallet_type || walletType.walletType || "TREASURY")
+      : walletType;
+    return await genNubanOriginal({ wallet_type: typeVal });
+  };
+
+  const GET_BUSINESS_STABLECOINS_QUERY = `
+    query GetBusinessStablecoins($filter: StablecoinFilter) {
+      business_stablecoins(filter: $filter) {
+        id
+        address
+        coin
+        network
+      }
+    }
+  `;
+
+  const getStablecoinsQuery = (filter = null, queryOptions = {}) => {
+    const variables = filter ? { filter } : {};
+    return useGQLQuery(
+      ["businessStablecoins", filter],
+      GET_BUSINESS_STABLECOINS_QUERY,
+      variables,
+      queryOptions
+    );
+  };
+
+  const GENERATE_STABLECOIN_MUTATION = `
+    mutation GenerateStablecoin($input: StablecoinInput!) {
+      generateStablecoin(input: $input) {
+        id
+        address
+        coin
+        network
+      }
+    }
+  `;
+
+  const generateStablecoinMutation = useGQLMutation(
+    GENERATE_STABLECOIN_MUTATION,
+    {
+      onSuccess: () => {
+        qc.invalidateQueries({ queryKey: ["businessStablecoins"] });
+        qc.invalidateQueries({ queryKey: ["wallets"] });
+      },
+    }
+  );
+
+  const genStableOriginal = generateStablecoinMutation.mutateAsync.bind(
+    generateStablecoinMutation
+  );
+  generateStablecoinMutation.mutateAsync = async (inputData) => {
+    const input = inputData?.input ? inputData.input : inputData;
+    return await genStableOriginal({ input });
+  };
+
   return {
     userBusinesses: userBusinessesQuery,
     registerBusiness: registerBusinessMutation,
@@ -299,5 +405,9 @@ export const useBusiness = (options = {}) => {
     getCurrenciesQuery,
     getBusinessWalletQuery,
     addWallet: addWalletMutation,
+    getNubanAccountsQuery,
+    generateNubanAccount: generateNubanAccountMutation,
+    getStablecoinsQuery,
+    generateStablecoin: generateStablecoinMutation,
   };
 };

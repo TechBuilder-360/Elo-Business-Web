@@ -26,6 +26,7 @@ import {
   Wallet as WalletIcon
 } from "lucide-vue-next";
 import AccountDetails from "@/components/wallet/AccountDetails.vue";
+import { toast } from "@/utils/alert";
 
 definePageMeta({
   layout: false,
@@ -37,8 +38,16 @@ const businessName = computed(() => route.query.name || "My Business");
 
 const showBalance = ref(true);
 const txFilter = ref("all");
+const isGeneratingAccount = ref(false);
 
-const { getBusinessWalletQuery, getCurrenciesQuery } = useBusiness();
+const {
+  getBusinessWalletQuery,
+  getCurrenciesQuery,
+  getNubanAccountsQuery,
+  generateNubanAccount,
+  getStablecoinsQuery,
+  generateStablecoin,
+} = useBusiness();
 const { isDark, toggleTheme } = useTheme();
 
 // Fetch Wallet
@@ -47,6 +56,10 @@ const { data: walletData, isPending: isWalletPending, isError } = getBusinessWal
 // Fetch Currencies to get symbol
 const { data: fiatCurrencies } = getCurrenciesQuery(true);
 const { data: cryptoCurrencies } = getCurrenciesQuery(false);
+
+// Fetch Real NUBAN Accounts & Stablecoins from Backend
+const { data: nubanData } = getNubanAccountsQuery();
+const { data: stablecoinsData } = getStablecoinsQuery();
 
 const currencyMap = computed(() => {
   const fiat = fiatCurrencies.value?.currencies || [];
@@ -63,47 +76,33 @@ const selectedWallet = computed(() => {
   const curr = currencyMap.value[w.currency] || {};
   const symbol = curr.symbol || w.currency;
 
-  // Fiat mock bank accounts by currency code
+  // Fiat mock bank accounts fallback map
   const fiatMockMap = {
     NGN: [
-      { id: "ngn-1", bankName: "GTBank", accountName: "Chidi Ventures Ltd", accountNumber: "0123456789", sortCode: "058", isPrimary: true },
-      { id: "ngn-2", bankName: "Access Bank", accountName: "Chidi Ventures Ltd", accountNumber: "9876543210", sortCode: "044", isPrimary: false },
+      { id: "ngn-1", bankName: "GTBank", accountName: "Elo Business Ltd", accountNumber: "0123456789", sortCode: "058", isPrimary: true },
     ],
     USD: [
-      { id: "usd-1", bankName: "Mercury", accountName: "Chidi Ventures Inc", accountNumber: "1928374650", routingNumber: "084009519", isPrimary: true },
+      { id: "usd-1", bankName: "Mercury", accountName: "Elo Business Inc", accountNumber: "1928374650", routingNumber: "084009519", isPrimary: true },
     ],
-    GBP: [
-      { id: "gbp-1", bankName: "Monzo", accountName: "Chidi Ventures Ltd", accountNumber: "12345678", sortCode: "04-00-75", isPrimary: true },
-    ],
-    EUR: [
-      { id: "eur-1", bankName: "Wise", accountName: "Chidi Ventures Ltd", accountNumber: "DE89370400440532013000", isPrimary: true },
-    ]
   };
 
-  // Crypto mock addresses
+  // Crypto mock addresses fallback map
   const cryptoMockMap = {
     USDT: { id: "usdt-1", address: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e", network: "ERC-20", isPrimary: true },
     USDC: { id: "usdc-1", address: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e", network: "ERC-20", isPrimary: true },
-    BTC:  { id: "btc-1", address: "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh", network: "Bitcoin", isPrimary: true },
-    ETH:  { id: "eth-1", address: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e", network: "ERC-20", isPrimary: true },
   };
 
-  // Determine if fiat based on the wallet's is_fiat field from backend
   const isFiat = w.is_fiat;
+  const realNubans = nubanData.value?.business_nuban_accounts || [];
+  const realCoins = stablecoinsData.value?.business_stablecoins || [];
 
   let accounts = [];
   if (isFiat) {
-    accounts = fiatMockMap[w.currency] || [
-      { id: `${w.currency}-1`, bankName: "Global Bank", accountName: "Chidi Ventures Ltd", accountNumber: "0000000000", isPrimary: true }
-    ];
+    const matched = realNubans.filter(a => !a.currency || a.currency.toUpperCase() === w.currency.toUpperCase());
+    accounts = matched.length > 0 ? matched : (realNubans.length > 0 ? realNubans : (fiatMockMap[w.currency] || []));
   } else {
-    const cryptoAccount = cryptoMockMap[w.currency] || {
-      id: `${w.currency}-1`,
-      address: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
-      network: "TRC-20",
-      isPrimary: true,
-    };
-    accounts = [cryptoAccount];
+    const matched = realCoins.filter(s => s.wallet_id === w.id || (s.coin && s.coin.toUpperCase() === w.currency.toUpperCase()));
+    accounts = matched.length > 0 ? matched : (realCoins.length > 0 ? realCoins : (cryptoMockMap[w.currency] ? [cryptoMockMap[w.currency]] : []));
   }
 
   return {
@@ -118,6 +117,28 @@ const selectedWallet = computed(() => {
     transactions: [],
   };
 });
+
+const handleGenerateAccount = async () => {
+  if (!selectedWallet.value) return;
+  isGeneratingAccount.value = true;
+  try {
+    if (selectedWallet.value.isFiat) {
+      await generateNubanAccount.mutateAsync("TREASURY");
+      toast.success("Static NUBAN bank account generated successfully!");
+    } else {
+      await generateStablecoin.mutateAsync({
+        wallet_id: selectedWallet.value.id,
+        network: selectedWallet.value.currency === "USDT" ? "TRC20" : "ERC20",
+      });
+      toast.success("Stablecoin deposit address generated successfully!");
+    }
+  } catch (err) {
+    console.error("Account generation error:", err);
+    toast.error(err.message || "Failed to generate account details.");
+  } finally {
+    isGeneratingAccount.value = false;
+  }
+};
 
 const formatAmount = (amount, symbol) => {
   return `${symbol}${amount.toLocaleString(undefined, {
@@ -285,9 +306,10 @@ const handleBack = () => {
 
         <!-- Account Details -->
         <AccountDetails
-          v-if="selectedWallet.accounts?.length > 0"
           :accounts="selectedWallet.accounts"
-          :isFiat="selectedWallet.is_fiat"
+          :is-fiat="selectedWallet.isFiat"
+          :is-generating="isGeneratingAccount"
+          @add="handleGenerateAccount"
         />
 
         <!-- Transactions -->
