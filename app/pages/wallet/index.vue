@@ -15,8 +15,6 @@ import {
   Moon,
   Sun,
 } from "lucide-vue-next";
-import AccountDetails from "@/components/wallet/AccountDetails.vue";
-import { toast } from "@/utils/alert";
 
 definePageMeta({
   layout: false,
@@ -28,15 +26,7 @@ const businessName = computed(() => route.query.name || "My Business");
 const activeTab = ref("fiat");
 const navigatingTo = ref(null);
 
-const {
-  getWalletsQuery,
-  getCurrenciesQuery,
-  addWallet,
-  getNubanAccountsQuery,
-  generateNubanAccount,
-  getStablecoinsQuery,
-  generateStablecoin,
-} = useBusiness();
+const { getWalletsQuery, getCurrenciesQuery, addWallet } = useBusiness();
 const { isDark, toggleTheme } = useTheme();
 const qc = useQueryClient();
 
@@ -69,79 +59,6 @@ const allFetchedWallets = computed(() => [
 const showAddWalletModal = ref(false);
 const selectedCurrencyCode = ref("");
 const isAddingWallet = ref(false);
-
-// Network Selection Modal state for stablecoins
-const showNetworkModal = ref(false);
-const selectedNetwork = ref("TRC20");
-const availableNetworks = [
-  { label: "TRON (TRC20)", value: "TRC20" },
-  { label: "TRON (TRC-20)", value: "TRC-20" },
-  { label: "TRON Network", value: "TRON" },
-  { label: "ETHEREUM (ERC20)", value: "ERC20" },
-  { label: "ETHEREUM (ERC-20)", value: "ERC-20" },
-  { label: "ETHEREUM Network", value: "ETHEREUM" },
-  { label: "POLYGON Network", value: "POLYGON" },
-  { label: "SOLANA Network", value: "SOLANA" },
-  { label: "BINANCE (BEP20)", value: "BEP20" },
-];
-
-// Fetch Static NUBAN Accounts & Stablecoins
-const { data: nubanData } = getNubanAccountsQuery();
-const { data: stablecoinsData } = getStablecoinsQuery();
-
-const nubanAccounts = computed(() => nubanData.value?.business_nuban_accounts || []);
-const stablecoins = computed(() => stablecoinsData.value?.business_stablecoins || []);
-
-const isGeneratingAccount = ref(false);
-
-const handleGenerateAccount = async () => {
-  if (activeTab.value === "crypto") {
-    showNetworkModal.value = true;
-    return;
-  }
-  isGeneratingAccount.value = true;
-  try {
-    await generateNubanAccount.mutateAsync("TREASURY");
-    toast.success("Static NUBAN bank account generated successfully!");
-  } catch (err) {
-    console.error("Generate account error:", err);
-    const msg = err?.message || "Failed to generate account details.";
-    if (msg.includes("not implemented")) {
-      toast.error("Static NUBAN generation feature is currently being finalized on the backend server.");
-    } else {
-      toast.error(msg);
-    }
-  } finally {
-    isGeneratingAccount.value = false;
-  }
-};
-
-const submitGenerateStablecoin = async () => {
-  showNetworkModal.value = false;
-  isGeneratingAccount.value = true;
-  try {
-    const firstCrypto = allFetchedWallets.value.find((w) => !w.is_fiat);
-    if (!firstCrypto) {
-      toast.error("No active crypto wallet found. Please create a crypto wallet first.");
-      return;
-    }
-    await generateStablecoin.mutateAsync({
-      wallet_id: firstCrypto.id,
-      network: selectedNetwork.value,
-    });
-    toast.success(`Stablecoin deposit address (${selectedNetwork.value}) generated successfully!`);
-  } catch (err) {
-    console.error("Generate stablecoin error:", err);
-    const msg = err?.message || "Failed to generate stablecoin address.";
-    if (msg.includes("network not found")) {
-      toast.error(`Network '${selectedNetwork.value}' is not supported by the backend. Please select another network.`);
-    } else {
-      toast.error(msg);
-    }
-  } finally {
-    isGeneratingAccount.value = false;
-  }
-};
 
 const groupedCurrencies = computed(() => ({
   fiat: fiatCurrencies.value?.currencies || [],
@@ -385,16 +302,6 @@ const handleWalletClick = async (w) => {
             <span class="text-lg leading-none">+</span> Add {{ activeTab === 'fiat' ? 'Fiat' : 'Crypto' }} Wallet
           </Button>
         </div>
-
-        <!-- Static NUBAN Accounts / Deposit Addresses Section -->
-        <div class="pt-4">
-          <AccountDetails
-            :accounts="activeTab === 'fiat' ? nubanAccounts : stablecoins"
-            :is-fiat="activeTab === 'fiat'"
-            :is-generating="isGeneratingAccount"
-            @add="handleGenerateAccount"
-          />
-        </div>
       </div>
     </main>
 
@@ -436,49 +343,6 @@ const handleWalletClick = async (w) => {
               >
                 <span v-if="isAddingWallet">Creating...</span>
                 <span v-else>Create Wallet</span>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </Teleport>
-
-    <!-- Select Network Modal for Stablecoin Address Generation -->
-    <Teleport to="body">
-      <div
-        v-if="showNetworkModal"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
-        @click.self="showNetworkModal = false"
-      >
-        <Card class="w-full max-w-sm border-0 shadow-2xl bg-card">
-          <CardContent class="p-6 space-y-4">
-            <div>
-              <h2 class="text-base font-semibold text-foreground">
-                Select Network
-              </h2>
-              <p class="text-xs text-muted-foreground mt-1">Choose the blockchain network to generate deposit address</p>
-            </div>
-            <div class="space-y-2">
-              <label class="text-sm font-medium text-foreground">Network</label>
-              <select
-                v-model="selectedNetwork"
-                class="w-full h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-              >
-                <option v-for="net in availableNetworks" :key="net.value" :value="net.value">
-                  {{ net.label }}
-                </option>
-              </select>
-            </div>
-            <div class="flex gap-3 pt-2">
-              <Button variant="outline" class="flex-1" @click="showNetworkModal = false">
-                Cancel
-              </Button>
-              <Button
-                class="flex-1"
-                :disabled="isGeneratingAccount"
-                @click="submitGenerateStablecoin"
-              >
-                Generate Address
               </Button>
             </div>
           </CardContent>
