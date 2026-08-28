@@ -15,6 +15,8 @@ import {
   Moon,
   Sun,
 } from "lucide-vue-next";
+import AccountDetails from "@/components/wallet/AccountDetails.vue";
+import { toast } from "@/utils/alert";
 
 definePageMeta({
   layout: false,
@@ -26,7 +28,15 @@ const businessName = computed(() => route.query.name || "My Business");
 const activeTab = ref("fiat");
 const navigatingTo = ref(null);
 
-const { getWalletsQuery, getCurrenciesQuery, addWallet } = useBusiness();
+const {
+  getWalletsQuery,
+  getCurrenciesQuery,
+  addWallet,
+  getNubanAccountsQuery,
+  generateNubanAccount,
+  getStablecoinsQuery,
+  generateStablecoin,
+} = useBusiness();
 const { isDark, toggleTheme } = useTheme();
 const qc = useQueryClient();
 
@@ -55,10 +65,36 @@ const allFetchedWallets = computed(() => [
   ...(cryptoWalletsData.value?.business_wallets || []),
 ]);
 
-// Add Wallet modal state
-const showAddWalletModal = ref(false);
-const selectedCurrencyCode = ref("");
-const isAddingWallet = ref(false);
+// Fetch Static NUBAN Accounts & Stablecoins
+const { data: nubanData } = getNubanAccountsQuery();
+const { data: stablecoinsData } = getStablecoinsQuery();
+
+const nubanAccounts = computed(() => nubanData.value?.business_nuban_accounts || []);
+const stablecoins = computed(() => stablecoinsData.value?.business_stablecoins || []);
+
+const isGeneratingAccount = ref(false);
+
+const handleGenerateAccount = async () => {
+  isGeneratingAccount.value = true;
+  try {
+    if (activeTab.value === "fiat") {
+      await generateNubanAccount.mutateAsync("TREASURY");
+      toast.success("Static NUBAN bank account generated successfully!");
+    } else {
+      const firstCrypto = allFetchedWallets.value.find((w) => !w.is_fiat);
+      await generateStablecoin.mutateAsync({
+        wallet_id: firstCrypto ? firstCrypto.id : "default",
+        network: "TRC20",
+      });
+      toast.success("Stablecoin deposit address generated successfully!");
+    }
+  } catch (err) {
+    console.error("Generate account error:", err);
+    toast.error(err.message || "Failed to generate account details.");
+  } finally {
+    isGeneratingAccount.value = false;
+  }
+};
 
 const groupedCurrencies = computed(() => ({
   fiat: fiatCurrencies.value?.currencies || [],
@@ -301,6 +337,16 @@ const handleWalletClick = async (w) => {
           <Button variant="outline" class="gap-2" @click="showAddWalletModal = true">
             <span class="text-lg leading-none">+</span> Add {{ activeTab === 'fiat' ? 'Fiat' : 'Crypto' }} Wallet
           </Button>
+        </div>
+
+        <!-- Static NUBAN Accounts / Deposit Addresses Section -->
+        <div class="pt-4">
+          <AccountDetails
+            :accounts="activeTab === 'fiat' ? nubanAccounts : stablecoins"
+            :is-fiat="activeTab === 'fiat'"
+            :is-generating="isGeneratingAccount"
+            @add="handleGenerateAccount"
+          />
         </div>
       </div>
     </main>
